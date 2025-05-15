@@ -10,7 +10,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
-            @vite(['resources/css/app.css', 'resources/js/app.js'])
+            @vite(['resources/css/app.css', 'resources/css/custom.css', 'resources/js/app.js'])
 
             <style>
             :root {
@@ -23,9 +23,9 @@
                 --success: #10b981;
                 --warning: #f59e0b;
                 --danger: #ef4444;
-                --text-primary: #1e293b;
-                --text-secondary: #475569;
-                --text-light: #f8fafc;
+                --text-primary: #111827;  /* Darker than default */
+                --text-secondary: #1f2937; /* Darker than default */
+                --text-light: #ffffff;     /* Pure white for contrast */
             }
 
             /* Modern Gradients */
@@ -304,41 +304,44 @@
             <!-- Search Box -->
             <div class="container">
                 <div class="search-box">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-                            <select class="modern-input w-full">
-                                <option>All Subjects</option>
-                                <option>Mathematics</option>
-                                <option>Science</option>
-                                <option>English</option>
-                                <option>History</option>
-                            </select>
+                    <form action="{{ route('tutors.index') }}" method="GET">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                                <select name="subject" class="modern-input w-full">
+                                    <option value="">All Subjects</option>
+                                    @foreach($popularSubjects as $subject)
+                                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Experience</label>
+                                <select name="experience" class="modern-input w-full">
+                                    <option value="">Any Experience</option>
+                                    <option value="1">1+ Years</option>
+                                    <option value="3">3+ Years</option>
+                                    <option value="5">5+ Years</option>
+                                    <option value="10">10+ Years</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+                                <select name="price_range" class="modern-input w-full">
+                                    <option value="">Any Price</option>
+                                    <option value="0-25">$0 - $25/hr</option>
+                                    <option value="26-50">$26 - $50/hr</option>
+                                    <option value="51-100">$51 - $100/hr</option>
+                                    <option value="101+">$101+/hr</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                <button type="submit" class="btn-primary w-full">
+                                    Search Tutors
+                                </button>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Level</label>
-                            <select class="modern-input w-full">
-                                <option>All Levels</option>
-                                <option>Beginner</option>
-                                <option>Intermediate</option>
-                                <option>Advanced</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
-                            <select class="modern-input w-full">
-                                <option>Any Price</option>
-                                <option>$0 - $20</option>
-                                <option>$20 - $40</option>
-                                <option>$40+</option>
-                            </select>
-                        </div>
-                        <div class="flex items-end">
-                            <button class="btn-primary w-full">
-                                Search Tutors
-                            </button>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -421,14 +424,67 @@
                         </h2>
                     </div>
                     <div class="flex flex-wrap justify-center gap-4">
-                        <a href="#" class="subject-tag">Mathematics</a>
-                        <a href="#" class="subject-tag">Physics</a>
-                        <a href="#" class="subject-tag">Chemistry</a>
-                        <a href="#" class="subject-tag">Biology</a>
-                        <a href="#" class="subject-tag">English</a>
-                        <a href="#" class="subject-tag">History</a>
-                        <a href="#" class="subject-tag">Computer Science</a>
-                        <a href="#" class="subject-tag">Economics</a>
+                        @foreach($popularSubjects as $subject)
+                            <a href="{{ route('tutors.index', ['subject' => $subject->id]) }}" class="subject-tag">
+                                {{ $subject->name }} ({{ $subject->tutors_count }})
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Tutors -->
+            <div class="section bg-gradient-light">
+                <div class="container">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                            Featured <span class="text-gradient">Tutors</span>
+                        </h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        @foreach($featuredTutors as $tutor)
+                            <div class="card-hover p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="flex-shrink-0">
+                                        <img class="h-16 w-16 rounded-full" src="{{ $tutor->user->avatar ? asset('storage/' . $tutor->user->avatar) : asset('images/default-avatar.png') }}" alt="{{ $tutor->user->name }}">
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-lg font-medium text-gray-900">{{ $tutor->user->name }}</h3>
+                                        <div class="flex items-center">
+                                            <div class="flex items-center">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <svg class="h-4 w-4 {{ $i <= $tutor->reviews_avg_rating ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                    </svg>
+                                                @endfor
+                                            </div>
+                                            <span class="ml-2 text-sm text-gray-600">({{ $tutor->reviews_count }} reviews)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <div class="flex flex-wrap mt-2">
+                                        @foreach($tutor->subjects->take(3) as $subject)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 mr-2 mb-2">
+                                                {{ $subject->name }}
+                                </span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-4">{{ Str::limit($tutor->bio, 100) }}</p>
+                                <div class="flex items-center justify-between mt-auto">
+                                    <div class="text-lg font-medium text-gray-900">${{ number_format($tutor->hourly_rate, 2) }}/hr</div>
+                                    <a href="{{ route('tutors.show', $tutor) }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        View Profile
+                                    </a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="text-center mt-10">
+                        <a href="{{ route('tutors.index') }}" class="btn-primary inline-block">
+                            Browse All Tutors
+                        </a>
                     </div>
                 </div>
             </div>
@@ -490,13 +546,13 @@
                 <div class="container py-12">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <div>
-                            <h3 class="text-lg font-semibold mb-4">About Us</h3>
+                            <h3 class="text-lg font-semibold text-white mb-4">About Us</h3>
                             <p class="text-gray-300">
                                 We connect students with qualified tutors for personalized learning experiences.
                             </p>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                            <h3 class="text-lg font-semibold text-white mb-4">Quick Links</h3>
                             <ul class="space-y-2">
                                 <li><a href="#" class="footer-link text-gray-300">Home</a></li>
                                 <li><a href="#" class="footer-link text-gray-300">Find a Tutor</a></li>
@@ -505,7 +561,7 @@
                             </ul>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold mb-4">Subjects</h3>
+                            <h3 class="text-lg font-semibold text-white mb-4">Subjects</h3>
                             <ul class="space-y-2">
                                 <li><a href="#" class="footer-link text-gray-300">Mathematics</a></li>
                                 <li><a href="#" class="footer-link text-gray-300">Science</a></li>
@@ -514,7 +570,7 @@
                             </ul>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold mb-4">Connect With Us</h3>
+                            <h3 class="text-lg font-semibold text-white mb-4">Connect With Us</h3>
                             <div class="flex space-x-4">
                                 <a href="#" class="social-icon text-gray-300">
                                     <span class="sr-only">Facebook</span>

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Carbon;
 
 class User extends Authenticatable
 {
@@ -54,6 +55,11 @@ class User extends Authenticatable
         return $this->hasOne(TutorProfile::class);
     }
 
+    public function tutor()
+    {
+        return $this->hasOne(Tutor::class);
+    }
+
     public function subjects()
     {
         return $this->belongsToMany(Subject::class, 'tutor_subjects');
@@ -94,10 +100,20 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
+    public function unreadNotifications()
+    {
+        return $this->notifications()->where('is_read', false);
+    }
+
     public function favoriteTutors()
     {
         return $this->belongsToMany(Tutor::class, 'favorite_tutors')
             ->withTimestamps();
+    }
+
+    public function unreadReceivedMessages()
+    {
+        return $this->receivedMessages()->unread();
     }
 
     // Helper methods
@@ -114,5 +130,61 @@ class User extends Authenticatable
     public function isStudent()
     {
         return $this->role === 'student';
+    }
+
+    // Dashboard attributes
+    public function getUpcomingBookingsAttribute()
+    {
+        $now = Carbon::now();
+
+        if ($this->role === 'tutor') {
+            return Booking::with(['student', 'subject'])
+                ->where('tutor_id', $this->tutor->id)
+                ->where('start_time', '>=', $now)
+                ->where('status', 'accepted')
+                ->orderBy('start_time')
+                ->take(5)
+                ->get();
+        } else {
+            return Booking::with(['tutor.user', 'subject'])
+                ->where('student_id', $this->id)
+                ->where('start_time', '>=', $now)
+                ->whereIn('status', ['accepted', 'pending'])
+                ->orderBy('start_time')
+                ->take(5)
+                ->get();
+        }
+    }
+
+    public function getUpcomingBookingsCountAttribute()
+    {
+        $now = Carbon::now();
+
+        if ($this->role === 'tutor') {
+            return Booking::where('tutor_id', $this->tutor->id)
+                ->where('start_time', '>=', $now)
+                ->where('status', 'accepted')
+                ->count();
+        } else {
+            return Booking::where('student_id', $this->id)
+                ->where('start_time', '>=', $now)
+                ->whereIn('status', ['accepted', 'pending'])
+                ->count();
+        }
+    }
+
+    public function getTotalHoursAttribute()
+    {
+        $query = $this->role === 'tutor'
+            ? Booking::where('tutor_id', $this->tutor->id)->where('status', 'completed')
+            : Booking::where('student_id', $this->id)->where('status', 'completed');
+
+        $totalSeconds = $query->get()->sum(function ($booking) {
+            $start = Carbon::parse($booking->start_time);
+            $end = Carbon::parse($booking->end_time);
+            return $end->diffInSeconds($start);
+        });
+
+        return round($totalSeconds / 3600, 1); // Convert seconds to hours
     }
 }

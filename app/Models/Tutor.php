@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Tutor extends Model
 {
@@ -53,5 +54,55 @@ class Tutor extends Model
     {
         return $this->belongsToMany(User::class, 'favorite_tutors')
             ->withTimestamps();
+    }
+
+    public function education()
+    {
+        return $this->hasMany(Education::class);
+    }
+
+    /**
+     * Check if the tutor is available at the given time slot
+     *
+     * @param string $startTime
+     * @param string $endTime
+     * @return bool
+     */
+    public function isTimeSlotAvailable($startTime, $endTime)
+    {
+        // Convert strings to Carbon instances
+        $startDateTime = Carbon::parse($startTime);
+        $endDateTime = Carbon::parse($endTime);
+        
+        // Get day of week (lowercase)
+        $dayOfWeek = strtolower($startDateTime->format('l'));
+        
+        // Check if the tutor has availability set for this day and time
+        $availabilityExists = $this->availability()
+            ->where('day_of_week', $dayOfWeek)
+            ->where('start_time', '<=', $startDateTime->format('H:i:s'))
+            ->where('end_time', '>=', $endDateTime->format('H:i:s'))
+            ->where('is_available', true)
+            ->exists();
+            
+        if (!$availabilityExists) {
+            return false;
+        }
+        
+        // Check if there are overlapping bookings
+        $overlappingBookings = $this->bookings()
+            ->where('status', '!=', 'cancelled')
+            ->where('status', '!=', 'rejected')
+            ->where(function ($query) use ($startDateTime, $endDateTime) {
+                $query->whereBetween('start_time', [$startDateTime, $endDateTime])
+                    ->orWhereBetween('end_time', [$startDateTime, $endDateTime])
+                    ->orWhere(function ($q) use ($startDateTime, $endDateTime) {
+                        $q->where('start_time', '<=', $startDateTime)
+                            ->where('end_time', '>=', $endDateTime);
+                    });
+            })
+            ->exists();
+            
+        return !$overlappingBookings;
     }
 }

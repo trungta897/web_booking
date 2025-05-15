@@ -59,3 +59,41 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+# Admin Dashboard Setup
+
+In order to use the independent admin dashboard site, follow these steps:
+
+## Environment Configuration
+
+Add the following lines to your `.env` file:
+
+```
+APP_DOMAIN=web-booking.test
+ADMIN_DOMAIN=admin.web-booking.test
+```
+
+## Local Development with Admin Subdomain
+
+For local development, you'll need to set up your hosts file to handle the admin subdomain:
+
+1. Open your hosts file:
+   - Windows: `C:\Windows\System32\drivers\etc\hosts`
+   - Mac/Linux: `/etc/hosts`
+
+2. Add the following lines:
+   ```
+   127.0.0.1  web-booking.test
+   127.0.0.1  admin.web-booking.test
+   ```
+
+3. Save the hosts file (you may need administrator privileges)
+
+4. Restart your web server
+
+## Accessing the Admin Dashboard
+
+1. Main site: http://web-booking.test
+2. Admin dashboard: http://admin.web-booking.test
+
+The admin dashboard is now independent from the main application with its own layout, styling, and domain.

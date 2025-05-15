@@ -12,11 +12,11 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\RoleSwitchController;
 
 // Public routes
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+Route::get('/', [PageController::class, 'index'])->name('home');
 
 Route::get('/find-tutors', [TutorController::class, 'index'])->name('tutors.index');
 Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
@@ -40,6 +40,10 @@ Route::middleware(['auth'])->group(function () {
         return view('tutor.dashboard');
     })->middleware('role:tutor')->name('tutor.dashboard');
 
+    // Role switching routes
+    Route::get('/role-switch/{role}', [RoleSwitchController::class, 'switchToRole'])->name('role.switch');
+    Route::get('/role-switch-back', [RoleSwitchController::class, 'switchBack'])->name('role.switchBack');
+
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -57,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::get('/bookings/{booking}/payment', [BookingController::class, 'payment'])->name('bookings.payment');
     Route::put('/bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
 
@@ -76,6 +81,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Payment routes
     Route::post('/bookings/{booking}/payment-intent', [PaymentController::class, 'createIntent'])->name('payments.create-intent');
+    Route::get('/bookings/{booking}/payment/confirm', [PaymentController::class, 'confirm'])->name('payments.confirm');
     Route::post('/webhook/stripe', [PaymentController::class, 'handleWebhook'])->name('payments.webhook');
 
     // Tutor availability routes
@@ -89,6 +95,36 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/tutors/{tutor}/reviews', [TutorController::class, 'storeReview'])->name('tutors.reviews.store');
     Route::put('/reviews/{review}', [TutorController::class, 'updateReview'])->name('tutors.reviews.update');
     Route::delete('/reviews/{review}', [TutorController::class, 'destroyReview'])->name('tutors.reviews.destroy');
+});
+
+// Admin routes - Moved to separate domain
+Route::domain(config('app.admin_domain'))->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/tutors', [AdminController::class, 'tutors'])->name('admin.tutors');
+    Route::get('/students', [AdminController::class, 'students'])->name('admin.students');
+    Route::get('/bookings', [AdminController::class, 'bookings'])->name('admin.bookings');
+    Route::get('/subjects', [AdminController::class, 'subjects'])->name('admin.subjects');
+    Route::get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
+
+    // Fallback for backward compatibility - these will be redirected by middleware
+    Route::prefix('admin')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/tutors', [AdminController::class, 'tutors']);
+        Route::get('/students', [AdminController::class, 'students']);
+        Route::get('/bookings', [AdminController::class, 'bookings']);
+        Route::get('/subjects', [AdminController::class, 'subjects']);
+        Route::get('/reports', [AdminController::class, 'reports']);
+    });
+});
+
+// Fallback for backward compatibility - these will be redirected by middleware
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/tutors', [AdminController::class, 'tutors'])->name('tutors');
+    Route::get('/students', [AdminController::class, 'students'])->name('students');
+    Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
+    Route::get('/subjects', [AdminController::class, 'subjects'])->name('subjects');
+    Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
 });
 
 // Test route for Tutor and Subject relationships

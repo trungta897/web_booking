@@ -111,4 +111,23 @@ class BookingController extends Controller
         return redirect()->route('bookings.index')
             ->with('success', 'Booking cancelled successfully.');
     }
+
+    /**
+     * Redirect to the payment page for a booking
+     *
+     * @param Booking $booking
+     * @return \Illuminate\View\View
+     */
+    public function payment(Booking $booking)
+    {
+        $this->authorize('view', $booking);
+
+        // Check if the booking is in a valid state for payment
+        if ($booking->status !== 'accepted' || $booking->payment_status === 'paid') {
+            return redirect()->route('bookings.show', $booking)
+                ->with('error', 'This booking is not eligible for payment.');
+        }
+
+        return view('bookings.payment', compact('booking'));
+    }
 }

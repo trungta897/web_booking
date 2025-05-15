@@ -129,6 +129,97 @@
                                 <p class="text-gray-600">No reviews yet.</p>
                             @endforelse
                         </div>
+
+                        @auth
+                            @if(auth()->user()->role === 'student')
+                                <div class="mt-8 border-t border-gray-200 pt-8">
+                                    <h3 class="text-lg font-medium text-gray-900 mb-4">Leave a Review</h3>
+
+                                    @if(session('error'))
+                                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                            {{ session('error') }}
+                                        </div>
+                                    @endif
+
+                                    <!-- Check if user has any completed bookings with this tutor -->
+                                    @php
+                                        $completedBookings = \App\Models\Booking::where('student_id', auth()->id())
+                                            ->where('tutor_id', $tutor->id)
+                                            ->where('status', 'completed')
+                                            ->whereDoesntHave('review')
+                                            ->get();
+                                    @endphp
+
+                                    @if($completedBookings->count() > 0)
+                                        <form action="{{ route('tutors.reviews.store', $tutor) }}" method="POST" class="space-y-4">
+                                            @csrf
+
+                                            <div>
+                                                <label for="booking_id" class="block text-sm font-medium text-gray-700">Select Session</label>
+                                                <select name="booking_id" id="booking_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                    @foreach($completedBookings as $booking)
+                                                        <option value="{{ $booking->id }}">
+                                                            {{ $booking->subject->name }} - {{ $booking->start_time->format('M d, Y g:i A') }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('booking_id')
+                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div>
+                                                <label for="rating" class="block text-sm font-medium text-gray-700">Rating</label>
+                                                <div class="mt-1 flex items-center">
+                                                    <div class="flex space-x-1">
+                                                        @for($i = 1; $i <= 5; $i++)
+                                                            <button type="button" onclick="setRating({{ $i }})" class="star-rating-btn">
+                                                                <svg id="star-{{ $i }}" class="h-6 w-6 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                                </svg>
+                                                            </button>
+                                                        @endfor
+                                                    </div>
+                                                    <input type="hidden" name="rating" id="rating" value="0">
+                                                </div>
+                                                @error('rating')
+                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div>
+                                                <label for="comment" class="block text-sm font-medium text-gray-700">Comment</label>
+                                                <textarea id="comment" name="comment" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Share your experience with this tutor">{{ old('comment') }}</textarea>
+                                                @error('comment')
+                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div class="text-right">
+                                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                    Submit Review
+                                                </button>
+                                            </div>
+                                        </form>
+                                    @else
+                                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                                            <div class="flex">
+                                                <div class="flex-shrink-0">
+                                                    <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm text-yellow-700">
+                                                        You can only leave a review after completing a session with this tutor.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                        @endauth
                     </div>
                 </div>
             </div>
@@ -178,6 +269,23 @@
                         }
                     });
             });
+        }
+
+        // Star rating functionality
+        function setRating(rating) {
+            document.getElementById('rating').value = rating;
+
+            // Update star colors
+            for (let i = 1; i <= 5; i++) {
+                const star = document.getElementById(`star-${i}`);
+                if (i <= rating) {
+                    star.classList.remove('text-gray-300');
+                    star.classList.add('text-yellow-400');
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-gray-300');
+                }
+            }
         }
 
         // Check availability on page load

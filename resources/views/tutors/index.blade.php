@@ -44,12 +44,58 @@
                                     <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2+ Stars</option>
                                 </select>
                             </div>
+
+                            <div>
+                                <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                                <input type="text" name="location" id="location" value="{{ request('location') }}" placeholder="City, State, or Zip" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            </div>
+
+                            <div>
+                                <label for="day_of_week" class="block text-sm font-medium text-gray-700">Available On</label>
+                                <select name="day_of_week" id="day_of_week" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Any Day</option>
+                                    <option value="monday" {{ request('day_of_week') == 'monday' ? 'selected' : '' }}>Monday</option>
+                                    <option value="tuesday" {{ request('day_of_week') == 'tuesday' ? 'selected' : '' }}>Tuesday</option>
+                                    <option value="wednesday" {{ request('day_of_week') == 'wednesday' ? 'selected' : '' }}>Wednesday</option>
+                                    <option value="thursday" {{ request('day_of_week') == 'thursday' ? 'selected' : '' }}>Thursday</option>
+                                    <option value="friday" {{ request('day_of_week') == 'friday' ? 'selected' : '' }}>Friday</option>
+                                    <option value="saturday" {{ request('day_of_week') == 'saturday' ? 'selected' : '' }}>Saturday</option>
+                                    <option value="sunday" {{ request('day_of_week') == 'sunday' ? 'selected' : '' }}>Sunday</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="experience" class="block text-sm font-medium text-gray-700">Minimum Experience</label>
+                                <select name="experience" id="experience" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Any Experience</option>
+                                    <option value="1" {{ request('experience') == '1' ? 'selected' : '' }}>1+ Years</option>
+                                    <option value="3" {{ request('experience') == '3' ? 'selected' : '' }}>3+ Years</option>
+                                    <option value="5" {{ request('experience') == '5' ? 'selected' : '' }}>5+ Years</option>
+                                    <option value="10" {{ request('experience') == '10' ? 'selected' : '' }}>10+ Years</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="flex justify-end">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-blue-600 uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition">
-                                Apply Filters
-                            </button>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <label for="sort" class="block text-sm font-medium text-gray-700">Sort By</label>
+                                <select name="sort" id="sort" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Most Recent</option>
+                                    <option value="price_low" {{ request('sort') == 'price_low' ? 'selected' : '' }}>Price: Low to High</option>
+                                    <option value="price_high" {{ request('sort') == 'price_high' ? 'selected' : '' }}>Price: High to Low</option>
+                                    <option value="rating" {{ request('sort') == 'rating' ? 'selected' : '' }}>Highest Rated</option>
+                                    <option value="experience" {{ request('sort') == 'experience' ? 'selected' : '' }}>Most Experienced</option>
+                                </select>
+                            </div>
+
+                            <div class="flex space-x-4">
+                                <a href="{{ route('tutors.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Reset Filters
+                                </a>
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition">
+                                    Apply Filters
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>

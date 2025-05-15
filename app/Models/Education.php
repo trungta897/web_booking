@@ -11,22 +11,22 @@ class Education extends Model
     use HasFactory;
 
     protected $fillable = [
-        'tutor_profile_id',
+        'tutor_id',
         'institution',
         'degree',
         'field_of_study',
-        'start_date',
-        'end_date',
+        'start_year',
+        'end_year',
         'description',
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'start_year' => 'integer',
+        'end_year' => 'integer',
     ];
 
-    public function tutorProfile(): BelongsTo
+    public function tutor(): BelongsTo
     {
-        return $this->belongsTo(TutorProfile::class);
+        return $this->belongsTo(Tutor::class);
     }
 }
