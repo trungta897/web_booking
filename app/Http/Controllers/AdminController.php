@@ -246,4 +246,41 @@ class AdminController extends Controller
             'bookings_by_subject'
         ));
     }
+
+    /**
+     * Display list of reviews for admin.
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function reviews(Request $request)
+    {
+        $query = DB::table('reviews')
+            ->join('users as students', 'reviews.student_id', '=', 'students.id')
+            ->join('users as tutors', 'reviews.tutor_id', '=', 'tutors.id')
+            ->select(
+                'reviews.*',
+                'students.name as student_name',
+                'students.profile_photo_url as student_photo',
+                'tutors.name as tutor_name'
+            );
+
+        // Apply filters
+        if ($request->filled('rating')) {
+            $query->where('rating', $request->rating);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('students.name', 'like', "%{$search}%")
+                  ->orWhere('tutors.name', 'like', "%{$search}%")
+                  ->orWhere('reviews.comment', 'like', "%{$search}%");
+            });
+        }
+
+        $reviews = $query->latest()->paginate(10);
+
+        return view('admin.reviews', compact('reviews'));
+    }
 }

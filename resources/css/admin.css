@@ -387,7 +387,8 @@ body.admin-body {
 
 /* Main Content Area & Top Bar - Phoenix Style */
 .admin-main-content {
-    background-color: #f9fafb; /* gray-50, very light for content */
+    background-color: #f9fafb; /* gray-50 */
+    min-height: calc(100vh - 4rem); /* Subtract top bar height */
 }
 
 .admin-top-bar {
@@ -455,14 +456,159 @@ body.admin-body {
 
 /* Page Header (e.g., "Ecommerce Dashboard" title) */
 .admin-page-header {
-    /* padding already in blade, this class is for the h2 inside */
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1.5rem 1.5rem;
 }
 
 .admin-page-header h2 {
-    font-size: 1.25rem; /* text-xl - Phoenix dashboard titles are not overly large */
-    font-weight: 600; /* semibold */
-    color: #1f2937; /* gray-800 */
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
 }
 
 /* Ensure Vite processes this file */
 /* You can add more specific styles below */
+
+/* Main Content Area - Phoenix Style */
+.admin-main-content {
+    background-color: #f9fafb; /* gray-50 */
+    min-height: calc(100vh - 4rem); /* Subtract top bar height */
+}
+
+/* Page Header - Phoenix Style */
+.admin-page-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1.5rem 1.5rem;
+}
+
+.admin-page-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+/* Dashboard Grid - Phoenix Style */
+.admin-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .admin-dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .admin-dashboard-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Stat Cards - Phoenix Style */
+.admin-stat-card {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.admin-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.admin-stat-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.admin-stat-icon.primary {
+    background-color: #e0e7ff;
+    color: #4f46e5;
+}
+
+.admin-stat-icon.success {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.admin-stat-icon.warning {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.admin-stat-icon.danger {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.admin-stat-value {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+}
+
+.admin-stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* Content Cards - Phoenix Style */
+.admin-card {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.admin-card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-card-header h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.admin-card-body {
+    padding: 1.5rem;
+}
+
+/* Alert Messages - Phoenix Style */
+.admin-alert {
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+.admin-alert-success {
+    background-color: #dcfce7;
+    border: 1px solid #86efac;
+    color: #166534;
+}
+
+.admin-alert-error {
+    background-color: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+}

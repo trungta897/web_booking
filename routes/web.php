@@ -32,9 +32,10 @@ Route::middleware('guest')->group(function () {
 // Protected routes (require authentication)
 Route::middleware(['auth'])->group(function () {
     // Dashboard routes
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Removing the public dashboard route
+    // Route::get('/dashboard', function () {
+    //     return view('dashboard');
+    // })->name('dashboard');
 
     Route::get('/tutor/dashboard', function () {
         return view('tutor.dashboard');
@@ -131,6 +132,7 @@ Route::middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class . ':
     Route::put('/subjects/{subject}', [AdminController::class, 'updateSubject'])->name('subjects.update');
     Route::delete('/subjects/{subject}', [AdminController::class, 'destroySubject'])->name('subjects.destroy');
     Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+    Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews');
 });
 
 // Test route for Tutor and Subject relationships
