@@ -11,6 +11,7 @@ class Education extends Model
     use HasFactory;
 
     protected $fillable = [
+        'tutor_profile_id',
         'tutor_id',
         'institution',
         'degree',
@@ -24,6 +25,11 @@ class Education extends Model
         'start_year' => 'integer',
         'end_year' => 'integer',
     ];
+
+    public function tutorProfile(): BelongsTo
+    {
+        return $this->belongsTo(TutorProfile::class);
+    }
 
     public function tutor(): BelongsTo
     {

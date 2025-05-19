@@ -76,13 +76,17 @@
                     <div class="mb-8">
                         <h2 class="text-lg font-medium text-gray-900 mb-4">Education</h2>
                         <div class="space-y-4">
-                            @foreach($tutor->education as $education)
-                                <div class="border-l-4 border-indigo-500 pl-4">
-                                    <h3 class="font-medium text-gray-900">{{ $education->degree }} in {{ $education->field_of_study }}</h3>
-                                    <p class="text-gray-600">{{ $education->institution }}</p>
-                                    <p class="text-sm text-gray-500">{{ $education->start_year }} - {{ $education->end_year ?? 'Present' }}</p>
-                                </div>
-                            @endforeach
+                            @if($tutor->education && count($tutor->education) > 0)
+                                @foreach($tutor->education as $education)
+                                    <div class="border-l-4 border-indigo-500 pl-4">
+                                        <h3 class="font-medium text-gray-900">{{ $education->degree }} in {{ $education->field_of_study }}</h3>
+                                        <p class="text-gray-600">{{ $education->institution }}</p>
+                                        <p class="text-sm text-gray-500">{{ $education->start_year }} - {{ $education->end_year ?? 'Present' }}</p>
+                                    </div>
+                                @endforeach
+                            @else
+                                <p class="text-gray-500">No education information available</p>
+                            @endif
                         </div>
                     </div>
 

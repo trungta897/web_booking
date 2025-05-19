@@ -36,7 +36,10 @@ class TutorProfileController extends Controller
             'education' => ['required', 'array'],
             'education.*.degree' => ['required', 'string', 'max:255'],
             'education.*.institution' => ['required', 'string', 'max:255'],
-            'education.*.year' => ['required', 'string', 'max:4'],
+            'education.*.field_of_study' => ['nullable', 'string', 'max:255'],
+            'education.*.start_year' => ['required', 'numeric', 'min:1900', 'max:' . date('Y')],
+            'education.*.end_year' => ['nullable', 'numeric', 'min:1900', 'max:' . (date('Y') + 10)],
+            'education.*.description' => ['nullable', 'string', 'max:500'],
         ]);
 
         $tutorProfile->update([

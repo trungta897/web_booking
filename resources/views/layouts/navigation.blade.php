@@ -5,8 +5,8 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('home') }}" class="text-2xl font-bold text-white hover:text-white transition-colors duration-300">
-                        TutorHub
+                    <a href="{{ route('home') }}" class="flex items-center">
+                        <x-application-logo class="text-white" />
                     </a>
                 </div>
 
@@ -31,28 +31,6 @@
                     <x-nav-link :href="route('pricing')" :active="request()->routeIs('pricing')" class="nav-text-white hover:text-white transition-colors duration-300">
                         {{ __('Pricing') }}
                     </x-nav-link>
-
-                    <!-- Admin Links -->
-                    @if(auth()->check() && auth()->user()->role === 'admin')
-                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="nav-text-white hover:text-white transition-colors duration-300">
-                            {{ __('Admin Dashboard') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.tutors')" :active="request()->routeIs('admin.tutors')" class="nav-text-white hover:text-white transition-colors duration-300">
-                            {{ __('Tutors') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.students')" :active="request()->routeIs('admin.students')" class="nav-text-white hover:text-white transition-colors duration-300">
-                            {{ __('Students') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.bookings')" :active="request()->routeIs('admin.bookings')" class="nav-text-white hover:text-white transition-colors duration-300">
-                            {{ __('Bookings') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.subjects')" class="nav-text-white hover:text-white transition-colors duration-300">
-                            {{ __('Subjects') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.reports')" :active="request()->routeIs('admin.reports')" class="nav-text-white hover:text-white transition-colors duration-300">
-                            {{ __('Reports') }}
-                        </x-nav-link>
-                    @endif
                 </div>
             </div>
 
@@ -64,7 +42,9 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
+                            @if(Auth::user()->unreadNotifications && Auth::user()->unreadNotifications->count() > 0)
                             <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                            @endif
                         </a>
                     </div>
 
@@ -74,7 +54,9 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
+                            @if(Auth::user()->unreadMessages && Auth::user()->unreadMessages->count() > 0)
                             <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                            @endif
                         </a>
                     </div>
 
@@ -227,6 +209,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                             {{ __('Messages') }}
+                            @if(Auth::user()->unreadMessages && Auth::user()->unreadMessages->count() > 0)
+                                <span class="ml-1 inline-block h-2 w-2 rounded-full bg-red-500"></span>
+                            @endif
                         </div>
                     </x-responsive-nav-link>
 
@@ -236,6 +221,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                             {{ __('Notifications') }}
+                            @if(Auth::user()->unreadNotifications && Auth::user()->unreadNotifications->count() > 0)
+                                <span class="ml-1 inline-block h-2 w-2 rounded-full bg-red-500"></span>
+                            @endif
                         </div>
                     </x-responsive-nav-link>
 

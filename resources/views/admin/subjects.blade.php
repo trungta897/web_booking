@@ -95,7 +95,7 @@
                                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                                             </button>
                                                         </div>
-                                                        <form action="{{ route('subjects.update', $subject) }}" method="POST">
+                                                        <form action="{{ route('admin.subjects.update', $subject) }}" method="POST">
                                                             @csrf
                                                             @method('PUT')
                                                             <div class="p-6 space-y-6">
@@ -129,7 +129,7 @@
                                                             <svg class="mx-auto mb-4 text-gray-400 w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                             <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to delete the subject "{{ $subject->name }}"?</h3>
                                                             <p class="mb-5 text-sm text-gray-500">This will also remove this subject from all tutor profiles and may affect existing bookings.</p>
-                                                            <form action="{{ route('subjects.destroy', $subject) }}" method="POST">
+                                                            <form action="{{ route('admin.subjects.destroy', $subject) }}" method="POST">
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
@@ -174,7 +174,7 @@
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-                <form action="{{ route('subjects.store') }}" method="POST">
+                <form action="{{ route('admin.subjects.store') }}" method="POST">
                     @csrf
                     <div class="p-6 space-y-6">
                         <div>

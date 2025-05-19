@@ -154,6 +154,60 @@ class AdminController extends Controller
     }
 
     /**
+     * Store a newly created subject in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function storeSubject(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:subjects,name',
+        ]);
+
+        Subject::create($request->only('name'));
+
+        return redirect()->route('admin.subjects')->with('success', 'Subject created successfully.');
+    }
+
+    /**
+     * Update the specified subject in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Subject  $subject
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function updateSubject(Request $request, Subject $subject)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:subjects,name,'. $subject->id,
+        ]);
+
+        $subject->update($request->only('name'));
+
+        return redirect()->route('admin.subjects')->with('success', 'Subject updated successfully.');
+    }
+
+    /**
+     * Remove the specified subject from storage.
+     *
+     * @param  \App\Models\Subject  $subject
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroySubject(Subject $subject)
+    {
+        // Optional: Add checks here if the subject is associated with tutors/bookings
+        // and handle accordingly (e.g., prevent deletion or disassociate)
+        try {
+            $subject->delete();
+            return redirect()->route('admin.subjects')->with('success', 'Subject deleted successfully.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle potential foreign key constraint violations if not handled by cascading deletes
+            return redirect()->route('admin.subjects')->with('error', 'Could not delete subject. It might be in use.');
+        }
+    }
+
+    /**
      * Display admin reports page.
      *
      * @return \Illuminate\View\View

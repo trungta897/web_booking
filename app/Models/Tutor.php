@@ -58,7 +58,7 @@ class Tutor extends Model
 
     public function education()
     {
-        return $this->hasMany(Education::class);
+        return $this->hasMany(Education::class, 'tutor_id');
     }
 
     /**
@@ -73,10 +73,10 @@ class Tutor extends Model
         // Convert strings to Carbon instances
         $startDateTime = Carbon::parse($startTime);
         $endDateTime = Carbon::parse($endTime);
-        
+
         // Get day of week (lowercase)
         $dayOfWeek = strtolower($startDateTime->format('l'));
-        
+
         // Check if the tutor has availability set for this day and time
         $availabilityExists = $this->availability()
             ->where('day_of_week', $dayOfWeek)
@@ -84,11 +84,11 @@ class Tutor extends Model
             ->where('end_time', '>=', $endDateTime->format('H:i:s'))
             ->where('is_available', true)
             ->exists();
-            
+
         if (!$availabilityExists) {
             return false;
         }
-        
+
         // Check if there are overlapping bookings
         $overlappingBookings = $this->bookings()
             ->where('status', '!=', 'cancelled')
@@ -102,7 +102,7 @@ class Tutor extends Model
                     });
             })
             ->exists();
-            
+
         return !$overlappingBookings;
     }
 }

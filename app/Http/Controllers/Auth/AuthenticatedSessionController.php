@@ -28,7 +28,19 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = Auth::user(); // Get the authenticated user via Auth facade
+
+        if ($user && $user->role === 'admin') {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        } elseif ($user && $user->role === 'tutor') {
+            // Optionally, redirect tutors to their specific dashboard if it exists
+            // and if you have a separate role check for 'tutor.dashboard' or similar
+            // For now, let's assume tutors also go to the generic 'dashboard' or you can refine this.
+            return redirect()->intended(route('tutor.dashboard', absolute: false)); // Or 'dashboard'
+        } else {
+            // For students or any other roles
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
     }
 
     /**
