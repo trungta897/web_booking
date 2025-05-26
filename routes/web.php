@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RoleSwitchController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 
 // Public routes
 Route::get('/', [PageController::class, 'index'])->name('home');
@@ -125,14 +126,22 @@ Route::domain(config('app.admin_domain'))->middleware(['auth', \App\Http\Middlew
 Route::middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class . ':admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/tutors', [AdminController::class, 'tutors'])->name('tutors');
+    Route::get('/tutors/{user}', [AdminController::class, 'showTutor'])->name('tutors.show');
+    Route::patch('/tutors/{user}/suspend', [AdminController::class, 'suspendTutor'])->name('tutors.suspend');
     Route::get('/students', [AdminController::class, 'students'])->name('students');
+    Route::get('/students/{user}', [AdminController::class, 'showStudent'])->name('students.show');
+    Route::patch('/students/{user}/suspend', [AdminController::class, 'suspendStudent'])->name('students.suspend');
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
+    Route::get('/bookings/{booking}', [AdminController::class, 'showBooking'])->name('bookings.show');
     Route::get('/subjects', [AdminController::class, 'subjects'])->name('subjects');
+    Route::get('/subjects/{subject}', [AdminController::class, 'showSubject'])->name('subjects.show');
     Route::post('/subjects', [AdminController::class, 'storeSubject'])->name('subjects.store');
     Route::put('/subjects/{subject}', [AdminController::class, 'updateSubject'])->name('subjects.update');
     Route::delete('/subjects/{subject}', [AdminController::class, 'destroySubject'])->name('subjects.destroy');
     Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
     Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews');
+    Route::get('/profile', [AdminProfileController::class, 'show'])->name('profile.show');
+    Route::patch('/profile/suspend', [AdminProfileController::class, 'suspend'])->name('profile.suspend');
 });
 
 // Test route for Tutor and Subject relationships

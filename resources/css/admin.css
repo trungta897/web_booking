@@ -612,3 +612,123 @@ body.admin-body {
     border: 1px solid #fca5a5;
     color: #991b1b;
 }
+
+/* Dark Theme Styles */
+html.dark body.admin-body {
+    background-color: #111827;
+    color: #d1d5db;
+}
+
+html.dark .admin-sidebar {
+    background-color: #1f2937;
+    border-right-color: #374151;
+}
+
+html.dark .admin-sidebar .app-name-admin span {
+    color: #e5e7eb;
+}
+html.dark .admin-sidebar .nav-link {
+    color: #9ca3af;
+}
+html.dark .admin-sidebar .nav-link:hover,
+html.dark .admin-sidebar .nav-link.active {
+    background-color: #374151;
+    color: #ffffff;
+}
+html.dark .admin-sidebar .sidebar-section-separator {
+    border-top-color: #374151;
+}
+
+html.dark .admin-top-bar {
+    background-color: #1f2937;
+    border-bottom-color: #374151;
+}
+html.dark .admin-top-bar .top-bar-icon-btn {
+    color: #9ca3af;
+}
+html.dark .admin-top-bar .top-bar-icon-btn:hover {
+    background-color: #374151;
+    color: #ffffff;
+}
+html.dark .admin-top-bar .search-input {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #e5e7eb;
+}
+html.dark .admin-top-bar .search-input::placeholder {
+    color: #9ca3af;
+}
+
+html.dark .admin-page-header {
+    background-color: #1f2937;
+    border-bottom-color: #374151;
+}
+html.dark .admin-page-header h2 {
+     color: #e5e7eb;
+}
+
+html.dark .admin-stat-card {
+    background-color: #1f2937;
+    border-color: #374151;
+}
+html.dark .admin-stat-card .admin-stat-value {
+    color: #ffffff;
+}
+html.dark .admin-stat-card .admin-stat-label {
+    color: #9ca3af;
+}
+
+html.dark .admin-card {
+    background-color: #1f2937;
+    border-color: #374151;
+}
+html.dark .admin-card .admin-card-header h3 {
+    color: #e5e7eb;
+}
+html.dark .admin-card .admin-card-header a {
+    color: #a5b4fc;
+}
+html.dark .admin-card .admin-card-header a:hover {
+    color: #c7d2fe;
+}
+
+html.dark .admin-table th {
+    color: #9ca3af;
+    border-bottom-color: #374151;
+}
+html.dark .admin-table td {
+    color: #d1d5db;
+    border-bottom-color: #374151;
+}
+html.dark .admin-table .text-gray-500 {
+    color: #9ca3af !important;
+}
+
+html.dark .admin-badge-success {
+    background-color: #064e3b; color: #a7f3d0;
+}
+html.dark .admin-badge-warning {
+    background-color: #78350f; color: #fde68a;
+}
+html.dark .admin-badge-info {
+    background-color: #1e40af; color: #bfdbfe;
+}
+
+html.dark .bg-white.dark\:bg-gray-700 {
+    background-color: #374151 !important;
+}
+html.dark .text-gray-700.dark\:text-gray-200 {
+    color: #e5e7eb !important;
+}
+html.dark .text-gray-600.dark\:text-gray-300 {
+    color: #d1d5db !important;
+}
+html.dark .border-b.dark\:border-gray-600 {
+    border-bottom-color: #4b5563 !important;
+}
+html.dark .divide-gray-100.dark\:divide-gray-600 {
+    border-color: #4b5563 !important;
+}
+html.dark .hover\:bg-gray-100.dark\:hover\:bg-gray-600:hover {
+    background-color: #4b5563 !important;
+}

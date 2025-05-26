@@ -109,4 +109,4 @@ class UserSeeder extends Seeder
             User::create($student);
         }
     }
-} 
+}

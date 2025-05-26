@@ -51,16 +51,30 @@
                                                 {{ $studentUser->studentBookings->count() }} {{-- Assuming studentBookings relationship exists --}}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                    Active
+                                                <span @class([
+                                                    'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                                                    'bg-green-100 text-green-800' => $studentUser->account_status === 'active',
+                                                    'bg-yellow-100 text-yellow-800' => $studentUser->account_status === 'suspended',
+                                                    'bg-red-100 text-red-800' => $studentUser->account_status === 'banned',
+                                                    'dark:bg-green-700 dark:text-green-100' => $studentUser->account_status === 'active',
+                                                    'dark:bg-yellow-700 dark:text-yellow-100' => $studentUser->account_status === 'suspended',
+                                                    'dark:bg-red-700 dark:text-red-100' => $studentUser->account_status === 'banned',
+                                                ])>
+                                                    {{ ucfirst($studentUser->account_status) }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $studentUser->created_at->format('M d, Y') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">View</a> {{-- Placeholder --}}
-                                                <a href="#" class="text-red-600 hover:text-red-900">Suspend</a> {{-- Placeholder --}}
+                                                <a href="{{ route('admin.students.show', $studentUser) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">View</a>
+                                                <form method="POST" action="{{ route('admin.students.suspend', $studentUser) }}" class="inline-block" onsubmit="return confirm('Are you sure you want to {{ $studentUser->account_status === 'suspended' ? 'reinstate' : 'suspend' }} this student?');">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="{{ $studentUser->account_status === 'suspended' ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900' }}">
+                                                        {{ $studentUser->account_status === 'suspended' ? 'Reinstate' : 'Suspend' }}
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                     @endforeach

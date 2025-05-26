@@ -78,26 +78,94 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                         </button>
                         <div class="relative hidden md:block top-bar-search-wrapper">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                                <i class="fas fa-search search-icon"></i>
-                            </span>
-                            <input type="text" placeholder="Search..." class="search-input">
+                            <form action="{{ route('admin.dashboard') /* Placeholder for admin.search */ }}" method="GET"> {{-- Search Form --}}
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <i class="fas fa-search search-icon"></i>
+                                </span>
+                                <input type="search" name="q" placeholder="Search..." class="search-input">
+                            </form>
                         </div>
                     </div>
                     <div class="flex items-center space-x-1 sm:space-x-2">
-                        <button class="top-bar-icon-btn">
-                            <i class="fas fa-sun"></i>
+                        <button id="theme-toggle-button" class="top-bar-icon-btn">
+                            <i id="theme-toggle-dark-icon" class="fas fa-moon hidden"></i>
+                            <i id="theme-toggle-light-icon" class="fas fa-sun"></i>
                         </button>
-                        <button class="top-bar-icon-btn">
-                            <i class="fas fa-bell"></i>
-                        </button>
-                        <button class="top-bar-icon-btn">
-                            <i class="fas fa-th"></i>
-                        </button>
-                        <div class="ml-2 relative">
-                             <button class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+
+                        <div x-data="{ open: false }" class="relative">
+                            <button @click="open = !open" class="top-bar-icon-btn">
+                                <i class="fas fa-bell"></i>
+                                {{-- Add a badge for unread notifications later --}}
+                            </button>
+                            <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-700 rounded-md shadow-lg overflow-hidden z-20" style="display: none;">
+                                <div class="py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-200 border-b dark:border-gray-600">Notifications</div>
+                                <div class="divide-y divide-gray-100 dark:divide-gray-600">
+                                    {{-- Placeholder Notifications --}}
+                                    <a href="#" class="block px-4 py-3 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                        <p class="font-medium">New user registered</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">2 hours ago</p>
+                                    </a>
+                                    <a href="#" class="block px-4 py-3 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                        <p class="font-medium">Booking confirmed</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Yesterday</p>
+                                    </a>
+                                    <a href="#" class="block px-4 py-2 text-center text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">View all notifications</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-data="{ open: false }" class="relative">
+                            <button @click="open = !open" class="top-bar-icon-btn">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg overflow-hidden z-20" style="display: none;">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Settings</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">User Profile</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">Help Center</a>
+                            </div>
+                        </div>
+
+                        <div x-data="{ open: false }" class="relative">
+                            <button @click="open = !open" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                                <span class="sr-only">Open user menu</span>
                                 <img class="h-8 w-8 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name ?? 'A').'&color=7F9CF5&background=EBF4FF' }}" alt="{{ Auth::user()->name ?? 'Admin' }}">
                             </button>
+                            <div x-show="open" @click.away="open = false"
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-56 origin-top-right rounded-md bg-white dark:bg-gray-700 py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20"
+                                 role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1"
+                                 style="display: none;">
+                                <div class="px-4 py-3">
+                                    <p class="text-sm text-gray-900 dark:text-white">Signed in as</p>
+                                    <p class="truncate text-sm font-medium text-gray-900 dark:text-white">{{ Auth::user()->name ?? 'Admin User' }}</p>
+                                    <p class="truncate text-xs font-medium text-gray-500 dark:text-gray-400">{{ Auth::user()->email }}</p>
+                                </div>
+                                <div class="py-1" role="none">
+                                    <a href="{{ route('admin.profile.show') }}" class="text-gray-700 dark:text-gray-200 block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600" role="menuitem" tabindex="-1" id="user-menu-item-0">View Profile</a>
+                                    <a href="#" class="text-gray-700 dark:text-gray-200 block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600" role="menuitem" tabindex="-1" id="user-menu-item-1">Account Settings</a>
+
+                                    <form method="POST" action="{{ route('admin.profile.suspend') }}" onsubmit="return confirm('Are you sure you want to suspend your account? This action will log you out.');" role="none">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="text-red-600 dark:text-red-400 block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600" role="menuitem" tabindex="-1" id="user-menu-item-2">
+                                            Suspend Account
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="py-1" role="none">
+                                    <form method="POST" action="{{ route('logout') }}" role="none">
+                                        @csrf
+                                        <button type="submit" class="text-gray-700 dark:text-gray-200 block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-600" role="menuitem" tabindex="-1" id="user-menu-item-3">
+                                            Sign out
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </header>

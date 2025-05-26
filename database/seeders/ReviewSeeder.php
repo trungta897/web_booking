@@ -15,7 +15,7 @@ class ReviewSeeder extends Seeder
     {
         // Get all completed bookings
         $completedBookings = Booking::where('status', 'completed')->get();
-        
+
         $comments = [
             "Excellent tutor! Very knowledgeable and patient. Made complex concepts easy to understand.",
             "Great teaching style and very responsive to questions. I learned a lot in our session.",
@@ -28,7 +28,7 @@ class ReviewSeeder extends Seeder
             "Well-prepared and efficient with our time. Covered more material than I expected.",
             "Patient and understanding. Took time to ensure I fully grasped the concepts."
         ];
-        
+
         foreach ($completedBookings as $booking) {
             // 80% chance of leaving a review for completed booking
             if (rand(1, 10) <= 8) {
@@ -46,4 +46,4 @@ class ReviewSeeder extends Seeder
             }
         }
     }
-} 
+}

@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Revert back to the original enum values
+        // Revert back to the original enum values (without 'completed')
         DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM('pending', 'accepted', 'rejected', 'cancelled') DEFAULT 'pending'");
     }
 };

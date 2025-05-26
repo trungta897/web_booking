@@ -18,17 +18,12 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
-        // Get counts for dashboard cards
-        $stats = [
-            'tutors_count' => User::where('role', 'tutor')->count(),
-            'students_count' => User::where('role', 'student')->count(),
-            'bookings_count' => Booking::count(),
-            'subjects_count' => Subject::count(),
-            'completed_bookings' => Booking::where('status', 'completed')->count(),
-            'pending_bookings' => Booking::where('status', 'pending')->count(),
-            'accepted_bookings' => Booking::where('status', 'accepted')->count(),
-            'revenue' => Booking::where('payment_status', 'paid')->sum('price'),
-        ];
+        // Explicitly define stats for the view
+        $totalStudents = User::where('role', 'student')->count();
+        $totalTutors = User::where('role', 'tutor')->count();
+        $totalAdmins = User::where('role', 'admin')->count();
+        $activeBookings = Booking::where('status', 'accepted')->count(); // Assuming 'active' means 'accepted'
+        $totalRevenue = Booking::where('payment_status', 'paid')->sum('price');
 
         // Get recent bookings
         $recent_bookings = Booking::with(['student', 'tutor.user', 'subject'])
@@ -43,19 +38,27 @@ class AdminController extends Controller
             ->take(5)
             ->get();
 
-        // Get top tutors
-        $top_tutors = Tutor::with('user')
-            ->withCount('bookings')
-            ->withAvg('reviews', 'rating')
-            ->orderByDesc('reviews_avg_rating')
-            ->take(5)
+        // Get top rated tutor users (User model with tutor role)
+        $topRatedTutorUsers = User::where('role', 'tutor')
+            ->with('tutor')
+            ->withAvg('reviewsReceived', 'rating')
+            ->orderByDesc('reviews_received_avg_rating')
+            ->take(6)
             ->get();
 
+        // Get recently joined users
+        $recentUsers = User::latest()->take(5)->get();
+
         return view('admin.dashboard', compact(
-            'stats',
+            'totalStudents',
+            'totalTutors',
+            'totalAdmins',
+            'activeBookings',
+            'totalRevenue',
             'recent_bookings',
             'popular_subjects',
-            'top_tutors'
+            'topRatedTutorUsers',
+            'recentUsers'
         ));
     }
 
@@ -85,6 +88,53 @@ class AdminController extends Controller
     }
 
     /**
+     * Display the specified tutor.
+     *
+     * @param  \App\Models\User  $user // Type hint for the User model, which should be a tutor
+     * @return \Illuminate\View\View
+     */
+    public function showTutor(User $user)
+    {
+        // Ensure the user is a tutor and load related data
+        if ($user->role !== 'tutor') {
+            abort(404, 'Tutor not found.');
+        }
+        $user->load('tutor.subjects', 'tutorBookings.student', 'tutorBookings.subject', 'reviewsReceived.reviewer');
+        // Calculate average rating
+        $averageRating = $user->reviewsReceived->avg('rating');
+
+        return view('admin.tutors.show', compact('user', 'averageRating'));
+    }
+
+    /**
+     * Suspend or reinstate the specified tutor account.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function suspendTutor(User $user)
+    {
+        // Ensure the user is a tutor
+        if ($user->role !== 'tutor') {
+            return redirect()->route('admin.tutors')->with('error', 'User is not a tutor.');
+        }
+
+        if ($user->account_status === 'suspended') {
+            $user->account_status = 'active';
+            $user->save();
+            // Additionally, you might want to re-verify the tutor or reset their availability
+            // For example: $user->tutor->update(['is_verified' => true, 'is_available' => true]);
+            return redirect()->route('admin.tutors')->with('success', 'Tutor account reinstated successfully.');
+        } else {
+            $user->account_status = 'suspended';
+            $user->save();
+            // You might want to also mark the tutor as unavailable
+            // For example: $user->tutor->update(['is_available' => false]);
+            return redirect()->route('admin.tutors')->with('success', 'Tutor account suspended successfully.');
+        }
+    }
+
+    /**
      * Display list of students for admin.
      *
      * @param Request $request
@@ -106,6 +156,59 @@ class AdminController extends Controller
         $students = $query->latest()->paginate(10);
 
         return view('admin.students', compact('students'));
+    }
+
+    /**
+     * Display the specified student.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\View\View
+     */
+    public function showStudent(User $user)
+    {
+        // Ensure the user is a student
+        if ($user->role !== 'student') {
+            abort(404, 'Student not found.');
+        }
+        // Eager load bookings for the student
+        $user->load('studentBookings.tutor.user', 'studentBookings.subject');
+        return view('admin.students.show', compact('user'));
+    }
+
+    /**
+     * Suspend the specified student account.
+     *
+     * @param  \App\Models\User  $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function suspendStudent(User $user)
+    {
+        // Ensure the user is a student
+        if ($user->role !== 'student') {
+            return redirect()->route('admin.students')->with('error', 'User is not a student.');
+        }
+
+        if ($user->account_status === 'suspended') {
+            $user->account_status = 'active';
+            $user->save();
+            return redirect()->route('admin.students')->with('success', 'Student account reinstated successfully.');
+        } else {
+            $user->account_status = 'suspended';
+            $user->save();
+            return redirect()->route('admin.students')->with('success', 'Student account suspended successfully.');
+        }
+    }
+
+    /**
+     * Display the specified booking.
+     *
+     * @param  \App\Models\Booking  $booking
+     * @return \Illuminate\View\View
+     */
+    public function showBooking(Booking $booking)
+    {
+        $booking->load('student', 'tutor.user', 'subject', 'review'); // Eager load related models
+        return view('admin.bookings.show', compact('booking'));
     }
 
     /**
@@ -205,6 +308,18 @@ class AdminController extends Controller
             // Handle potential foreign key constraint violations if not handled by cascading deletes
             return redirect()->route('admin.subjects')->with('error', 'Could not delete subject. It might be in use.');
         }
+    }
+
+    /**
+     * Display the specified subject.
+     *
+     * @param  \App\Models\Subject  $subject
+     * @return \Illuminate\View\View
+     */
+    public function showSubject(Subject $subject)
+    {
+        $subject->load('tutors.user', 'bookings.student', 'bookings.tutor.user'); // Eager load related tutors and bookings
+        return view('admin.subjects.show', compact('subject'));
     }
 
     /**

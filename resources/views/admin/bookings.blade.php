@@ -90,7 +90,7 @@
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="#" class="text-indigo-600 hover:text-indigo-900">View Details</a> {{-- Placeholder --}}
+                                                <a href="{{ route('admin.bookings.show', $booking) }}" class="text-indigo-600 hover:text-indigo-900">View Details</a>
                                             </td>
                                         </tr>
                                     @endforeach

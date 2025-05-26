@@ -22,6 +22,15 @@
             <div class="admin-stat-label">Total Tutors</div>
         </div>
 
+        <!-- Total Admins Card -->
+        <div class="admin-stat-card">
+            <div class="admin-stat-icon info">
+                <i class="fas fa-user-shield text-xl"></i>
+            </div>
+            <div class="admin-stat-value">{{ $totalAdmins ?? 0 }}</div>
+            <div class="admin-stat-label">Total Admins</div>
+        </div>
+
         <!-- Active Bookings Card -->
         <div class="admin-stat-card">
             <div class="admin-stat-icon warning">
