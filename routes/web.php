@@ -21,6 +21,7 @@ Route::get('/', [PageController::class, 'index'])->name('home');
 
 Route::get('/find-tutors', [TutorController::class, 'index'])->name('tutors.index');
 Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
+Route::get('/subjects/{subject}/tutors', [SubjectController::class, 'listTutorsForSubject'])->name('subjects.tutors');
 Route::get('/how-it-works', [PageController::class, 'howItWorks'])->name('how-it-works');
 Route::get('/pricing', [PageController::class, 'pricing'])->name('pricing');
 

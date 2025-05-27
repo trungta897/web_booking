@@ -91,15 +91,31 @@ class TutorController extends Controller
         }
 
         $tutors = $query->paginate(12);
-        $subjects = Subject::all();
+        $allSubjects = Subject::all();
+        $pageTitle = 'Find Your Perfect Tutor';
+        $filteredSubject = null;
+
+        if ($request->filled('subject')) {
+            $filteredSubject = Subject::find($request->subject);
+            if ($filteredSubject) {
+                $pageTitle = 'Tutors for ' . $filteredSubject->name;
+            }
+        }
 
         // Cache the data, not the view
         Cache::put($cacheKey, [
             'tutors' => $tutors,
-            'subjects' => $subjects
+            'subjects' => $allSubjects,
+            'pageTitle' => $pageTitle,
+            'filteredSubject' => $filteredSubject
         ], 3600);
 
-        return view('tutors.index', compact('tutors', 'subjects'));
+        return view('tutors.index', [
+            'tutors' => $tutors,
+            'subjects' => $allSubjects,
+            'pageTitle' => $pageTitle,
+            'filteredSubject' => $filteredSubject
+        ]);
     }
 
     public function show(Tutor $tutor)

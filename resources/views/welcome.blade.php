@@ -380,7 +380,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div class="card-hover p-8">
                             <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full gradient-primary">
-                                <span class="text-3xl font-bold text-blue-600">1</span>
+                                <span class="text-4xl font-bold text-white">1</span>
                             </div>
                             <h3 class="text-xl font-semibold text-gray-900 mb-4">
                                 Find a Tutor
@@ -391,7 +391,7 @@
                         </div>
                         <div class="card-hover p-8">
                             <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full gradient-primary">
-                                <span class="text-3xl font-bold text-blue-600">2</span>
+                                <span class="text-4xl font-bold text-white">2</span>
                             </div>
                             <h3 class="text-xl font-semibold text-gray-900 mb-4">
                                 Book a Session
@@ -402,7 +402,7 @@
                         </div>
                         <div class="card-hover p-8">
                             <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full gradient-primary">
-                                <span class="text-3xl font-bold text-blue-600">3</span>
+                                <span class="text-4xl font-bold text-white">3</span>
                             </div>
                             <h3 class="text-xl font-semibold text-gray-900 mb-4">
                                 Start Learning
@@ -415,20 +415,34 @@
                 </div>
             </div>
 
-            <!-- Popular Subjects -->
+            <!-- Popular Subjects / Browse Subjects Section -->
             <div class="section bg-white">
                 <div class="container">
                     <div class="text-center mb-16">
                         <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                            Popular <span class="text-gradient">Subjects</span>
+                            Browse Subjects
                         </h2>
+                        <p class="mt-4 text-lg text-gray-600">Find the perfect tutor for your subject</p>
                     </div>
-                    <div class="flex flex-wrap justify-center gap-4">
-                        @foreach($popularSubjects as $subject)
-                            <a href="{{ route('tutors.index', ['subject' => $subject->id]) }}" class="subject-tag">
-                                {{ $subject->name }} ({{ $subject->tutors_count }})
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        @forelse($popularSubjects as $subject)
+                            <a href="{{ route('tutors.index', ['subject' => $subject->id]) }}" class="block card-hover p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h3 class="text-xl font-semibold text-gray-900">{{ $subject->name }}</h3>
+                                    <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{{ $subject->tutors_count }} {{ Str::plural('Tutor', $subject->tutors_count) }}</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-4 min-h-[40px]">
+                                    {{-- Ensure $subject->description is available or provide a good fallback --}}
+                                    {{ Str::limit($subject->description ?? 'Explore ' . $subject->name . ' courses and find expert tutors.', 100) }}
+                                </p>
+                                <div class="flex items-center text-sm text-indigo-600 hover:text-indigo-800">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m0 0A7.027 7.027 0 0112 17.747a7.027 7.027 0 010-11.494M4 19.5V7.5a3 3 0 013-3h10a3 3 0 013 3v12a3 3 0 01-3 3H7a3 3 0 01-3-3z"></path></svg>
+                                    View Tutors for {{ $subject->name }}
+                                </div>
                             </a>
-                        @endforeach
+                        @empty
+                            <p class="text-gray-600 col-span-full text-center">No subjects available at the moment.</p>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -500,7 +514,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div class="card-hover p-8">
                             <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full gradient-primary">
-                                <svg class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
@@ -513,7 +527,7 @@
                         </div>
                         <div class="card-hover p-8">
                             <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full gradient-primary">
-                                <svg class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                 </svg>
                             </div>
@@ -526,7 +540,7 @@
                         </div>
                         <div class="card-hover p-8">
                             <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full gradient-primary">
-                                <svg class="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                 </svg>
                             </div>
@@ -554,19 +568,19 @@
                         <div>
                             <h3 class="text-lg font-semibold text-white mb-4">Quick Links</h3>
                             <ul class="space-y-2">
-                                <li><a href="#" class="footer-link text-gray-300">Home</a></li>
-                                <li><a href="#" class="footer-link text-gray-300">Find a Tutor</a></li>
-                                <li><a href="#" class="footer-link text-gray-300">Become a Tutor</a></li>
-                                <li><a href="#" class="footer-link text-gray-300">Contact Us</a></li>
+                                <li><a href="{{ route('home') }}" class="footer-link text-gray-300">Home</a></li>
+                                <li><a href="{{ route('tutors.index') }}" class="footer-link text-gray-300">Find a Tutor</a></li>
+                                <li><a href="{{ route('register') }}?role=tutor" class="footer-link text-gray-300">Become a Tutor</a></li>
+                                <li><a href="#contact-us" class="footer-link text-gray-300">Contact Us</a></li>
                             </ul>
                         </div>
                         <div>
                             <h3 class="text-lg font-semibold text-white mb-4">Subjects</h3>
                             <ul class="space-y-2">
-                                <li><a href="#" class="footer-link text-gray-300">Mathematics</a></li>
-                                <li><a href="#" class="footer-link text-gray-300">Science</a></li>
-                                <li><a href="#" class="footer-link text-gray-300">Languages</a></li>
-                                <li><a href="#" class="footer-link text-gray-300">More Subjects</a></li>
+                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Mathematics']) }}" class="footer-link text-gray-300">Mathematics</a></li>
+                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Science']) }}" class="footer-link text-gray-300">Science</a></li>
+                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Languages']) }}" class="footer-link text-gray-300">Languages</a></li>
+                                <li><a href="{{ route('tutors.index') }}" class="footer-link text-gray-300">More Subjects</a></li>
                             </ul>
                         </div>
                         <div>
@@ -575,7 +589,7 @@
                                 <a href="#" class="social-icon text-gray-300">
                                     <span class="sr-only">Facebook</span>
                                     <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" />
+                                        <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" clip-rule="evenodd" />
                                     </svg>
                                 </a>
                                 <a href="#" class="social-icon text-gray-300">

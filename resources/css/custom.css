@@ -257,3 +257,192 @@ label {
 .role-indicator-link:hover {
     color: #78350f;
 }
+
+/* Homepage Specific Styles (from welcome.blade.php) */
+:root {
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --secondary: #8b5cf6;
+    --accent: #f97316;
+    --dark: #1e293b;
+    --light: #f8fafc;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --text-primary: #111827;  /* Darker than default */
+    --text-secondary: #1f2937; /* Darker than default */
+    --text-light: #ffffff;     /* Pure white for contrast */
+}
+
+/* Modern Gradients */
+.gradient-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+}
+.gradient-dark {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+.gradient-light {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+.gradient-accent {
+    background: linear-gradient(135deg, var(--accent) 0%, #f97316 100%);
+}
+
+/* Smooth Transitions */
+.smooth-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-scale {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+/* Modern Cards */
+.card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Modern Buttons */
+.btn-primary {
+    background: var(--primary);
+    color: var(--text-light);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+}
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px -1px rgba(79, 70, 229, 0.3);
+}
+
+/* Modern Inputs */
+.modern-input {
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modern-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Section Styles */
+.section {
+    padding: 5rem 0;
+    position: relative;
+}
+.section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* Stats Card */
+.stats-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Search Box */
+.search-box {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-top: -3rem;
+    position: relative;
+    z-index: 10;
+}
+
+/* Subject Tags */
+.subject-tag {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: var(--light);
+    color: var(--text-primary);
+    border-radius: 2rem;
+    margin: 0.25rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+}
+.subject-tag:hover {
+    background: var(--primary);
+    color: var(--text-light);
+    transform: translateY(-2px);
+}
+
+/* Text Gradients */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Floating Elements */
+.floating {
+    animation: float 6s ease-in-out infinite;
+}
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Modern Footer */
+.footer-link {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.footer-link:hover {
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Social Icons */
+.social-icon {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.social-icon:hover {
+    transform: translateY(-3px);
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .section {
+        padding: 3rem 0;
+    }
+    .search-box {
+        margin-top: -2rem;
+    }
+}

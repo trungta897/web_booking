@@ -37,3 +37,4 @@ class ProfileController extends Controller
         return redirect('/')->with('success', 'Your account has been suspended.');
     }
 }
+ 
