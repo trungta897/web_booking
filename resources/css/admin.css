@@ -693,12 +693,14 @@ html.dark .admin-card .admin-card-header a:hover {
 }
 
 html.dark .admin-table th {
-    color: #9ca3af;
-    border-bottom-color: #374151;
+    background-color: var(--admin-secondary) !important; /* Added dark background for table headers */
+    color: #d1d5db !important; /* Adjusted text color for better contrast (e.g., gray-300) */
+    border-bottom-color: #4b5563 !important; /* Adjusted border color (e.g., gray-600) */
 }
 html.dark .admin-table td {
-    color: #d1d5db;
-    border-bottom-color: #374151;
+    background-color: #1f2937 !important; /* Standard dark background for table cells (e.g., gray-800) */
+    color: var(--admin-light); /* Lighter text for table cells */
+    border-bottom: 1px solid var(--admin-secondary); /* Darker border for table cells */
 }
 html.dark .admin-table .text-gray-500 {
     color: #9ca3af !important;
@@ -732,3 +734,102 @@ html.dark .divide-gray-100.dark\:divide-gray-600 {
 html.dark .hover\:bg-gray-100.dark\:hover\:bg-gray-600:hover {
     background-color: #4b5563 !important;
 }
+
+/* Ensure specific text colors are overridden */
+html.dark .text-gray-900 {
+    color: #f3f4f6 !important; /* gray-100 */
+}
+html.dark .text-gray-500 {
+    color: #9ca3af !important; /* gray-400 */
+}
+html.dark .text-indigo-600 {
+    color: #a5b4fc !important; /* indigo-300 */
+}
+html.dark .hover\:text-indigo-900:hover {
+    color: #c7d2fe !important; /* indigo-200 */
+}
+
+/* Table and container backgrounds and borders */
+html.dark .bg-white {
+    background-color: #1f2937 !important; /* gray-800 */
+}
+html.dark .bg-gray-50 {
+    background-color: #374151 !important; /* gray-700 */
+}
+html.dark .border-b.border-gray-200 {
+    border-color: #4b5563 !important; /* gray-600 */
+}
+html.dark .divide-y.divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: #4b5563 !important; /* gray-600 for dividers */
+}
+
+
+/* Badge Overrides - Targeting specific Tailwind classes used */
+/* Pending (Yellow) */
+html.dark .bg-yellow-100 {
+    background-color: #422006 !important; /* Darker yellow bg */
+}
+html.dark .text-yellow-800 {
+    color: #fef3c7 !important;    /* Lighter yellow text */
+}
+
+/* Accepted (Blue) */
+html.dark .bg-blue-100 {
+    background-color: #1e40af !important; /* Darker blue bg */
+}
+html.dark .text-blue-800 {
+    color: #dbeafe !important;    /* Lighter blue text */
+}
+
+/* Completed (Green) */
+html.dark .bg-green-100 {
+    background-color: #064e3b !important; /* Darker green bg */
+}
+html.dark .text-green-800 {
+    color: #d1fae5 !important;    /* Lighter green text */
+}
+
+/* Cancelled/Rejected (Red) */
+html.dark .bg-red-100 {
+    background-color: #7f1d1d !important; /* Darker red bg */
+}
+html.dark .text-red-800 {
+    color: #fee2e2 !important;    /* Lighter red text */
+}
+
+/* Default/Other (Gray) */
+html.dark .bg-gray-100 {
+    background-color: #4b5563 !important; /* gray-600 */
+}
+html.dark .text-gray-800 {
+    color: #e5e7eb !important;    /* gray-200 */
+}
+
+
+/* Pagination basic dark styles */
+html.dark .pagination span,
+html.dark .pagination a {
+    color: #d1d5db; /* gray-300 */
+}
+
+html.dark .pagination .active span {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: white;
+}
+
+html.dark .pagination .disabled span {
+    color: #6b7280; /* gray-500 */
+}
+
+html.dark .pagination a:hover {
+    background-color: var(--admin-secondary);
+}
+
+/* Ensure main content background is dark */
+html.dark .admin-main-content {
+    background-color: var(--admin-dark) !important; /* Match body background or a slightly lighter dark shade */
+}
+
+/* If there are specific page wrappers inside admin-main-content that are white, they might also need targeting, e.g.: */
+/* html.dark .admin-page-wrapper-class { background-color: var(--admin-dark); } */
