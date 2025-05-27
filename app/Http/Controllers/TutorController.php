@@ -27,9 +27,10 @@ class TutorController extends Controller
 
         // Filter by subject
         if ($request->filled('subject')) {
-            $query->join('subject_tutor', 'tutors.id', '=', 'subject_tutor.tutor_id')
-                  ->where('subject_tutor.subject_id', $request->subject)
-                  ->select('tutors.*');
+            $query->whereHas('subjects', function ($q) use ($request) {
+                $q->where('subjects.id', $request->subject);
+            });
+            // dd($query->toSql(), $query->getBindings()); // Temporary debug line
         }
 
         // Filter by price range
@@ -49,9 +50,9 @@ class TutorController extends Controller
 
         // Filter by location
         if ($request->filled('location')) {
-            $query->join('users', 'tutors.user_id', '=', 'users.id')
-                ->where('users.address', 'like', '%' . $request->location . '%')
-                ->select('tutors.*');
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('users.address', 'like', '%' . $request->location . '%');
+            });
         }
 
         // Filter by availability on a specific day
@@ -64,7 +65,7 @@ class TutorController extends Controller
 
         // Filter by experience level
         if ($request->filled('experience')) {
-            $query->where('years_of_experience', '>=', $request->experience);
+            $query->where('experience_years', '>=', $request->experience);
         }
 
         // Sort options
@@ -80,7 +81,7 @@ class TutorController extends Controller
                     $query->orderBy('reviews_avg_rating', 'desc');
                     break;
                 case 'experience':
-                    $query->orderBy('years_of_experience', 'desc');
+                    $query->orderBy('experience_years', 'desc');
                     break;
                 default:
                     $query->latest();
