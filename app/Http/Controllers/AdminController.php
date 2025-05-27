@@ -274,6 +274,16 @@ class AdminController extends Controller
     }
 
     /**
+     * Show the form for creating a new subject.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function createSubject()
+    {
+        return view('admin.subjects.create');
+    }
+
+    /**
      * Update the specified subject in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -289,6 +299,17 @@ class AdminController extends Controller
         $subject->update($request->only('name'));
 
         return redirect()->route('admin.subjects')->with('success', 'Subject updated successfully.');
+    }
+
+    /**
+     * Show the form for editing the specified subject.
+     *
+     * @param  \App\Models\Subject  $subject
+     * @return \Illuminate\View\View
+     */
+    public function editSubject(Subject $subject)
+    {
+        return view('admin.subjects.edit', compact('subject'));
     }
 
     /**
@@ -308,6 +329,17 @@ class AdminController extends Controller
             // Handle potential foreign key constraint violations if not handled by cascading deletes
             return redirect()->route('admin.subjects')->with('error', 'Could not delete subject. It might be in use.');
         }
+    }
+
+    /**
+     * Show the form for confirming deletion of the specified subject.
+     *
+     * @param  \App\Models\Subject  $subject
+     * @return \Illuminate\View\View
+     */
+    public function confirmDeleteSubject(Subject $subject)
+    {
+        return view('admin.subjects.confirm-delete', compact('subject'));
     }
 
     /**

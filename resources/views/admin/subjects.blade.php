@@ -1,15 +1,15 @@
 <x-admin-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Manage Subjects') }}
             </h2>
-            <button data-modal-target="add-subject-modal" data-modal-toggle="add-subject-modal" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
+            <a href="{{ route('admin.subjects.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                Add Subject
-            </button>
+                {{ __('Add Subject') }}
+            </a>
         </div>
     </x-slot>
 
@@ -35,7 +35,7 @@
                             <!-- Submit -->
                             <div class="flex items-end">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
-                                    Filter
+                                    Search
                                 </button>
                                 <a href="{{ route('admin.subjects') }}" class="ml-2 inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-400 focus:outline-none focus:border-gray-500 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
                                     Reset
@@ -80,68 +80,9 @@
                                             <div class="text-sm text-gray-900">{{ $subject->bookings_count }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <a href="{{ route('admin.subjects.show', $subject) }}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
-                                            <button data-modal-target="edit-subject-modal-{{ $subject->id }}" data-modal-toggle="edit-subject-modal-{{ $subject->id }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</button>
-                                            <button data-modal-target="delete-subject-modal-{{ $subject->id }}" data-modal-toggle="delete-subject-modal-{{ $subject->id }}" class="text-red-600 hover:text-red-900">Delete</button>
-
-                                            <!-- Edit Subject Modal -->
-                                            <div id="edit-subject-modal-{{ $subject->id }}" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-                                                <div class="relative w-full max-w-md max-h-full">
-                                                    <div class="relative bg-white rounded-lg shadow">
-                                                        <div class="flex items-center justify-between p-4 border-b rounded-t">
-                                                            <h3 class="text-xl font-medium text-gray-900">
-                                                                Edit Subject
-                                                            </h3>
-                                                            <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center" data-modal-hide="edit-subject-modal-{{ $subject->id }}">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                            </button>
-                                                        </div>
-                                                        <form action="{{ route('admin.subjects.update', $subject) }}" method="POST">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <div class="p-6 space-y-6">
-                                                                <div>
-                                                                    <label for="name" class="block text-sm font-medium text-gray-700">Subject Name</label>
-                                                                    <input type="text" name="name" id="name" value="{{ $subject->name }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
-                                                                </div>
-                                                            </div>
-                                                            <div class="flex items-center justify-end p-6 space-x-2 border-t border-gray-200 rounded-b">
-                                                                <button data-modal-hide="edit-subject-modal-{{ $subject->id }}" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-indigo-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Cancel</button>
-                                                                <button type="submit" class="text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Update</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Delete Subject Modal -->
-                                            <div id="delete-subject-modal-{{ $subject->id }}" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-                                                <div class="relative w-full max-w-md max-h-full">
-                                                    <div class="relative bg-white rounded-lg shadow">
-                                                        <div class="flex items-center justify-between p-4 border-b rounded-t">
-                                                            <h3 class="text-xl font-medium text-gray-900">
-                                                                Confirm Delete
-                                                            </h3>
-                                                            <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center" data-modal-hide="delete-subject-modal-{{ $subject->id }}">
-                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                            </button>
-                                                        </div>
-                                                        <div class="p-6 text-center">
-                                                            <svg class="mx-auto mb-4 text-gray-400 w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                            <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to delete the subject "{{ $subject->name }}"?</h3>
-                                                            <p class="mb-5 text-sm text-gray-500">This will also remove this subject from all tutor profiles and may affect existing bookings.</p>
-                                                            <form action="{{ route('admin.subjects.destroy', $subject) }}" method="POST">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
-                                                                    Yes, delete it
-                                                                </button>
-                                                                <button data-modal-hide="delete-subject-modal-{{ $subject->id }}" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">No, cancel</button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <a href="{{ route('admin.subjects.show', $subject) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">View</a>
+                                            <a href="{{ route('admin.subjects.edit', $subject) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-3">Edit</a>
+                                            <a href="{{ route('admin.subjects.confirm-delete', $subject) }}" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Delete</a>
                                         </td>
                                     </tr>
                                 @empty
@@ -159,35 +100,6 @@
                         {{ $subjects->links() }}
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Subject Modal -->
-    <div id="add-subject-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-        <div class="relative w-full max-w-md max-h-full">
-            <div class="relative bg-white rounded-lg shadow">
-                <div class="flex items-center justify-between p-4 border-b rounded-t">
-                    <h3 class="text-xl font-medium text-gray-900">
-                        Add New Subject
-                    </h3>
-                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center" data-modal-hide="add-subject-modal">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-                <form action="{{ route('admin.subjects.store') }}" method="POST">
-                    @csrf
-                    <div class="p-6 space-y-6">
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Subject Name</label>
-                            <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-end p-6 space-x-2 border-t border-gray-200 rounded-b">
-                        <button data-modal-hide="add-subject-modal" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-indigo-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Cancel</button>
-                        <button type="submit" class="text-white bg-indigo-700 hover:bg-indigo-800 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Add Subject</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>

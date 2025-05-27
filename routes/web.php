@@ -125,21 +125,38 @@ Route::domain(config('app.admin_domain'))->middleware(['auth', \App\Http\Middlew
 // Fallback for backward compatibility - these will be redirected by middleware
 Route::middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class . ':admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Tutors
     Route::get('/tutors', [AdminController::class, 'tutors'])->name('tutors');
     Route::get('/tutors/{user}', [AdminController::class, 'showTutor'])->name('tutors.show');
     Route::patch('/tutors/{user}/suspend', [AdminController::class, 'suspendTutor'])->name('tutors.suspend');
+
+    // Students
     Route::get('/students', [AdminController::class, 'students'])->name('students');
     Route::get('/students/{user}', [AdminController::class, 'showStudent'])->name('students.show');
     Route::patch('/students/{user}/suspend', [AdminController::class, 'suspendStudent'])->name('students.suspend');
+
+    // Bookings
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
     Route::get('/bookings/{booking}', [AdminController::class, 'showBooking'])->name('bookings.show');
+
+    // Subjects
     Route::get('/subjects', [AdminController::class, 'subjects'])->name('subjects');
-    Route::get('/subjects/{subject}', [AdminController::class, 'showSubject'])->name('subjects.show');
+    Route::get('/subjects/create', [AdminController::class, 'createSubject'])->name('subjects.create');
     Route::post('/subjects', [AdminController::class, 'storeSubject'])->name('subjects.store');
+    Route::get('/subjects/{subject}', [AdminController::class, 'showSubject'])->name('subjects.show');
+    Route::get('/subjects/{subject}/edit', [AdminController::class, 'editSubject'])->name('subjects.edit');
     Route::put('/subjects/{subject}', [AdminController::class, 'updateSubject'])->name('subjects.update');
+    Route::get('/subjects/{subject}/confirm-delete', [AdminController::class, 'confirmDeleteSubject'])->name('subjects.confirm-delete');
     Route::delete('/subjects/{subject}', [AdminController::class, 'destroySubject'])->name('subjects.destroy');
+
+    // Reports
     Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+
+    // Reviews
     Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews');
+
+    // Admin Profile
     Route::get('/profile', [AdminProfileController::class, 'show'])->name('profile.show');
     Route::patch('/profile/suspend', [AdminProfileController::class, 'suspend'])->name('profile.suspend');
 });
