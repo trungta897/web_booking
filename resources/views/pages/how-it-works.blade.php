@@ -93,7 +93,7 @@
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">Ready to Start Learning?</h2>
                 <p class="text-gray-600 mb-8">Join thousands of students who are already learning with our tutors</p>
                 <div class="flex justify-center space-x-4">
-                    <a href="{{ route('tutors.index') }}" class="bg-primary text-blue-600 px-6 py-3 rounded-md hover:bg-primary-dark transition-colors duration-300">
+                    <a href="{{ route('tutors.index') }}" class="bg-white text-primary border border-primary px-6 py-3 rounded-md hover:bg-primary/5 transition-colors duration-300">
                         Find a Tutor
                     </a>
                     <a href="{{ route('register') }}" class="bg-white text-primary border border-primary px-6 py-3 rounded-md hover:bg-primary/5 transition-colors duration-300">

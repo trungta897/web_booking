@@ -11,125 +11,121 @@
                 <!-- Basic Plan -->
                 <div class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
                     <div class="p-8">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Basic</h3>
-                        <div class="mb-6">
-                            <span class="text-4xl font-bold text-gray-900">$20</span>
-                            <span class="text-gray-600">/hour</span>
+                        <div class="flex items-baseline justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Basic: Up to $25/hr</h3>
                         </div>
                         <ul class="space-y-4 mb-8">
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 One-on-one tutoring
                             </li>
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Basic subject coverage
                             </li>
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Email support
                             </li>
                         </ul>
-                        <a href="{{ route('register') }}" class="block w-full bg-primary text-blue-600 text-center px-6 py-3 rounded-md hover:bg-primary-dark transition-colors duration-300">
-                            Get Started
-                        </a>
                     </div>
                 </div>
 
                 <!-- Standard Plan -->
                 <div class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 border-2 border-primary">
                     <div class="p-8">
-                        <div class="bg-primary text-blue-600 text-sm font-semibold px-3 py-1 rounded-full inline-block mb-4">
-                            Most Popular
-                        </div>
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Standard</h3>
-                        <div class="mb-6">
-                            <span class="text-4xl font-bold text-gray-900">$35</span>
-                            <span class="text-gray-600">/hour</span>
+
+                        <div class="flex items-baseline justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Standard: $25-$40/hr</h3>
                         </div>
                         <ul class="space-y-4 mb-8">
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 One-on-one tutoring
                             </li>
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 All subjects covered
                             </li>
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 24/7 support
                             </li>
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Progress tracking
                             </li>
                         </ul>
-                        <a href="{{ route('register') }}" class="block w-full bg-primary text-blue-600 text-center px-6 py-3 rounded-md hover:bg-primary-dark transition-colors duration-300">
-                            Get Started
-                        </a>
                     </div>
                 </div>
 
                 <!-- Premium Plan -->
                 <div class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
                     <div class="p-8">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Premium</h3>
-                        <div class="mb-6">
-                            <span class="text-4xl font-bold text-gray-900">$50</span>
-                            <span class="text-gray-600">/hour</span>
+                        <div class="flex items-baseline justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Premium: $40+/hr</h3>
                         </div>
                         <ul class="space-y-4 mb-8">
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 One-on-one tutoring
                             </li>
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 All subjects covered
                             </li>
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 24/7 priority support
                             </li>
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Advanced progress tracking
                             </li>
                             <li class="flex items-center">
-                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Custom learning materials
                             </li>
                         </ul>
-                        <a href="{{ route('register') }}" class="block w-full bg-primary text-blue-600 text-center px-6 py-3 rounded-md hover:bg-primary-dark transition-colors duration-300">
-                            Get Started
-                        </a>
                     </div>
                 </div>
+            </div>
+
+            <!-- Buttons Row -->
+            <div class="flex flex-col sm:flex-row justify-around items-center gap-4 mb-16 mt-8">
+                <a href="{{ route('tutors.index', ['price_range' => '0-25']) }}" class="w-full sm:w-auto inline-block bg-blue-500 text-white text-center px-6 py-3 rounded-md hover:bg-blue-600 transition-colors duration-300 no-underline">
+                    Basic: Up to $25/hr
+                </a>
+                <a href="{{ route('tutors.index', ['price_range' => '25-40']) }}" class="w-full sm:w-auto inline-block bg-blue-500 text-white text-center px-6 py-3 rounded-md hover:bg-blue-600 transition-colors duration-300 no-underline border-2 border-blue-700 ring-2 ring-offset-2 ring-blue-700">
+                    Standard: $25-$40/hr
+                </a>
+                <a href="{{ route('tutors.index', ['price_range' => '40-']) }}" class="w-full sm:w-auto inline-block bg-blue-500 text-white text-center px-6 py-3 rounded-md hover:bg-blue-600 transition-colors duration-300 no-underline">
+                    Premium: $40+/hr
+                </a>
             </div>
 
             <!-- FAQ Section -->

@@ -71,9 +71,9 @@
                     <tbody>
                         @forelse($recentBookings ?? [] as $booking)
                             <tr>
-                                <td>{{ $booking->student->name }}</td>
-                                <td>{{ $booking->tutor->name }}</td>
-                                <td>{{ $booking->subject->name }}</td>
+                                <td>{{ optional($booking->student)->name }}</td>
+                                <td>{{ optional($booking->tutor)->name }}</td>
+                                <td>{{ optional($booking->subject)->name }}</td>
                                 <td>{{ $booking->date->format('M d, Y') }}</td>
                                 <td>
                                     <span class="admin-badge {{ $booking->status === 'confirmed' ? 'admin-badge-success' : 'admin-badge-warning' }}">

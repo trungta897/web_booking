@@ -61,7 +61,7 @@ class PaymentReceived extends Notification implements ShouldQueue
             ->line("You've received payment from {$student} for the upcoming {$subject} session.")
             ->line("Session Date: {$this->booking->start_time->format('F j, Y')}")
             ->line("Session Time: {$startTime} - {$endTime}")
-            ->line("Amount: ${$amount}")
+            ->line("Amount: {$amount}")
             ->action('View Booking Details', route('bookings.show', $this->booking))
             ->line('Thank you for teaching with our platform!');
     }
