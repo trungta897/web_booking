@@ -10,6 +10,7 @@ use App\Notifications\BookingStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Carbon\Carbon;
 
 class BookingController extends Controller
 {
@@ -34,7 +35,12 @@ class BookingController extends Controller
         $subjects = $tutor->subjects;
         $availability = $tutor->availability;
 
-        return view('bookings.create', compact('tutor', 'subjects', 'availability'));
+        // Set default start and end times in GMT+7 (Asia/Ho_Chi_Minh)
+        $nowInHanoi = Carbon::now('Asia/Ho_Chi_Minh');
+        $defaultStartTime = $nowInHanoi->format('Y-m-d\TH:i');
+        $defaultEndTime = $nowInHanoi->copy()->addHours(24)->format('Y-m-d\TH:i');
+
+        return view('bookings.create', compact('tutor', 'subjects', 'availability', 'defaultStartTime', 'defaultEndTime'));
     }
 
     public function store(Request $request, Tutor $tutor)
@@ -116,7 +122,7 @@ class BookingController extends Controller
      * Redirect to the payment page for a booking
      *
      * @param Booking $booking
-     * @return \Illuminate\View\View
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function payment(Booking $booking)
     {

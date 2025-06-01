@@ -26,7 +26,7 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $request->session()->regenerate();
+        request()->session()->regenerate();
 
         $user = Auth::user(); // Get the authenticated user via Auth facade
 
@@ -39,7 +39,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('tutor.dashboard', absolute: false)); // Or 'dashboard'
         } else {
             // For students or any other roles
-            return redirect()->intended(route('dashboard', absolute: false));
+            return redirect()->intended(route('/'));
         }
     }
 
@@ -50,9 +50,9 @@ class AuthenticatedSessionController extends Controller
     {
         Auth::guard('web')->logout();
 
-        $request->session()->invalidate();
+        request()->session()->invalidate();
 
-        $request->session()->regenerateToken();
+        request()->session()->regenerateToken();
 
         return redirect('/');
     }

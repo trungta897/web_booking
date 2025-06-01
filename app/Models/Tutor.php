@@ -32,7 +32,8 @@ class Tutor extends Model
 
     public function subjects()
     {
-        return $this->belongsToMany(Subject::class, 'tutor_subjects_new', 'tutor_id', 'subject_id');
+        return $this->belongsToMany(Subject::class, 'subject_tutor', 'tutor_id', 'subject_id')
+                    ->withPivot(['hourly_rate', 'description']);
     }
 
     public function reviews()

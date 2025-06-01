@@ -25,7 +25,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Add an unread() method to HasMany relationships
         HasMany::macro('unread', function () {
-            return $this->where('is_read', false);
+            /** @var \Illuminate\Database\Eloquent\Relations\HasMany $this */
+            return $this->getQuery()->where('is_read', false);
         });
     }
 }
