@@ -30,8 +30,11 @@ class SubjectSeeder extends Seeder
             ['name' => 'Physical Education', 'description' => 'Learn about sports, fitness, and health', 'icon' => 'fa-running'],
         ];
 
-        foreach ($subjects as $subject) {
-            Subject::create($subject);
+        foreach ($subjects as $subjectData) {
+            Subject::updateOrCreate(
+                ['name' => $subjectData['name']],
+                $subjectData
+            );
         }
     }
 }

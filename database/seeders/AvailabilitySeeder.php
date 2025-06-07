@@ -15,44 +15,57 @@ class AvailabilitySeeder extends Seeder
     {
         $tutors = Tutor::all();
         $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-        
+
+        if ($tutors->isEmpty()) {
+            $this->command->info('AvailabilitySeeder: No tutors found. Skipping availability creation.');
+            return;
+        }
+
         foreach ($tutors as $tutor) {
+            // Delete existing availability for this tutor to ensure a fresh set
+            $tutor->availability()->delete();
+
             // Assign 3-5 days of availability to each tutor
-            $numDays = rand(3, 5);
-            $availableDays = array_rand(array_flip($days), $numDays);
-            
-            // Make sure $availableDays is always an array
-            if (!is_array($availableDays)) {
-                $availableDays = [$availableDays];
+            if (empty($days)) { // Should not happen with the predefined $days array
+                continue;
             }
-            
-            foreach ($availableDays as $day) {
+            $numDays = rand(3, min(5, count($days))); // Ensure rand max is not greater than count of days
+            $availableDayKeys = array_rand($days, $numDays);
+
+            // Make sure $availableDayKeys is always an array
+            if (!is_array($availableDayKeys)) {
+                $availableDayKeys = [$availableDayKeys];
+            }
+
+            foreach ($availableDayKeys as $key) {
+                $day = $days[$key];
                 // Morning schedule
-                $morningStart = rand(8, 10) . ':00';
-                $morningEnd = rand(11, 13) . ':00';
-                
+                $morningStartHour = rand(8, 10);
+                $morningEndHour = rand(max($morningStartHour + 1, 11), 13); // Ensure end is after start
+
                 Availability::create([
                     'tutor_id' => $tutor->id,
                     'day_of_week' => $day,
-                    'start_time' => $morningStart,
-                    'end_time' => $morningEnd,
+                    'start_time' => sprintf('%02d:00:00', $morningStartHour),
+                    'end_time' => sprintf('%02d:00:00', $morningEndHour),
                     'is_available' => true,
                 ]);
-                
+
                 // Afternoon schedule (with a 60% chance)
                 if (rand(1, 10) <= 6) {
-                    $afternoonStart = rand(14, 16) . ':00';
-                    $afternoonEnd = rand(17, 19) . ':00';
-                    
+                    $afternoonStartHour = rand(14, 16);
+                    $afternoonEndHour = rand(max($afternoonStartHour + 1, 17), 19); // Ensure end is after start
+
                     Availability::create([
                         'tutor_id' => $tutor->id,
                         'day_of_week' => $day,
-                        'start_time' => $afternoonStart,
-                        'end_time' => $afternoonEnd,
+                        'start_time' => sprintf('%02d:00:00', $afternoonStartHour),
+                        'end_time' => sprintf('%02d:00:00', $afternoonEndHour),
                         'is_available' => true,
                     ]);
                 }
             }
         }
+        $this->command->info('AvailabilitySeeder: Processed availability for ' . $tutors->count() . ' tutors.');
     }
-} 
+}

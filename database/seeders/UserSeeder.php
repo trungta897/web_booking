@@ -15,13 +15,15 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Admin user
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'email_verified_at' => now(),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
 
         // Tutor users
         $tutors = [
@@ -60,10 +62,49 @@ class UserSeeder extends Seeder
                 'role' => 'tutor',
                 'email_verified_at' => now(),
             ],
+            // Additional tutors
+            [
+                'name' => 'Priya Patel',
+                'email' => 'priya.patel@example.com',
+                'password' => Hash::make('password'),
+                'role' => 'tutor',
+                'email_verified_at' => now(),
+            ],
+            [
+                'name' => 'Carlos Ramirez',
+                'email' => 'carlos.ramirez@example.com',
+                'password' => Hash::make('password'),
+                'role' => 'tutor',
+                'email_verified_at' => now(),
+            ],
+            [
+                'name' => 'Anna Müller',
+                'email' => 'anna.muller@example.com',
+                'password' => Hash::make('password'),
+                'role' => 'tutor',
+                'email_verified_at' => now(),
+            ],
+            [
+                'name' => 'Fatima Zahra',
+                'email' => 'fatima.zahra@example.com',
+                'password' => Hash::make('password'),
+                'role' => 'tutor',
+                'email_verified_at' => now(),
+            ],
+            [
+                'name' => 'David Kim',
+                'email' => 'david.kim@example.com',
+                'password' => Hash::make('password'),
+                'role' => 'tutor',
+                'email_verified_at' => now(),
+            ],
         ];
 
-        foreach ($tutors as $tutor) {
-            User::create($tutor);
+        foreach ($tutors as $tutorData) {
+            User::updateOrCreate(
+                ['email' => $tutorData['email']],
+                $tutorData
+            );
         }
 
         // Student users
@@ -105,8 +146,11 @@ class UserSeeder extends Seeder
             ],
         ];
 
-        foreach ($students as $student) {
-            User::create($student);
+        foreach ($students as $studentData) {
+            User::updateOrCreate(
+                ['email' => $studentData['email']],
+                $studentData
+            );
         }
     }
 }

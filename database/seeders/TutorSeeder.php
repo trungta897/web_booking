@@ -4,10 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Tutor;
 use App\Models\User;
-use App\Models\Subject;
-use App\Models\Availability;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+// Removed unused imports for Subject, Availability, Hash if they are not used elsewhere in this file specifically for TutorSeeder logic
 
 class TutorSeeder extends Seeder
 {
@@ -35,16 +33,23 @@ class TutorSeeder extends Seeder
             'Data Structures and Algorithms'
         ];
 
-        foreach ($tutorUsers as $index => $user) {
-            // Create tutor profile
-            Tutor::create([
-                'user_id' => $user->id,
-                'bio' => $bios[$index % count($bios)],
-                'hourly_rate' => rand(25, 100),
-                'is_available' => true,
-                'experience_years' => rand(2, 15),
-                'specialization' => $specializations[$index % count($specializations)],
-            ]);
+        if ($tutorUsers->isEmpty()) {
+            $this->command->info('TutorSeeder: No users with role \'tutor\' found. Skipping tutor profile creation.');
+            return;
         }
+
+        foreach ($tutorUsers as $index => $user) {
+            Tutor::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'bio' => $bios[$index % count($bios)],
+                    'hourly_rate' => rand(25, 100),
+                    'is_available' => true,
+                    'experience_years' => rand(2, 15),
+                    'specialization' => $specializations[$index % count($specializations)],
+                ]
+            );
+        }
+        $this->command->info('TutorSeeder: Processed tutor profiles for ' . $tutorUsers->count() . ' users.');
     }
 }

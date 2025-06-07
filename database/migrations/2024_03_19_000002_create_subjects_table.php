@@ -22,17 +22,22 @@ return new class extends Migration
             $table->index('level');
         });
 
-        Schema::create('subject_tutor_profile', function (Blueprint $table) {
+        Schema::create('subject_tutor', function (Blueprint $table) {
             $table->id();
             $table->foreignId('subject_id')->constrained()->onDelete('cascade');
-            $table->foreignId('tutor_profile_id')->constrained()->onDelete('cascade');
+            $table->foreignId('tutor_id')->constrained('tutors')->onDelete('cascade');
+            $table->decimal('hourly_rate', 8, 2)->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
+
+            // Optional: Add a unique constraint for subject_id and tutor_id if a tutor cannot have the same subject multiple times
+            // $table->unique(['subject_id', 'tutor_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('subject_tutor_profile');
+        Schema::dropIfExists('subject_tutor');
         Schema::dropIfExists('subjects');
     }
 };

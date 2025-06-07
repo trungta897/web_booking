@@ -11,7 +11,7 @@ class Education extends Model
     use HasFactory;
 
     protected $fillable = [
-        'tutor_profile_id',
+        // 'tutor_profile_id', // Removed
         'tutor_id',
         'institution',
         'degree',
@@ -26,13 +26,14 @@ class Education extends Model
         'end_year' => 'integer',
     ];
 
-    public function tutorProfile(): BelongsTo
-    {
-        return $this->belongsTo(TutorProfile::class);
-    }
+    // Removed tutorProfile() relationship
+    // public function tutorProfile(): BelongsTo
+    // {
+    //     return $this->belongsTo(TutorProfile::class);
+    // }
 
     public function tutor(): BelongsTo
     {
-        return $this->belongsTo(Tutor::class);
+        return $this->belongsTo(Tutor::class, 'tutor_id'); // Ensure foreign key is specified if not default
     }
 }

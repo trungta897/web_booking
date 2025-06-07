@@ -39,7 +39,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('tutor.dashboard', absolute: false)); // Or 'dashboard'
         } else {
             // For students or any other roles
-            return redirect()->intended(route('/'));
+            return redirect()->intended(route('home'));
         }
     }
 

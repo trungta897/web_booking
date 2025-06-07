@@ -38,7 +38,7 @@ class BookingController extends Controller
         // Set default start and end times in GMT+7 (Asia/Ho_Chi_Minh)
         $nowInHanoi = Carbon::now('Asia/Ho_Chi_Minh');
         $defaultStartTime = $nowInHanoi->format('Y-m-d\TH:i');
-        $defaultEndTime = $nowInHanoi->copy()->addHours(24)->format('Y-m-d\TH:i');
+        $defaultEndTime = $nowInHanoi->copy()->addHours(2)->format('Y-m-d\TH:i');
 
         return view('bookings.create', compact('tutor', 'subjects', 'availability', 'defaultStartTime', 'defaultEndTime'));
     }
@@ -76,8 +76,9 @@ class BookingController extends Controller
         // Send notification to tutor
         $tutor->user->notify(new BookingStatusChanged($booking));
 
-        return redirect()->route('bookings.show', $booking)
-            ->with('success', 'Booking request sent successfully.');
+        return redirect()->route('bookings.index')
+            ->with('success', 'Booking request sent successfully.')
+            ->with('new_booking_id', $booking->id);
     }
 
     public function show(Booking $booking)

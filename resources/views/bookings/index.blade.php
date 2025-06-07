@@ -47,8 +47,11 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
+                                    @php
+                                        $newBookingId = session('new_booking_id');
+                                    @endphp
                                     @foreach($bookings as $booking)
-                                        <tr>
+                                        <tr @if($booking->id == $newBookingId) class="bg-yellow-100 border-2 border-yellow-500" @endif>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center">
                                                     <div class="flex-shrink-0 h-10 w-10">

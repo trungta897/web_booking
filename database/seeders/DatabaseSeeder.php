@@ -16,7 +16,6 @@ class DatabaseSeeder extends Seeder
             SubjectSeeder::class,
             UserSeeder::class,
             TutorSeeder::class,
-            TutorSubjectSeeder::class,
             AvailabilitySeeder::class,
             BookingSeeder::class,
             ReviewSeeder::class,

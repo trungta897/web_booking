@@ -16,7 +16,6 @@ class Tutor extends Model
         'hourly_rate',
         'is_available',
         'experience_years',
-        'education',
         'specialization',
     ];
 
@@ -81,8 +80,8 @@ class Tutor extends Model
         // Check if the tutor has availability set for this day and time
         $availabilityExists = $this->availability()
             ->where('day_of_week', $dayOfWeek)
-            ->where('start_time', '<=', $startDateTime->format('H:i:s'))
-            ->where('end_time', '>=', $endDateTime->format('H:i:s'))
+            ->where('start_time', '<', $startDateTime->format('H:i:s'))
+            ->where('end_time', '>', $endDateTime->format('H:i:s'))
             ->where('is_available', true)
             ->exists();
 
@@ -95,12 +94,10 @@ class Tutor extends Model
             ->where('status', '!=', 'cancelled')
             ->where('status', '!=', 'rejected')
             ->where(function ($query) use ($startDateTime, $endDateTime) {
-                $query->whereBetween('start_time', [$startDateTime, $endDateTime])
-                    ->orWhereBetween('end_time', [$startDateTime, $endDateTime])
-                    ->orWhere(function ($q) use ($startDateTime, $endDateTime) {
-                        $q->where('start_time', '<=', $startDateTime)
-                            ->where('end_time', '>=', $endDateTime);
-                    });
+                $query->where(function($q) use ($startDateTime, $endDateTime) {
+                    $q->where('start_time', '<', $endDateTime)
+                      ->where('end_time', '>', $startDateTime);
+                });
             })
             ->exists();
 

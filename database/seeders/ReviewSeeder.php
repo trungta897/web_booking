@@ -13,8 +13,16 @@ class ReviewSeeder extends Seeder
      */
     public function run(): void
     {
+        Review::query()->delete(); // Deletes all existing reviews
+        $this->command->info('ReviewSeeder: Deleted all existing reviews.');
+
         // Get all completed bookings
         $completedBookings = Booking::where('status', 'completed')->get();
+
+        if ($completedBookings->isEmpty()) {
+            $this->command->info('ReviewSeeder: No completed bookings found to review. Skipping review creation.');
+            return;
+        }
 
         $comments = [
             "Excellent tutor! Very knowledgeable and patient. Made complex concepts easy to understand.",
@@ -29,21 +37,30 @@ class ReviewSeeder extends Seeder
             "Patient and understanding. Took time to ensure I fully grasped the concepts."
         ];
 
+        $reviewsCreated = 0;
         foreach ($completedBookings as $booking) {
             // 80% chance of leaving a review for completed booking
             if (rand(1, 10) <= 8) {
-                Review::create([
-                    'tutor_id' => $booking->tutor_id,
-                    'student_id' => $booking->student_id,
-                    'booking_id' => $booking->id,
-                    'reviewer_id' => $booking->student_id, // Student is the reviewer
-                    'reviewed_user_id' => $booking->tutor_id, // Tutor is being reviewed
-                    'rating' => rand(3, 5), // Mostly positive ratings
-                    'comment' => $comments[array_rand($comments)],
-                    'created_at' => $booking->end_time->addHours(rand(1, 24)),
-                    'updated_at' => $booking->end_time->addHours(rand(1, 24)),
-                ]);
+                // Ensure a booking doesn't get multiple reviews from this seeder run
+                Review::updateOrCreate(
+                    [
+                        'booking_id' => $booking->id,
+                        // Assuming one review per booking from student to tutor
+                        'reviewer_id' => $booking->student_id,
+                        'reviewed_user_id' => $booking->tutor_id
+                    ],
+                    [
+                        'tutor_id' => $booking->tutor_id,
+                        'student_id' => $booking->student_id,
+                        'rating' => rand(4, 5), // Mostly positive ratings
+                        'comment' => $comments[array_rand($comments)],
+                        'created_at' => $booking->end_time ? $booking->end_time->addHours(rand(1, 24)) : now()->addHours(rand(1,24)),
+                        'updated_at' => $booking->end_time ? $booking->end_time->addHours(rand(1, 24)) : now()->addHours(rand(1,24)),
+                    ]
+                );
+                $reviewsCreated++;
             }
         }
+        $this->command->info("ReviewSeeder: Created {$reviewsCreated} reviews for completed bookings.");
     }
 }

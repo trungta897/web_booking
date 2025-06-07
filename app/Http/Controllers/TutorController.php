@@ -128,7 +128,7 @@ class TutorController extends Controller
             return view('tutors.show', $data);
         }
 
-        $tutor->load(['user', 'subjects', 'education', 'reviews.user']);
+        $tutor->load(['user', 'subjects', 'education', 'reviews.student']);
         $tutor->loadCount('reviews');
         $tutor->loadAvg('reviews', 'rating');
 

@@ -21,6 +21,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Before reverting the ENUM, update any 'completed' statuses
+        // to a value that will be valid in the reverted ENUM.
+        // For example, let's change them to 'accepted'.
+        DB::table('bookings')->where('status', 'completed')->update(['status' => 'accepted']);
+
         // Revert back to the original enum values (without 'completed')
         DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM('pending', 'accepted', 'rejected', 'cancelled') DEFAULT 'pending'");
     }

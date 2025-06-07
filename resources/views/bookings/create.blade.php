@@ -12,6 +12,16 @@
                     <form method="POST" action="{{ route('bookings.store', $tutor) }}">
                         @csrf
 
+                        @if($errors->any())
+                            <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                                <ul class="list-disc pl-5">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         <div class="mb-4">
                             <label for="subject_id" class="block text-sm font-medium text-gray-700">Subject</label>
                             <select name="subject_id" id="subject_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
@@ -85,7 +95,7 @@
                         return;
                     }
 
-                    const endTime = new Date(startTime.getTime() + (24 * 60 * 60 * 1000));
+                    const endTime = new Date(startTime.getTime() + (2 * 60 * 60 * 1000));
 
                     const year = endTime.getFullYear();
                     const month = (endTime.getMonth() + 1).toString().padStart(2, '0');
