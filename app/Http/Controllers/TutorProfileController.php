@@ -14,10 +14,10 @@ class TutorProfileController extends Controller
     {
         $tutor = Auth::user()->tutor;
         if (!$tutor) {
-            return view('tutor.profile.show', compact('tutor'));
+            return view('tutors.profile.show', compact('tutor'));
         }
         $tutor->load('user', 'subjects', 'education');
-        return view('tutor.profile.show', compact('tutor'));
+        return view('tutors.profile.show', compact('tutor'));
     }
 
     public function edit()
@@ -28,7 +28,7 @@ class TutorProfileController extends Controller
         }
         $tutor->load('user', 'subjects', 'education');
         $subjects = Subject::all();
-        return view('tutor.profile.edit', compact('tutor', 'subjects'));
+        return view('tutors.profile.edit', compact('tutor', 'subjects'));
     }
 
     public function update(Request $request)

@@ -35,7 +35,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/tutor/dashboard', function () {
-        return view('tutor.dashboard');
+        return view('tutors.dashboard');
     })->middleware(\App\Http\Middleware\RoleSwitchMiddleware::class . ':tutor')->name('tutor.dashboard');
 
     // Role switching routes

@@ -263,7 +263,7 @@ class TutorController extends Controller
         $tutor = $user->tutor;
         $availabilities = $tutor->availability;
 
-        return view('tutor.availability', compact('tutor', 'availabilities'));
+        return view('tutors.availability', compact('tutor', 'availabilities'));
     }
 
     /**
@@ -302,7 +302,7 @@ class TutorController extends Controller
             $availability->save();
         }
 
-        return redirect()->route('tutor.availability')
+        return redirect()->route('tutors.availability')
             ->with('success', 'Your availability has been updated successfully.');
     }
 }

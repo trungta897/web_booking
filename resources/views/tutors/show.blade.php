@@ -193,7 +193,7 @@
                                                     <input type="hidden" name="rating" id="rating" value="0">
                                                 </div>
                                                 @error('rating')
-                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                    <p class="mt-1 text-sm text-red-600">{{ $errors->first('rating') }}</p>
                                                 @enderror
                                             </div>
 
@@ -201,7 +201,7 @@
                                                 <label for="comment" class="block text-sm font-medium text-gray-700">Comment</label>
                                                 <textarea id="comment" name="comment" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Share your experience with this tutor">{{ old('comment') }}</textarea>
                                                 @error('comment')
-                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                    <p class="mt-1 text-sm text-red-600">{{ $errors->first('comment') }}</p>
                                                 @enderror
                                             </div>
 
