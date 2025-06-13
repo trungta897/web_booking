@@ -1,0 +1,831 @@
+/* Admin Panel Styles */
+
+/* Main admin color scheme */
+:root {
+    --admin-primary: #1e40af;
+    --admin-secondary: #374151;
+    --admin-accent: #4f46e5;
+    --admin-light: #f3f4f6;
+    --admin-dark: #111827;
+    --admin-success: #10b981;
+    --admin-danger: #ef4444;
+    --admin-warning: #f59e0b;
+    --admin-info: #3b82f6;
+}
+
+/* Admin typography */
+.admin-page h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--admin-dark);
+    margin-bottom: 1rem;
+}
+
+.admin-page h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--admin-dark);
+    margin-bottom: 0.75rem;
+}
+
+.admin-page h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--admin-dark);
+    margin-bottom: 0.5rem;
+}
+
+.admin-page p {
+    color: var(--admin-secondary);
+    line-height: 1.6;
+}
+
+/* Admin navigation styling */
+.admin-nav-link {
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.admin-nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.admin-nav-link.active {
+    background-color: var(--admin-primary);
+}
+
+/* Admin cards and containers */
+.admin-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.admin-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-stat-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+}
+
+.admin-stat-icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.5rem;
+    margin-right: 1rem;
+}
+
+.admin-stat-content {
+    flex-grow: 1;
+}
+
+.admin-stat-label {
+    color: var(--admin-secondary);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.admin-stat-value {
+    color: var(--admin-dark);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* Admin tables */
+.admin-table {
+    min-width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    background-color: var(--admin-light);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--admin-secondary);
+}
+
+.admin-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-table tr:hover {
+    background-color: #f9fafb;
+}
+
+/* Admin forms */
+.admin-form-group {
+    margin-bottom: 1.5rem;
+}
+
+.admin-form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--admin-dark);
+    margin-bottom: 0.5rem;
+}
+
+.admin-form-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background-color: white;
+}
+
+.admin-form-input:focus {
+    outline: 2px solid var(--admin-primary);
+    outline-offset: 2px;
+}
+
+.admin-form-select {
+    width: 100%;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background-color: white;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    appearance: none;
+}
+
+/* Admin buttons */
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.admin-btn-primary {
+    background-color: var(--admin-primary);
+    color: white;
+}
+
+.admin-btn-primary:hover {
+    background-color: #1e3a8a;
+}
+
+.admin-btn-secondary {
+    background-color: var(--admin-secondary);
+    color: white;
+}
+
+.admin-btn-secondary:hover {
+    background-color: #1f2937;
+}
+
+.admin-btn-success {
+    background-color: var(--admin-success);
+    color: white;
+}
+
+.admin-btn-success:hover {
+    background-color: #059669;
+}
+
+.admin-btn-danger {
+    background-color: var(--admin-danger);
+    color: white;
+}
+
+.admin-btn-danger:hover {
+    background-color: #dc2626;
+}
+
+/* Status badges */
+.admin-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.admin-badge-success {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.admin-badge-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.admin-badge-danger {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+.admin-badge-info {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+/* Dashboard layout */
+.admin-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .admin-dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .admin-dashboard-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+/* Admin main content area */
+.admin-content {
+    padding: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .admin-content {
+        padding: 2rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .admin-content {
+        padding: 2.5rem;
+    }
+}
+
+/* General Admin Layout Styles */
+body.admin-body {
+    font-family: 'Figtree', sans-serif; /* Ensure consistent font */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Sidebar Styles - Phoenix Light Theme */
+.admin-sidebar {
+    background-color: #ffffff; /* White */
+    border-right: 1px solid #e5e7eb; /* gray-200 for a subtle separator */
+    color: #374151; /* gray-700 - for general text in sidebar if any */
+}
+
+.admin-sidebar-header {
+    padding: 1rem 1rem 1rem 1.25rem; /* Slightly adjust left padding */
+    border-bottom: 1px solid #e5e7eb; /* gray-200 */
+    margin-bottom: 0.75rem; /* Increased margin for spacing below header */
+}
+
+.admin-sidebar-header .app-name-admin {
+    font-size: 1rem; /* text-base, Phoenix logo text is not too large */
+    font-weight: 600; /* font-semibold */
+    color: #1f2937; /* gray-800 */
+    display: flex;
+    align-items: center;
+}
+
+.admin-sidebar-header .app-name-admin svg {
+    width: 1.5rem; /* w-6 */
+    height: 1.5rem; /* h-6 */
+    margin-right: 0.5rem; /* mr-2 */
+}
+
+/* Sidebar Navigation Links - Phoenix Style */
+.admin-sidebar nav a.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.625rem 1.25rem; /* py-2.5 px-5 */
+    margin-left: 0.75rem; /* mx-3 effectively */
+    margin-right: 0.75rem;
+    border-radius: 0.375rem; /* rounded-md */
+    color: #374151; /* gray-700 text - slightly darker than before */
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500; /* medium */
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out, border-left-color 0.15s ease-in-out;
+    border-left: 3px solid transparent; /* Adjusted border thickness */
+}
+
+.admin-sidebar nav a.nav-link:hover {
+    background-color: #f0f3f9; /* A very light blue/gray, custom */
+    color: #1e3a8a; /* A darker blue for text on hover */
+}
+
+.admin-sidebar nav a.nav-link.active {
+    color: #1e40af; /* blue-700 - Phoenix active link color */
+    background-color: transparent; /* No background color for active */
+    font-weight: 600; /* semibold */
+    border-left-color: #1e40af; /* blue-700 */
+}
+
+/* Icons within sidebar links */
+.admin-sidebar nav a.nav-link i {
+    margin-right: 0.75rem; /* mr-3 */
+    width: 1.125rem; /* w-4.5 */
+    font-size: 0.875rem; /* text-sm for icons */
+    text-align: center;
+    color: #6b7280; /* gray-500 for icons */
+}
+
+.admin-sidebar nav a.nav-link.active i {
+    color: #1e40af; /* blue-700 for active icons */
+}
+
+/* Sidebar Footer Links (View Site / Logout) */
+.admin-sidebar .sidebar-section-separator a.nav-link,
+.admin-sidebar .sidebar-section-separator button.nav-link {
+    padding: 0.625rem 1.5rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    color: #4b5563; /* gray-600 */
+    font-size: 0.875rem;
+    border-left: 4px solid transparent;
+}
+.admin-sidebar .sidebar-section-separator a.nav-link:hover,
+.admin-sidebar .sidebar-section-separator button.nav-link:hover {
+    background-color: #f3f4f6; /* gray-100 */
+    color: #111827; /* gray-900 */
+}
+
+.admin-sidebar .sidebar-section-separator {
+    border-top: 1px solid #e5e7eb; /* gray-200 */
+    margin: 1rem 0.5rem 0 0.5rem; /* Apply side margins too */
+    padding-top: 1rem;
+}
+
+/* Main Content Area & Top Bar - Phoenix Style */
+.admin-main-content {
+    background-color: #f9fafb; /* gray-50 */
+    min-height: calc(100vh - 4rem); /* Subtract top bar height */
+}
+
+.admin-top-bar {
+    background-color: #ffffff; /* White */
+    border-bottom: 1px solid #e5e7eb; /* gray-200 */
+    height: 4rem; /* 64px, typical top bar height */
+    padding-left: 1.5rem; /* px-6 */
+    padding-right: 1.5rem; /* px-6 */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Phoenix-like Search Input in Top Bar */
+.admin-top-bar .search-input {
+    min-width: 280px;
+    font-size: 0.875rem; /* text-sm */
+    height: 2.25rem; /* h-9, slightly shorter */
+    padding-left: 2.5rem; /* for icon */
+    border: 1px solid #d1d5db; /* gray-300, could be lighter for Phoenix */
+    border-radius: 0.375rem; /* rounded-md */
+    background-color: #f9fafb; /* gray-50, very light background */
+    color: #374151; /* gray-700 for text */
+}
+.admin-top-bar .search-input::placeholder {
+    color: #9ca3af; /* gray-400 */
+    font-size: 0.875rem;
+}
+.admin-top-bar .search-input:focus {
+    background-color: #ffffff; /* White on focus */
+    border-color: #a5b4fc; /* indigo-300, subtle focus border */
+    box-shadow: 0 0 0 2px #c7d2fe; /* indigo-200, subtle focus ring */
+    outline: none;
+}
+
+.admin-top-bar .search-icon {
+    color: #9ca3af; /* gray-400 */
+    /* Positioned absolutely in the blade file */
+}
+
+/* Top Bar Icons (right side) - Phoenix Style */
+.admin-top-bar .top-bar-icon-btn {
+    color: #6b7280; /* gray-500 - standard icon color */
+    padding: 0.375rem; /* p-1.5 for tighter spacing */
+    border-radius: 9999px; /* rounded-full */
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+.admin-top-bar .top-bar-icon-btn:hover {
+    color: #1f2937; /* gray-800 - darker on hover */
+    background-color: #f3f4f6; /* gray-100 - subtle hover background */
+}
+.admin-top-bar .top-bar-icon-btn i {
+    font-size: 1rem; /* text-base for icons like sun, bell, th */
+    display: block; /* Helps with alignment if icons have varying heights */
+}
+
+.admin-top-bar .user-avatar-button img {
+    width: 2rem; /* w-8 */
+    height: 2rem; /* h-8 */
+}
+
+/* Page Header (e.g., "Ecommerce Dashboard" title) */
+.admin-page-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1.5rem 1.5rem;
+}
+
+.admin-page-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+/* Ensure Vite processes this file */
+/* You can add more specific styles below */
+
+/* Main Content Area - Phoenix Style */
+.admin-main-content {
+    background-color: #f9fafb; /* gray-50 */
+    min-height: calc(100vh - 4rem); /* Subtract top bar height */
+}
+
+/* Page Header - Phoenix Style */
+.admin-page-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1.5rem 1.5rem;
+}
+
+.admin-page-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+/* Dashboard Grid - Phoenix Style */
+.admin-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .admin-dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .admin-dashboard-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Stat Cards - Phoenix Style */
+.admin-stat-card {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.admin-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.admin-stat-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.admin-stat-icon.primary {
+    background-color: #e0e7ff;
+    color: #4f46e5;
+}
+
+.admin-stat-icon.success {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.admin-stat-icon.warning {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.admin-stat-icon.danger {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.admin-stat-value {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+}
+
+.admin-stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* Content Cards - Phoenix Style */
+.admin-card {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.admin-card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-card-header h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.admin-card-body {
+    padding: 1.5rem;
+}
+
+/* Alert Messages - Phoenix Style */
+.admin-alert {
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+.admin-alert-success {
+    background-color: #dcfce7;
+    border: 1px solid #86efac;
+    color: #166534;
+}
+
+.admin-alert-error {
+    background-color: #fee2e2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+}
+
+/* Dark Theme Styles */
+html.dark body.admin-body {
+    background-color: #111827;
+    color: #d1d5db;
+}
+
+html.dark .admin-sidebar {
+    background-color: #1f2937;
+    border-right-color: #374151;
+}
+
+html.dark .admin-sidebar .app-name-admin span {
+    color: #e5e7eb;
+}
+html.dark .admin-sidebar .nav-link {
+    color: #9ca3af;
+}
+html.dark .admin-sidebar .nav-link:hover,
+html.dark .admin-sidebar .nav-link.active {
+    background-color: #374151;
+    color: #ffffff;
+}
+html.dark .admin-sidebar .sidebar-section-separator {
+    border-top-color: #374151;
+}
+
+html.dark .admin-top-bar {
+    background-color: #1f2937;
+    border-bottom-color: #374151;
+}
+html.dark .admin-top-bar .top-bar-icon-btn {
+    color: #9ca3af;
+}
+html.dark .admin-top-bar .top-bar-icon-btn:hover {
+    background-color: #374151;
+    color: #ffffff;
+}
+html.dark .admin-top-bar .search-input {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #e5e7eb;
+}
+html.dark .admin-top-bar .search-input::placeholder {
+    color: #9ca3af;
+}
+
+html.dark .admin-page-header {
+    background-color: #1f2937;
+    border-bottom-color: #374151;
+}
+html.dark .admin-page-header h2 {
+     color: #e5e7eb;
+}
+
+html.dark .admin-stat-card {
+    background-color: #1f2937;
+    border-color: #374151;
+}
+html.dark .admin-stat-card .admin-stat-value {
+    color: #ffffff;
+}
+html.dark .admin-stat-card .admin-stat-label {
+    color: #9ca3af;
+}
+
+html.dark .admin-card {
+    background-color: #1f2937;
+    border-color: #374151;
+}
+html.dark .admin-card .admin-card-header h3 {
+    color: #e5e7eb;
+}
+html.dark .admin-card .admin-card-header a {
+    color: #a5b4fc;
+}
+html.dark .admin-card .admin-card-header a:hover {
+    color: #c7d2fe;
+}
+
+html.dark .admin-table th {
+    background-color: var(--admin-secondary) !important; /* Added dark background for table headers */
+    color: #d1d5db !important; /* Adjusted text color for better contrast (e.g., gray-300) */
+    border-bottom-color: #4b5563 !important; /* Adjusted border color (e.g., gray-600) */
+}
+html.dark .admin-table td {
+    background-color: #1f2937 !important; /* Standard dark background for table cells (e.g., gray-800) */
+    color: var(--admin-light); /* Lighter text for table cells */
+    border-bottom: 1px solid var(--admin-secondary); /* Darker border for table cells */
+}
+html.dark .admin-table .text-gray-500 {
+    color: #9ca3af !important;
+}
+
+html.dark .admin-badge-success {
+    background-color: #064e3b; color: #a7f3d0;
+}
+html.dark .admin-badge-warning {
+    background-color: #78350f; color: #fde68a;
+}
+html.dark .admin-badge-info {
+    background-color: #1e40af; color: #bfdbfe;
+}
+
+html.dark .bg-white.dark\:bg-gray-700 {
+    background-color: #374151 !important;
+}
+html.dark .text-gray-700.dark\:text-gray-200 {
+    color: #e5e7eb !important;
+}
+html.dark .text-gray-600.dark\:text-gray-300 {
+    color: #d1d5db !important;
+}
+html.dark .border-b.dark\:border-gray-600 {
+    border-bottom-color: #4b5563 !important;
+}
+html.dark .divide-gray-100.dark\:divide-gray-600 {
+    border-color: #4b5563 !important;
+}
+html.dark .hover\:bg-gray-100.dark\:hover\:bg-gray-600:hover {
+    background-color: #4b5563 !important;
+}
+
+/* Ensure specific text colors are overridden */
+html.dark .text-gray-900 {
+    color: #f3f4f6 !important; /* gray-100 */
+}
+html.dark .text-gray-500 {
+    color: #9ca3af !important; /* gray-400 */
+}
+html.dark .text-indigo-600 {
+    color: #a5b4fc !important; /* indigo-300 */
+}
+html.dark .hover\:text-indigo-900:hover {
+    color: #c7d2fe !important; /* indigo-200 */
+}
+
+/* Table and container backgrounds and borders */
+html.dark .bg-white {
+    background-color: #1f2937 !important; /* gray-800 */
+}
+html.dark .bg-gray-50 {
+    background-color: #374151 !important; /* gray-700 */
+}
+html.dark .border-b.border-gray-200 {
+    border-color: #4b5563 !important; /* gray-600 */
+}
+html.dark .divide-y.divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: #4b5563 !important; /* gray-600 for dividers */
+}
+
+
+/* Badge Overrides - Targeting specific Tailwind classes used */
+/* Pending (Yellow) */
+html.dark .bg-yellow-100 {
+    background-color: #422006 !important; /* Darker yellow bg */
+}
+html.dark .text-yellow-800 {
+    color: #fef3c7 !important;    /* Lighter yellow text */
+}
+
+/* Accepted (Blue) */
+html.dark .bg-blue-100 {
+    background-color: #1e40af !important; /* Darker blue bg */
+}
+html.dark .text-blue-800 {
+    color: #dbeafe !important;    /* Lighter blue text */
+}
+
+/* Completed (Green) */
+html.dark .bg-green-100 {
+    background-color: #064e3b !important; /* Darker green bg */
+}
+html.dark .text-green-800 {
+    color: #d1fae5 !important;    /* Lighter green text */
+}
+
+/* Cancelled/Rejected (Red) */
+html.dark .bg-red-100 {
+    background-color: #7f1d1d !important; /* Darker red bg */
+}
+html.dark .text-red-800 {
+    color: #fee2e2 !important;    /* Lighter red text */
+}
+
+/* Default/Other (Gray) */
+html.dark .bg-gray-100 {
+    background-color: #4b5563 !important; /* gray-600 */
+}
+html.dark .text-gray-800 {
+    color: #e5e7eb !important;    /* gray-200 */
+}
+
+
+/* Pagination basic dark styles */
+html.dark .pagination span,
+html.dark .pagination a {
+    color: #d1d5db; /* gray-300 */
+}
+
+html.dark .pagination .active span {
+    background-color: var(--admin-primary);
+    border-color: var(--admin-primary);
+    color: white;
+}
+
+html.dark .pagination .disabled span {
+    color: #6b7280; /* gray-500 */
+}
+
+html.dark .pagination a:hover {
+    background-color: var(--admin-secondary);
+}
+
+/* Ensure main content background is dark */
+html.dark .admin-main-content {
+    background-color: var(--admin-dark) !important; /* Match body background or a slightly lighter dark shade */
+}
+
+/* If there are specific page wrappers inside admin-main-content that are white, they might also need targeting, e.g.: */
+/* html.dark .admin-page-wrapper-class { background-color: var(--admin-dark); } */
