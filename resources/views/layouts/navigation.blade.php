@@ -81,21 +81,21 @@
                             </x-slot>
 
                             <x-slot name="content">
-                                <x-dropdown-link :href="route('profile.edit')" class="flex items-center text-gray-600 hover:text-blue-600">
+                                <x-dropdown-link :href="route('profile.edit')" class="flex items-center link-secondary">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
                                     {{ __('common.profile') }}
                                 </x-dropdown-link>
 
-                                <x-dropdown-link :href="route('favorites.index')" class="flex items-center text-gray-600 hover:text-blue-600">
+                                <x-dropdown-link :href="route('favorites.index')" class="flex items-center link-secondary">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                     </svg>
                                     {{ __('common.favorites') }}
                                 </x-dropdown-link>
 
-                                <x-dropdown-link :href="route('bookings.index')" class="flex items-center text-gray-600 hover:text-blue-600">
+                                <x-dropdown-link :href="route('bookings.index')" class="flex items-center link-secondary">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
@@ -103,12 +103,12 @@
                                 </x-dropdown-link>
 
                                 <!-- Authentication -->
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <x-dropdown-link :href="route('logout')"
-                                            onclick="event.preventDefault();
-                                                        this.closest('form').submit();"
-                                            class="flex items-center text-red-600 hover:text-red-700">
+                                                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <x-dropdown-link :href="route('logout')"
+                                onclick="event.preventDefault();
+                                            this.closest('form').submit();"
+                        class="flex items-center text-error-600 hover:text-error-700">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                         </svg>
@@ -126,7 +126,7 @@
                             </svg>
                             {{ __('common.login') }}
                         </a>
-                        <a href="{{ route('register') }}" class="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-300 shadow-sm hover:shadow-md">
+                        <a href="{{ route('register') }}" class="btn-primary px-6 py-2 rounded-full shadow-sm hover:shadow-md">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
@@ -157,12 +157,12 @@
                     <a href="{{ route('language.switch', 'vi') }}"
                        class="flex items-center px-3 py-1 text-sm rounded {{ app()->getLocale() == 'vi' ? 'bg-gray-700 text-white' : 'text-gray-300 hover:text-white' }}">
                         <img src="https://flagcdn.com/w20/vn.png" class="w-4 h-3 mr-2" alt="Vietnamese">
-                        {{ __('common.vietnamese') }}
+                        Tiếng Việt
                     </a>
                     <a href="{{ route('language.switch', 'en') }}"
                        class="flex items-center px-3 py-1 text-sm rounded {{ app()->getLocale() == 'en' ? 'bg-gray-700 text-white' : 'text-gray-300 hover:text-white' }}">
                         <img src="https://flagcdn.com/w20/us.png" class="w-4 h-3 mr-2" alt="English">
-                        {{ __('common.english') }}
+                        English
                     </a>
                 </div>
             </div>

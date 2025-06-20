@@ -86,6 +86,9 @@
             <main>
                 {{ $slot }}
             </main>
+
+            <!-- Language Notification -->
+            <x-language-notification />
         </div>
     </body>
 </html>

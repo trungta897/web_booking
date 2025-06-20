@@ -3,7 +3,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    <h1 class="text-2xl font-semibold mb-6">Tutors for {{ $subject->name }}</h1>
+                    <h1 class="text-2xl font-semibold mb-6">{{ __('tutors.tutors_for') }} {{ translateSubjectName($subject->name) }}</h1>
 
                     @if($tutors->count() > 0)
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -34,7 +34,7 @@
                                     <div class="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
                                         <div class="text-lg font-medium text-gray-900">${{ number_format($tutor->hourly_rate, 2) }}/hr</div>
                                         <a href="{{ route('tutors.show', $tutor) }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                            View Profile
+                                            {{ __('tutors.view_profile') }}
                                         </a>
                                     </div>
                                 </div>
@@ -45,7 +45,7 @@
                             {{ $tutors->links() }}
                         </div>
                     @else
-                        <p class="text-gray-600">No tutors found for {{ $subject->name }}.</p>
+                        <p class="text-gray-600">{{ __('tutors.no_tutors_for') }} {{ translateSubjectName($subject->name) }}.</p>
                     @endif
                 </div>
             </div>

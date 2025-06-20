@@ -1,3 +1,127 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom Brand Color Classes */
+@layer components {
+    /* Primary Button Styles */
+    .btn-primary {
+        @apply inline-flex items-center px-4 py-2 bg-primary-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-700 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition ease-in-out duration-150;
+    }
+
+    /* Secondary Button Styles */
+    .btn-secondary {
+        @apply inline-flex items-center px-4 py-2 bg-secondary-100 border border-secondary-300 rounded-md font-semibold text-xs text-secondary-700 uppercase tracking-widest hover:bg-secondary-200 focus:bg-secondary-200 active:bg-secondary-300 focus:outline-none focus:ring-2 focus:ring-secondary-500 focus:ring-offset-2 transition ease-in-out duration-150;
+    }
+
+    /* Success Button Styles */
+    .btn-success {
+        @apply inline-flex items-center px-4 py-2 bg-success-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-success-700 focus:bg-success-700 active:bg-success-900 focus:outline-none focus:ring-2 focus:ring-success-500 focus:ring-offset-2 transition ease-in-out duration-150;
+    }
+
+    /* Error/Danger Button Styles */
+    .btn-danger {
+        @apply inline-flex items-center px-4 py-2 bg-error-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-error-700 focus:bg-error-700 active:bg-error-900 focus:outline-none focus:ring-2 focus:ring-error-500 focus:ring-offset-2 transition ease-in-out duration-150;
+    }
+
+    /* Input Field Styles */
+    .input-field {
+        @apply border-secondary-300 focus:border-primary-500 focus:ring-primary-500 rounded-md shadow-sm;
+    }
+
+    /* Card Hover Effects */
+    .card-hover {
+        @apply bg-white rounded-lg shadow-sm border border-secondary-200 hover:shadow-md hover:border-primary-300 transition-all duration-300;
+    }
+
+    /* Navigation Link Active */
+    .nav-link-active {
+        @apply border-b-2 border-primary-500 text-secondary-900;
+    }
+
+    /* Navigation Link Inactive */
+    .nav-link-inactive {
+        @apply border-b-2 border-transparent text-secondary-600 hover:text-secondary-900 hover:border-secondary-300;
+    }
+
+    /* Badge/Tag Styles */
+    .badge-primary {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800;
+    }
+
+    .badge-secondary {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-100 text-secondary-800;
+    }
+
+    .badge-success {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-100 text-success-800;
+    }
+
+    .badge-warning {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-100 text-warning-800;
+    }
+
+    .badge-error {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-error-100 text-error-800;
+    }
+
+    /* Alert Styles */
+    .alert-success {
+        @apply bg-success-50 border border-success-200 text-success-800 px-4 py-3 rounded-md;
+    }
+
+    .alert-warning {
+        @apply bg-warning-50 border border-warning-200 text-warning-800 px-4 py-3 rounded-md;
+    }
+
+    .alert-error {
+        @apply bg-error-50 border border-error-200 text-error-800 px-4 py-3 rounded-md;
+    }
+
+    /* Link Styles */
+    .link-primary {
+        @apply text-primary-600 hover:text-primary-800 transition-colors duration-200;
+    }
+
+    .link-secondary {
+        @apply text-secondary-600 hover:text-secondary-800 transition-colors duration-200;
+    }
+
+    /* Star Rating Colors */
+    .star-filled {
+        @apply text-warning-400;
+    }
+
+    .star-empty {
+        @apply text-secondary-300;
+    }
+
+    /* Form Validation */
+    .input-error {
+        @apply text-sm text-error-600;
+    }
+
+    /* Gradient Backgrounds */
+    .gradient-primary {
+        @apply bg-gradient-to-r from-primary-600 to-primary-700;
+    }
+
+    .gradient-dark {
+        @apply bg-gradient-to-r from-secondary-800 to-secondary-900;
+    }
+}
+
+/* Additional utility classes */
+@layer utilities {
+    .text-brand-primary {
+        @apply text-primary-600;
+    }
+
+    .bg-brand-primary {
+        @apply bg-primary-600;
+    }
+
+    .border-brand-primary {
+        @apply border-primary-600;
+    }
+}

@@ -222,25 +222,25 @@
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
-                                Start Learning Today
+                                {{ __('welcome.start_learning') }}
                             </div>
                             <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-                                Find Your Perfect <span class="text-gradient">Tutor</span>
+                                {{ __('welcome.title') }}
                             </h1>
                             <p class="text-lg leading-8 text-gray-600 max-w-2xl">
-                                Get help with your studies from qualified tutors. Simple, easy, and effective learning experience tailored to your needs.
+                                {{ __('welcome.description') }}
                             </p>
                             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
                     @auth
                                     <a href="@if(Auth::user()->role === 'admin') {{ route('admin.dashboard') }} @elseif(Auth::user()->role === 'tutor') {{ route('tutor.dashboard') }} @else {{ route('profile.edit') }} @endif" class="btn-primary w-full sm:w-auto text-center">
-                                        Go to Dashboard
+                                        {{ __('common.dashboard') }}
                                     </a>
                     @else
                                     <a href="{{ route('register') }}" class="btn-primary w-full sm:w-auto text-center">
-                                        Get Started
+                                        {{ __('welcome.get_started') }}
                                     </a>
                                     <a href="{{ route('login') }}" class="text-lg font-semibold text-primary hover:text-primary-dark smooth-transition flex items-center">
-                                        Log in <span aria-hidden="true" class="ml-2">→</span>
+                                        {{ __('common.login') }} <span aria-hidden="true" class="ml-2">→</span>
                                     </a>
                     @endauth
                             </div>
@@ -251,7 +251,7 @@
                                         <img class="w-8 h-8 rounded-full border-2 border-white" src="https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User">
                                         <img class="w-8 h-8 rounded-full border-2 border-white" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User">
                                     </div>
-                                    <span class="ml-3 text-sm text-gray-600">Join 1000+ students</span>
+                                    <span class="ml-3 text-sm text-gray-600">{{ __('welcome.join_students') }}</span>
                                 </div>
                                 <div class="flex items-center">
                                     <div class="flex items-center">
@@ -271,7 +271,7 @@
                                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
                                     </div>
-                                    <span class="ml-2 text-sm text-gray-600">4.9/5 Rating</span>
+                                    <span class="ml-2 text-sm text-gray-600">{{ __('welcome.rating') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -291,8 +291,8 @@
                                         </svg>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-medium text-gray-900">Expert Tutors</p>
-                                        <p class="text-xs text-gray-500">1000+ Available</p>
+                                        <p class="text-sm font-medium text-gray-900">{{ __('welcome.expert_tutors') }}</p>
+                                        <p class="text-xs text-gray-500">1000+ {{ __('welcome.available') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -307,28 +307,28 @@
                     <form action="{{ route('tutors.index') }}" method="GET">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('welcome.search.subject') }}</label>
                                 <select name="subject" class="modern-input w-full">
-                                    <option value="">All Subjects</option>
+                                    <option value="">{{ __('welcome.search.all_subjects') }}</option>
                                     @foreach($popularSubjects as $subject)
-                                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                        <option value="{{ $subject->id }}">{{ translateSubjectName($subject->name) }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Experience</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('welcome.search.experience') }}</label>
                                 <select name="experience" class="modern-input w-full">
-                                    <option value="">Any Experience</option>
-                                    <option value="1">1+ Years</option>
-                                    <option value="3">3+ Years</option>
-                                    <option value="5">5+ Years</option>
-                                    <option value="10">10+ Years</option>
+                                    <option value="">{{ __('welcome.search.any_experience') }}</option>
+                                    <option value="1">1{{ __('welcome.search.years_plus') }}</option>
+                                    <option value="3">3{{ __('welcome.search.years_plus') }}</option>
+                                    <option value="5">5{{ __('welcome.search.years_plus') }}</option>
+                                    <option value="10">10{{ __('welcome.search.years_plus') }}</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('welcome.search.price_range') }}</label>
                                 <select name="price_range" class="modern-input w-full">
-                                    <option value="">Any Price</option>
+                                    <option value="">{{ __('welcome.search.any_price') }}</option>
                                     <option value="0-25">$0 - $25/hr</option>
                                     <option value="26-50">$26 - $50/hr</option>
                                     <option value="51-100">$51 - $100/hr</option>
@@ -337,7 +337,7 @@
                             </div>
                             <div class="flex items-end">
                                 <button type="submit" class="btn-primary w-full">
-                                    Search Tutors
+                                    {{ __('welcome.search.search_tutors') }}
                                 </button>
                             </div>
                         </div>
@@ -351,19 +351,19 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <div class="stats-card text-center">
                             <div class="text-3xl font-bold text-primary mb-2">1000+</div>
-                            <div class="text-gray-600">Active Tutors</div>
+                            <div class="text-gray-600">{{ __('welcome.stats.active_tutors') }}</div>
                         </div>
                         <div class="stats-card text-center">
                             <div class="text-3xl font-bold text-secondary mb-2">5000+</div>
-                            <div class="text-gray-600">Happy Students</div>
+                            <div class="text-gray-600">{{ __('welcome.stats.happy_students') }}</div>
                         </div>
                         <div class="stats-card text-center">
                             <div class="text-3xl font-bold text-success mb-2">50+</div>
-                            <div class="text-gray-600">Subjects</div>
+                            <div class="text-gray-600">{{ __('welcome.stats.subjects') }}</div>
                         </div>
                         <div class="stats-card text-center">
                             <div class="text-3xl font-bold text-warning mb-2">4.9/5</div>
-                            <div class="text-gray-600">Average Rating</div>
+                            <div class="text-gray-600">{{ __('welcome.stats.average_rating') }}</div>
                         </div>
                     </div>
                 </div>
@@ -374,7 +374,7 @@
                 <div class="container">
                     <div class="text-center mb-16">
                         <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                            How It <span class="text-gradient">Works</span>
+                            {!! __('welcome.how_it_works.title') !!}
                         </h2>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -383,10 +383,10 @@
                                 <span class="text-4xl font-bold text-white">1</span>
                             </div>
                             <h3 class="text-xl font-semibold text-gray-900 mb-4">
-                                Find a Tutor
+                                {{ __('welcome.how_it_works.step1_title') }}
                             </h3>
                             <p class="text-gray-600">
-                                Browse through our list of qualified tutors and find the perfect match for your needs.
+                                {{ __('welcome.how_it_works.step1_desc') }}
                             </p>
                         </div>
                         <div class="card-hover p-8">
@@ -394,10 +394,10 @@
                                 <span class="text-4xl font-bold text-white">2</span>
                             </div>
                             <h3 class="text-xl font-semibold text-gray-900 mb-4">
-                                Book a Session
+                                {{ __('welcome.how_it_works.step2_title') }}
                             </h3>
                             <p class="text-gray-600">
-                                Choose a time that works for you and book your tutoring session.
+                                {{ __('welcome.how_it_works.step2_desc') }}
                             </p>
                         </div>
                         <div class="card-hover p-8">
@@ -405,10 +405,10 @@
                                 <span class="text-4xl font-bold text-white">3</span>
                             </div>
                             <h3 class="text-xl font-semibold text-gray-900 mb-4">
-                                Start Learning
+                                {{ __('welcome.how_it_works.step3_title') }}
                             </h3>
                             <p class="text-gray-600">
-                                Meet with your tutor online and begin your learning journey.
+                                {{ __('welcome.how_it_works.step3_desc') }}
                             </p>
                         </div>
                     </div>
@@ -420,24 +420,23 @@
                 <div class="container">
                     <div class="text-center mb-16">
                         <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                            Browse Subjects
+                            {{ __('welcome.browse_subjects.title') }}
                         </h2>
-                        <p class="mt-4 text-lg text-gray-600">Find the perfect tutor for your subject</p>
+                        <p class="mt-4 text-lg text-gray-600">{{ __('welcome.browse_subjects.subtitle') }}</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         @forelse($popularSubjects as $subject)
                             <a href="{{ route('tutors.index', ['subject' => $subject->id]) }}" class="block card-hover p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
                                 <div class="flex justify-between items-start mb-3">
-                                    <h3 class="text-xl font-semibold text-gray-900">{{ $subject->name }}</h3>
+                                    <h3 class="text-xl font-semibold text-gray-900">{{ translateSubjectName($subject->name) }}</h3>
                                     <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">{{ $subject->tutors_count }} {{ Str::plural('Tutor', $subject->tutors_count) }}</span>
                                 </div>
                                 <p class="text-sm text-gray-600 mb-4 min-h-[40px]">
-                                    {{-- Ensure $subject->description is available or provide a good fallback --}}
-                                    {{ Str::limit($subject->description ?? 'Explore ' . $subject->name . ' courses and find expert tutors.', 100) }}
+                                    {{ Str::limit(translateSubjectDescription($subject->name), 100) }}
                                 </p>
-                                <div class="flex items-center text-sm text-indigo-600 hover:text-indigo-800">
+                                <div class="flex items-center text-sm link-primary">
                                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m0 0A7.027 7.027 0 0112 17.747a7.027 7.027 0 010-11.494M4 19.5V7.5a3 3 0 013-3h10a3 3 0 013 3v12a3 3 0 01-3 3H7a3 3 0 01-3-3z"></path></svg>
-                                    View Tutors for {{ $subject->name }}
+                                    {{ __('welcome.browse_subjects.view_tutors') }} {{ translateSubjectName($subject->name) }}
                                 </div>
                             </a>
                         @empty
@@ -452,7 +451,7 @@
                 <div class="container">
                     <div class="text-center mb-16">
                         <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                            Featured <span class="text-gradient">Tutors</span>
+                            {!! __('welcome.featured_tutors.title') !!}
                         </h2>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -467,20 +466,20 @@
                                         <div class="flex items-center">
                                             <div class="flex items-center">
                                                 @for($i = 1; $i <= 5; $i++)
-                                                    <svg class="h-4 w-4 {{ $i <= $tutor->reviews_avg_rating ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
+                                                    <svg class="h-4 w-4 {{ $i <= $tutor->reviews_avg_rating ? 'star-filled' : 'star-empty' }}" fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                                     </svg>
                                                 @endfor
                                             </div>
-                                            <span class="ml-2 text-sm text-gray-600">({{ $tutor->reviews_count }} reviews)</span>
+                                            <span class="ml-2 text-sm text-gray-600">({{ $tutor->reviews_count }} {{ $tutor->reviews_count == 1 ? __('welcome.featured_tutors.review') : __('welcome.featured_tutors.reviews') }})</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mb-4">
                                     <div class="flex flex-wrap mt-2">
                                         @foreach($tutor->subjects->take(3) as $subject)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 mr-2 mb-2">
-                                                {{ $subject->name }}
+                                                                                    <span class="badge-primary mr-2 mb-2">
+                                            {{ translateSubjectName($subject->name) }}
                                 </span>
                                         @endforeach
                                     </div>
@@ -489,7 +488,7 @@
                                 <div class="flex items-center justify-between mt-auto">
                                     <div class="text-lg font-medium text-gray-900">${{ number_format($tutor->hourly_rate, 2) }}/hr</div>
                                     <a href="{{ route('tutors.show', $tutor) }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                        View Profile
+                                        {{ __('welcome.featured_tutors.view_profile') }}
                                     </a>
                                 </div>
                             </div>
@@ -497,7 +496,7 @@
                     </div>
                     <div class="text-center mt-10">
                         <a href="{{ route('tutors.index') }}" class="btn-primary inline-block">
-                            Browse All Tutors
+                            {{ __('welcome.featured_tutors.browse_all') }}
                         </a>
                     </div>
                 </div>
@@ -508,7 +507,7 @@
                 <div class="container">
                     <div class="text-center mb-16">
                         <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                            Why Choose <span class="text-gradient">Us</span>
+                            {!! __('welcome.why_choose.title') !!}
                         </h2>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -519,10 +518,10 @@
                                 </svg>
                             </div>
                             <h3 class="text-xl font-semibold text-gray-900 mb-4">
-                                Easy Booking
+                                {{ __('welcome.why_choose.easy_booking') }}
                             </h3>
                             <p class="text-gray-600">
-                                Book sessions in just a few clicks. No complicated process.
+                                {{ __('welcome.why_choose.easy_booking_desc') }}
                             </p>
                         </div>
                         <div class="card-hover p-8">
@@ -532,10 +531,10 @@
                                 </svg>
                             </div>
                             <h3 class="text-xl font-semibold text-gray-900 mb-4">
-                                Safe & Secure
+                                {{ __('welcome.why_choose.safe_secure') }}
                             </h3>
                             <p class="text-gray-600">
-                                Your safety is our priority. All tutors are verified.
+                                {{ __('welcome.why_choose.safe_secure_desc') }}
                             </p>
                         </div>
                         <div class="card-hover p-8">
@@ -545,10 +544,10 @@
                                 </svg>
                             </div>
                             <h3 class="text-xl font-semibold text-gray-900 mb-4">
-                                Expert Tutors
+                                {{ __('welcome.why_choose.expert_tutors') }}
                             </h3>
                             <p class="text-gray-600">
-                                Learn from qualified tutors who are experts in their fields.
+                                {{ __('welcome.why_choose.expert_tutors_desc') }}
                             </p>
                         </div>
                     </div>
@@ -556,35 +555,35 @@
             </div>
 
             <!-- Footer -->
-            <footer class="gradient-dark text-blue-600">
+                            <footer class="gradient-dark text-white">
                 <div class="container py-12">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <div>
-                            <h3 class="text-lg font-semibold text-white mb-4">About Us</h3>
+                            <h3 class="text-lg font-semibold text-white mb-4">{{ __('welcome.footer.about_us') }}</h3>
                             <p class="text-gray-300">
-                                We connect students with qualified tutors for personalized learning experiences.
+                                {{ __('welcome.footer.about_desc') }}
                             </p>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-white mb-4">Quick Links</h3>
+                            <h3 class="text-lg font-semibold text-white mb-4">{{ __('welcome.footer.quick_links') }}</h3>
                             <ul class="space-y-2">
-                                <li><a href="{{ route('home') }}" class="footer-link text-gray-300">Home</a></li>
-                                <li><a href="{{ route('tutors.index') }}" class="footer-link text-gray-300">Find a Tutor</a></li>
-                                <li><a href="{{ route('register') }}?role=tutor" class="footer-link text-gray-300">Become a Tutor</a></li>
-                                <li><a href="#contact-us" class="footer-link text-gray-300">Contact Us</a></li>
+                                <li><a href="{{ route('home') }}" class="footer-link text-gray-300">{{ __('common.home') }}</a></li>
+                                <li><a href="{{ route('tutors.index') }}" class="footer-link text-gray-300">{{ __('common.find_tutors') }}</a></li>
+                                <li><a href="{{ route('register') }}?role=tutor" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Trở Thành Gia Sư' : 'Become a Tutor' }}</a></li>
+                                <li><a href="#contact-us" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Liên Hệ' : 'Contact Us' }}</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-white mb-4">Subjects</h3>
+                            <h3 class="text-lg font-semibold text-white mb-4">{{ __('welcome.footer.subjects_section') }}</h3>
                             <ul class="space-y-2">
-                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Mathematics']) }}" class="footer-link text-gray-300">Mathematics</a></li>
-                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Science']) }}" class="footer-link text-gray-300">Science</a></li>
-                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Languages']) }}" class="footer-link text-gray-300">Languages</a></li>
-                                <li><a href="{{ route('tutors.index') }}" class="footer-link text-gray-300">More Subjects</a></li>
+                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Mathematics']) }}" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Toán Học' : 'Mathematics' }}</a></li>
+                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Science']) }}" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Khoa Học' : 'Science' }}</a></li>
+                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Languages']) }}" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Ngôn Ngữ' : 'Languages' }}</a></li>
+                                <li><a href="{{ route('tutors.index') }}" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Thêm Môn Học' : 'More Subjects' }}</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-white mb-4">Connect With Us</h3>
+                            <h3 class="text-lg font-semibold text-white mb-4">{{ __('welcome.footer.connect_with_us') }}</h3>
                             <div class="flex space-x-4">
                                 <a href="#" class="social-icon text-gray-300">
                                     <span class="sr-only">Facebook</span>
@@ -609,7 +608,7 @@
                     </div>
                     <div class="mt-8 pt-8 border-t border-gray-700 text-center">
                         <p class="text-gray-300">
-                            &copy; {{ date('Y') }} TutorHub. All rights reserved.
+                            {{ __('welcome.footer.copyright') }}
                         </p>
                 </div>
                 </div>

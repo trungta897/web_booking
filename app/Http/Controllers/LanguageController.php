@@ -17,7 +17,7 @@ class LanguageController extends Controller
      * @param string $locale
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function switchLanguage(Request $request, $locale)
+        public function switchLanguage(Request $request, $locale)
     {
         // Available languages
         $availableLocales = ['en', 'vi'];
@@ -27,33 +27,33 @@ class LanguageController extends Controller
             return redirect()->back()->with('error', 'Invalid language selected.');
         }
 
-        // Debug logging
-        Log::info('Language Switch Request', [
-            'requested_locale' => $locale,
-            'current_locale_before' => App::getLocale(),
-            'session_before' => Session::get('locale'),
-        ]);
+        try {
+            // Start the session if it's not already started
+            if (!$request->session()->isStarted()) {
+                $request->session()->start();
+            }
 
-        // Start session if needed
-        if (!Session::isStarted()) {
-            Session::start();
+            // Store in session
+            $request->session()->put('locale', $locale);
+            $request->session()->save();
+
+            // Set application locale for immediate effect
+            App::setLocale($locale);
+
+                        // Set success message based on the new locale
+            $message = $locale === 'vi' ? 'Đã chuyển đổi ngôn ngữ thành công sang Tiếng Việt' : 'Language successfully changed to English';
+
+            // Redirect back to the previous page with success message
+            return redirect()->back()->with('language_success', $message);
+
+        } catch (\Exception $e) {
+            Log::error('Language Switch Error', [
+                'error' => $e->getMessage(),
+                'locale' => $locale
+            ]);
+
+            return redirect()->back()->with('error', 'Failed to change language. Please try again.');
         }
-
-        // Set application locale immediately
-        App::setLocale($locale);
-
-        // Store in session with explicit save
-        Session::put('locale', $locale);
-        Session::save(); // Force save session
-
-        // Debug after setting
-        Log::info('Language Switch Complete', [
-            'current_locale_after' => App::getLocale(),
-            'session_after' => Session::get('locale'),
-        ]);
-
-        // Redirect back to the previous page with success message
-        return redirect()->back()->with('success', __('common.language_changed'));
     }
 
     /**

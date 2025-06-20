@@ -22,43 +22,21 @@ class SetLocale
         // Available languages
         $availableLocales = ['en', 'vi'];
 
-        // Start session if not already started
-        if (!$request->hasSession()) {
-            $request->setLaravelSession(app('session'));
-        }
-
-        // Get locale from various sources with priority order:
-        // 1. URL parameter (for language switching)
-        // 2. Session (for persistence)
-        // 3. Default from config
-        $locale = $request->get('lang') ??
-                 Session::get('locale') ??
-                 Config::get('app.locale', 'vi');
+        // Get locale from session first, then fall back to config default
+        $locale = $request->session()->get('locale', Config::get('app.locale', 'vi'));
 
         // Validate locale
         if (!in_array($locale, $availableLocales)) {
             $locale = 'vi';
         }
 
-        // Debug logging (temporarily)
-        Log::info('SetLocale Middleware Debug', [
-            'requested_locale' => $request->get('lang'),
-            'session_locale' => Session::get('locale'),
-            'final_locale' => $locale,
-            'current_locale_before' => App::getLocale(),
-        ]);
-
         // Set application locale
         App::setLocale($locale);
 
-        // Store in session for persistence
-        Session::put('locale', $locale);
-
-        // Debug after setting
-        Log::info('SetLocale After Setting', [
-            'current_locale_after' => App::getLocale(),
-            'session_stored' => Session::get('locale'),
-        ]);
+        // Store in session for persistence if not already set
+        if (!$request->session()->has('locale')) {
+            $request->session()->put('locale', $locale);
+        }
 
         return $next($request);
     }
