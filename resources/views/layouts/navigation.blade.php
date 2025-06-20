@@ -13,28 +13,33 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                     <x-nav-link :href="route('home')" :active="request()->routeIs('home')" class="nav-text-white hover:text-white transition-colors duration-300">
-                        {{ __('Home') }}
+                        {{ __('common.home') }}
                     </x-nav-link>
 
                     <x-nav-link :href="route('tutors.index')" :active="request()->routeIs('tutors.*')" class="nav-text-white hover:text-white transition-colors duration-300">
-                        {{ __('Find Tutors') }}
+                        {{ __('common.find_tutors') }}
                     </x-nav-link>
 
                     <x-nav-link :href="route('subjects.index')" :active="request()->routeIs('subjects.*')" class="nav-text-white hover:text-white transition-colors duration-300">
-                        {{ __('Subjects') }}
+                        {{ __('common.subjects') }}
                     </x-nav-link>
 
                     <x-nav-link :href="route('how-it-works')" :active="request()->routeIs('how-it-works')" class="nav-text-white hover:text-white transition-colors duration-300">
-                        {{ __('How It Works') }}
+                        {{ __('common.how_it_works') }}
                     </x-nav-link>
 
                     <x-nav-link :href="route('pricing')" :active="request()->routeIs('pricing')" class="nav-text-white hover:text-white transition-colors duration-300">
-                        {{ __('Pricing') }}
+                        {{ __('common.pricing') }}
                     </x-nav-link>
                 </div>
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ml-6">
+                <!-- Language Switcher -->
+                <div class="mr-4">
+                    <x-language-switcher />
+                </div>
+
                 @auth
                     <!-- Notifications -->
                     <div class="relative mr-4">
@@ -80,21 +85,21 @@
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                     </svg>
-                                    {{ __('Profile') }}
+                                    {{ __('common.profile') }}
                                 </x-dropdown-link>
 
                                 <x-dropdown-link :href="route('favorites.index')" class="flex items-center text-gray-600 hover:text-blue-600">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                     </svg>
-                                    {{ __('My Favorites') }}
+                                    {{ __('common.favorites') }}
                                 </x-dropdown-link>
 
                                 <x-dropdown-link :href="route('bookings.index')" class="flex items-center text-gray-600 hover:text-blue-600">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    {{ __('My Bookings') }}
+                                    {{ __('common.bookings') }}
                                 </x-dropdown-link>
 
                                 <!-- Authentication -->
@@ -107,7 +112,7 @@
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                         </svg>
-                                        {{ __('Log Out') }}
+                                        {{ __('common.logout') }}
                                     </x-dropdown-link>
                                 </form>
                             </x-slot>
@@ -119,13 +124,13 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                             </svg>
-                            {{ __('Log in') }}
+                            {{ __('common.login') }}
                         </a>
                         <a href="{{ route('register') }}" class="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-300 shadow-sm hover:shadow-md">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
-                            {{ __('Sign up') }}
+                            {{ __('common.register') }}
                         </a>
                     </div>
                 @endauth
@@ -146,24 +151,40 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
+            <!-- Language Switcher for Mobile -->
+            <div class="px-4 pb-2">
+                <div class="flex space-x-2">
+                    <a href="{{ route('language.switch', 'vi') }}"
+                       class="flex items-center px-3 py-1 text-sm rounded {{ app()->getLocale() == 'vi' ? 'bg-gray-700 text-white' : 'text-gray-300 hover:text-white' }}">
+                        <img src="https://flagcdn.com/w20/vn.png" class="w-4 h-3 mr-2" alt="Vietnamese">
+                        {{ __('common.vietnamese') }}
+                    </a>
+                    <a href="{{ route('language.switch', 'en') }}"
+                       class="flex items-center px-3 py-1 text-sm rounded {{ app()->getLocale() == 'en' ? 'bg-gray-700 text-white' : 'text-gray-300 hover:text-white' }}">
+                        <img src="https://flagcdn.com/w20/us.png" class="w-4 h-3 mr-2" alt="English">
+                        {{ __('common.english') }}
+                    </a>
+                </div>
+            </div>
+
             <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')" class="nav-text-white hover:text-white hover:bg-gray-700 transition-colors duration-300">
-                {{ __('Home') }}
+                {{ __('common.home') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('tutors.index')" :active="request()->routeIs('tutors.*')" class="nav-text-white hover:text-white hover:bg-gray-700 transition-colors duration-300">
-                {{ __('Find Tutors') }}
+                {{ __('common.find_tutors') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('subjects.index')" :active="request()->routeIs('subjects.*')" class="nav-text-white hover:text-white hover:bg-gray-700 transition-colors duration-300">
-                {{ __('Subjects') }}
+                {{ __('common.subjects') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('how-it-works')" :active="request()->routeIs('how-it-works')" class="nav-text-white hover:text-white hover:bg-gray-700 transition-colors duration-300">
-                {{ __('How It Works') }}
+                {{ __('common.how_it_works') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link :href="route('pricing')" :active="request()->routeIs('pricing')" class="nav-text-white hover:text-white hover:bg-gray-700 transition-colors duration-300">
-                {{ __('Pricing') }}
+                {{ __('common.pricing') }}
             </x-responsive-nav-link>
         </div>
 
@@ -181,7 +202,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
-                            {{ __('Profile') }}
+                            {{ __('common.profile') }}
                         </div>
                     </x-responsive-nav-link>
 
@@ -190,7 +211,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
-                            {{ __('My Favorites') }}
+                            {{ __('common.favorites') }}
                         </div>
                     </x-responsive-nav-link>
 
@@ -199,7 +220,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            {{ __('My Bookings') }}
+                            {{ __('common.bookings') }}
                         </div>
                     </x-responsive-nav-link>
 
@@ -208,7 +229,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            {{ __('Messages') }}
+                            {{ __('common.messages') }}
                             @if(Auth::user()->unreadMessages && Auth::user()->unreadMessages->count() > 0)
                                 <span class="ml-1 inline-block h-2 w-2 rounded-full bg-red-500"></span>
                             @endif
@@ -220,7 +241,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            {{ __('Notifications') }}
+                            {{ __('common.notifications') }}
                             @if(Auth::user()->unreadNotifications && Auth::user()->unreadNotifications->count() > 0)
                                 <span class="ml-1 inline-block h-2 w-2 rounded-full bg-red-500"></span>
                             @endif
@@ -238,7 +259,7 @@
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                 </svg>
-                                {{ __('Log Out') }}
+                                {{ __('common.logout') }}
                             </div>
                         </x-responsive-nav-link>
                     </form>

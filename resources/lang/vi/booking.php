@@ -1,0 +1,44 @@
+<?php
+
+return [
+    'book_session_with' => 'Đặt lịch học với',
+    'start_time' => 'Thời gian bắt đầu',
+    'end_time' => 'Thời gian kết thúc',
+    'subject' => 'Môn học',
+    'select_subject' => 'Chọn môn học',
+    'notes_for_tutor' => 'Ghi chú cho gia sư',
+    'notes_placeholder' => 'Các chủ đề hoặc lĩnh vực cụ thể bạn muốn tập trung?',
+    'request_booking' => 'Gửi yêu cầu đặt lịch',
+    'date_format_helper' => '(dd-mm-yyyy)',
+    'time_format_helper' => '(24h)',
+    'date_input_label' => 'Ngày (dd-mm-yyyy)',
+    'time_input_label' => 'Giờ (24h)',
+    'validation' => [
+        'date_format_error' => 'Vui lòng nhập ngày đúng định dạng dd-mm-yyyy',
+        'end_time_after_start' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
+        'booking_advance_notice' => 'Đặt lịch phải trước ít nhất 1 giờ.',
+        'max_duration' => 'Thời lượng đặt lịch không được vượt quá 4 giờ.',
+        'pending_booking_exists' => 'Bạn đã có một lịch đang chờ duyệt với gia sư này.',
+    ],
+    'success' => [
+        'booking_requested' => 'Yêu cầu đặt lịch đã được gửi thành công.',
+        'booking_updated' => 'Cập nhật trạng thái đặt lịch thành công.',
+        'booking_cancelled' => 'Hủy lịch thành công.',
+    ],
+    'errors' => [
+        'booking_failed' => 'Không thể tạo lịch đặt. Vui lòng thử lại.',
+        'update_failed' => 'Không thể cập nhật lịch đặt. Vui lòng thử lại.',
+        'cancel_failed' => 'Không thể hủy lịch đặt. Vui lòng thử lại.',
+        'tutor_not_available' => 'Gia sư này hiện không có sẵn để đặt lịch.',
+        'cannot_cancel' => 'Lịch đặt này không thể hủy.',
+        'invalid_payment_state' => 'Lịch đặt này không đủ điều kiện thanh toán.',
+    ],
+    'status' => [
+        'pending' => 'Chờ duyệt',
+        'accepted' => 'Đã chấp nhận',
+        'rejected' => 'Đã từ chối',
+        'cancelled' => 'Đã hủy',
+        'completed' => 'Hoàn thành',
+        'paid' => 'Đã thanh toán',
+    ],
+];

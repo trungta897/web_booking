@@ -14,7 +14,11 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RoleSwitchController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+
+// Language switching route (available to all users)
+Route::get('/language/{locale}', [LanguageController::class, 'switchLanguage'])->name('language.switch');
 
 // Public routes
 Route::get('/', [PageController::class, 'index'])->name('home');
@@ -57,7 +61,7 @@ Route::middleware(['auth'])->group(function () {
     // Booking routes
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/create/{tutor}', [BookingController::class, 'create'])->name('bookings.create');
-    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::post('/bookings/{tutor}', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::get('/bookings/{booking}/payment', [BookingController::class, 'payment'])->name('bookings.payment');
     Route::put('/bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');

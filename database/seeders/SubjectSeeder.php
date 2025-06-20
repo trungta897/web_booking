@@ -28,6 +28,16 @@ class SubjectSeeder extends Seeder
             ['name' => 'Music', 'description' => 'Study music theory, performance, and appreciation', 'icon' => 'fa-music'],
             ['name' => 'Art', 'description' => 'Explore visual arts, art history, and creative techniques', 'icon' => 'fa-palette'],
             ['name' => 'Physical Education', 'description' => 'Learn about sports, fitness, and health', 'icon' => 'fa-running'],
+            ['name' => 'Statistics', 'description' => 'Learn statistical analysis, probability, and data interpretation', 'icon' => 'fa-chart-bar'],
+            ['name' => 'Psychology', 'description' => 'Study human behavior, mental processes, and research methods', 'icon' => 'fa-brain'],
+            ['name' => 'Accounting', 'description' => 'Learn financial accounting, bookkeeping, and financial analysis', 'icon' => 'fa-coins'],
+            ['name' => 'Engineering', 'description' => 'Study engineering principles, design, and problem-solving', 'icon' => 'fa-cogs'],
+            ['name' => 'Environmental Science', 'description' => 'Explore environmental systems, ecology, and sustainability', 'icon' => 'fa-leaf'],
+            ['name' => 'Philosophy', 'description' => 'Study philosophical thought, ethics, and critical reasoning', 'icon' => 'fa-scroll'],
+            ['name' => 'Political Science', 'description' => 'Learn about government systems, politics, and public policy', 'icon' => 'fa-landmark'],
+            ['name' => 'Nursing', 'description' => 'Study healthcare, anatomy, physiology, and patient care', 'icon' => 'fa-user-nurse'],
+            ['name' => 'Medicine', 'description' => 'Learn medical sciences, anatomy, and healthcare fundamentals', 'icon' => 'fa-heartbeat'],
+            ['name' => 'Test Preparation', 'description' => 'Prepare for standardized tests like SAT, ACT, GRE, and more', 'icon' => 'fa-graduation-cap'],
         ];
 
         foreach ($subjects as $subjectData) {
