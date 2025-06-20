@@ -27,7 +27,7 @@
                                     <div class="{{ $message->sender_id === auth()->id() ? 'bg-blue-100 rounded-tl-lg rounded-br-lg rounded-bl-lg' : 'bg-gray-100 rounded-tr-lg rounded-br-lg rounded-bl-lg' }} p-3">
                                         <p class="text-sm font-medium text-gray-900">
                                             {{ $message->sender->name }}
-                                            <span class="ml-2 text-xs font-normal text-gray-500">{{ $message->created_at->format('M d, Y g:i A') }}</span>
+                                            <span class="ml-2 text-xs font-normal text-gray-500">{{ $message->created_at->format('M d, Y H:i') }}</span>
                                         </p>
                                         <p class="mt-1 text-sm text-gray-900">
                                             {{ $message->message }}

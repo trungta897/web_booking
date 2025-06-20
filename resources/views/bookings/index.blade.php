@@ -72,7 +72,7 @@
                                                     {{ $booking->start_time->format('M d, Y') }}
                                                 </div>
                                                 <div class="text-sm text-gray-500">
-                                                    {{ $booking->start_time->format('h:i A') }} - {{ $booking->end_time->format('h:i A') }}
+                                                    {{ $booking->start_time->format('H:i') }} - {{ $booking->end_time->format('H:i') }}
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">

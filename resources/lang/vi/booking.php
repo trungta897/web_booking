@@ -16,7 +16,7 @@ return [
     'validation' => [
         'date_format_error' => 'Vui lòng nhập ngày đúng định dạng dd-mm-yyyy',
         'end_time_after_start' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
-        'booking_advance_notice' => 'Đặt lịch phải trước ít nhất 1 giờ.',
+        'booking_advance_notice' => 'Đặt lịch phải trước ít nhất 30 phút.',
         'max_duration' => 'Thời lượng đặt lịch không được vượt quá 4 giờ.',
         'pending_booking_exists' => 'Bạn đã có một lịch đang chờ duyệt với gia sư này.',
     ],
@@ -29,6 +29,7 @@ return [
         'booking_failed' => 'Không thể tạo lịch đặt. Vui lòng thử lại.',
         'update_failed' => 'Không thể cập nhật lịch đặt. Vui lòng thử lại.',
         'cancel_failed' => 'Không thể hủy lịch đặt. Vui lòng thử lại.',
+        'cancellation_failed' => 'Hủy booking thất bại. Vui lòng thử lại.',
         'tutor_not_available' => 'Gia sư này hiện không có sẵn để đặt lịch.',
         'cannot_cancel' => 'Lịch đặt này không thể hủy.',
         'invalid_payment_state' => 'Lịch đặt này không đủ điều kiện thanh toán.',

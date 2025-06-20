@@ -7,7 +7,7 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=montserrat:400,500,600,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
             @vite(['resources/css/app.css', 'resources/css/custom.css', 'resources/js/app.js'])
@@ -225,7 +225,7 @@
                                 {{ __('welcome.start_learning') }}
                             </div>
                             <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-                                {{ __('welcome.title') }}
+                                {!! __('welcome.title') !!}
                             </h1>
                             <p class="text-lg leading-8 text-gray-600 max-w-2xl">
                                 {{ __('welcome.description') }}

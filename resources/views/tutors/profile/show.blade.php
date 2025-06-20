@@ -37,7 +37,7 @@
                     </div>
 
                     <div class="mb-6">
-                        <h3 class="text-lg font-medium">Subjects</h3>
+                        <h3 class="text-lg font-medium">{{ __('tutors.subjects') }}</h3>
                         <div class="mt-2 flex flex-wrap gap-2">
                             @if($tutor && $tutor->subjects)
                                 @forelse($tutor->subjects->unique('id') as $subject)
@@ -54,7 +54,7 @@
                     </div>
 
                     <div class="mb-6">
-                        <h3 class="text-lg font-medium">Education</h3>
+                        <h3 class="text-lg font-medium">{{ __('tutors.education') }}</h3>
                         <div class="mt-2 space-y-4">
                             @if($tutor && $tutor->education)
                                 @forelse($tutor->education as $education)

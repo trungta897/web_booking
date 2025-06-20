@@ -39,13 +39,13 @@
                         <div class="mt-4">
                             <x-input-label for="availability" :value="__('Availability')" />
                             <select id="availability" name="availability[]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" multiple required>
-                                <option value="monday">Monday</option>
-                                <option value="tuesday">Tuesday</option>
-                                <option value="wednesday">Wednesday</option>
-                                <option value="thursday">Thursday</option>
-                                <option value="friday">Friday</option>
-                                <option value="saturday">Saturday</option>
-                                <option value="sunday">Sunday</option>
+                                <option value="monday">{{ __('tutors.monday') }}</option>
+                                <option value="tuesday">{{ __('tutors.tuesday') }}</option>
+                                <option value="wednesday">{{ __('tutors.wednesday') }}</option>
+                                <option value="thursday">{{ __('tutors.thursday') }}</option>
+                                <option value="friday">{{ __('tutors.friday') }}</option>
+                                <option value="saturday">{{ __('tutors.saturday') }}</option>
+                                <option value="sunday">{{ __('tutors.sunday') }}</option>
                             </select>
                             <x-input-error class="mt-2" :messages="$errors->get('availability')" />
                         </div>

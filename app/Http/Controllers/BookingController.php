@@ -7,6 +7,7 @@ use App\Models\Tutor;
 use App\Models\Subject;
 use App\Notifications\BookingStatusChanged;
 use App\Notifications\BookingStatusUpdated;
+use App\Notifications\BookingCancelled;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -38,8 +39,8 @@ class BookingController extends Controller
 
         // Set default start and end times in GMT+7 (Asia/Ho_Chi_Minh)
         $nowInHanoi = Carbon::now('Asia/Ho_Chi_Minh');
-        $defaultStart = $nowInHanoi->copy()->addHour();
-        $defaultEnd = $nowInHanoi->copy()->addHours(3);
+        $defaultStart = $nowInHanoi->copy()->addHours(2); // 2 hours ahead to ensure it's safe
+        $defaultEnd = $nowInHanoi->copy()->addHours(4); // 4 hours ahead
 
         // Separate date and time for better d-m-y format handling
         $defaultStartDate = $defaultStart->format('Y-m-d');
@@ -88,11 +89,11 @@ class BookingController extends Controller
                     'date',
                     'after:now',
                     function ($attribute, $value, $fail) {
-                        $startTime = Carbon::parse($value);
-                        $now = Carbon::now();
+                        $startTime = Carbon::parse($value, 'Asia/Ho_Chi_Minh');
+                        $now = Carbon::now('Asia/Ho_Chi_Minh');
 
-                        if ($startTime->lt($now->copy()->addMinutes(60))) {
-                            $fail('Booking must be at least 1 hour in advance.');
+                        if ($startTime->lt($now->copy()->addMinutes(30))) {
+                            $fail(__('booking.validation.booking_advance_notice'));
                         }
                     },
                 ],
@@ -101,10 +102,10 @@ class BookingController extends Controller
                     'date',
                     'after:start_time',
                     function ($attribute, $value, $fail) use ($request) {
-                        $startTime = Carbon::parse($request->start_time);
-                        $endTime = Carbon::parse($value);
+                        $startTime = Carbon::parse($request->start_time, 'Asia/Ho_Chi_Minh');
+                        $endTime = Carbon::parse($value, 'Asia/Ho_Chi_Minh');
                         if ($endTime->diffInHours($startTime) > 4) {
-                            $fail('Booking duration cannot exceed 4 hours.');
+                            $fail(__('booking.validation.max_duration'));
                         }
                     },
                 ],
@@ -118,7 +119,7 @@ class BookingController extends Controller
                 ->exists();
 
             if ($hasPendingBooking) {
-                return back()->withErrors(['booking' => 'You already have a pending booking with this tutor.']);
+                return back()->withErrors(['booking' => __('booking.validation.pending_booking_exists')]);
             }
 
             // Calculate price based on duration and tutor's hourly rate
@@ -146,13 +147,13 @@ class BookingController extends Controller
             DB::commit();
 
             return redirect()->route('bookings.index')
-                ->with('success', 'Booking request sent successfully.')
+                ->with('success', __('booking.success.booking_requested'))
                 ->with('new_booking_id', $booking->id);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Booking creation failed: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Failed to create booking. Please try again.']);
+            return back()->withErrors(['error' => __('booking.errors.booking_failed')]);
         }
     }
 
@@ -179,6 +180,8 @@ class BookingController extends Controller
                     Booking::STATUS_CANCELLED
                 ])],
                 'meeting_link' => 'nullable|url|max:255',
+                'rejection_reason' => 'nullable|string|max:100',
+                'rejection_description' => 'nullable|string|max:500',
             ]);
 
             // Additional validation for status changes
@@ -193,7 +196,12 @@ class BookingController extends Controller
             $booking->update($validated);
 
             // Send notification to student
-            $booking->student->notify(new BookingStatusUpdated($booking));
+            if ($validated['status'] === Booking::STATUS_REJECTED) {
+                // Tutor rejected, notify student
+                $booking->student->notify(new BookingCancelled($booking, 'tutor'));
+            } else {
+                $booking->student->notify(new BookingStatusUpdated($booking));
+            }
 
             DB::commit();
 
@@ -218,22 +226,73 @@ class BookingController extends Controller
                 return back()->withErrors(['error' => 'This booking cannot be cancelled.']);
             }
 
-            $booking->update(['status' => Booking::STATUS_CANCELLED]);
-            $booking->delete();
+            $validated = request()->validate([
+                'cancellation_reason' => 'required|string|max:100',
+                'cancellation_description' => 'nullable|string|max:500',
+            ]);
 
-            // Send notification to tutor
-            $booking->tutor->user->notify(new BookingStatusChanged($booking));
+            $booking->update([
+                'status' => Booking::STATUS_CANCELLED,
+                'cancellation_reason' => $validated['cancellation_reason'],
+                'cancellation_description' => $validated['cancellation_description'] ?? null,
+            ]);
+
+            // Don't delete the booking, just mark as cancelled
+            // $booking->delete();
+
+            // Send notification to the other party
+            if (Auth::user()->id === $booking->student_id) {
+                // Student cancelled, notify tutor
+                $booking->tutor->user->notify(new BookingCancelled($booking, 'student'));
+            } else {
+                // Tutor cancelled, notify student
+                $booking->student->notify(new BookingCancelled($booking, 'tutor'));
+            }
 
             DB::commit();
 
             return redirect()->route('bookings.index')
-                ->with('success', 'Booking cancelled successfully.');
+                ->with('success', __('booking.success.booking_cancelled'));
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Booking cancellation failed: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'Failed to cancel booking. Please try again.']);
+            return back()->withErrors(['error' => __('booking.errors.cancellation_failed')]);
         }
+    }
+
+    /**
+     * Show student profile for tutors
+     *
+     * @param Booking $booking
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function showStudentProfile(Booking $booking)
+    {
+        // Only allow tutors to view student profiles for their bookings
+        if (Auth::user()->role !== 'tutor' || Auth::user()->id !== $booking->tutor->user->id) {
+            abort(403, 'Unauthorized to view this student profile.');
+        }
+
+        $student = $booking->student;
+
+        // Get all bookings between this tutor and student
+        $allBookings = Booking::where('tutor_id', $booking->tutor_id)
+            ->where('student_id', $student->id)
+            ->with(['subject'])
+            ->orderBy('start_time', 'desc')
+            ->get();
+
+        // Get student's reviews for this tutor
+        $reviews = \App\Models\Review::where('student_id', $student->id)
+            ->whereHas('booking', function($query) use ($booking) {
+                $query->where('tutor_id', $booking->tutor_id);
+            })
+            ->with(['booking.subject'])
+            ->latest()
+            ->get();
+
+        return view('bookings.student-profile', compact('booking', 'student', 'allBookings', 'reviews'));
     }
 
     /**

@@ -188,4 +188,19 @@ class User extends Authenticatable
 
         return round($totalSeconds / 3600, 1); // Convert seconds to hours
     }
+
+    /**
+     * Get the profile photo URL attribute.
+     *
+     * @return string
+     */
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->avatar && file_exists(public_path('storage/' . $this->avatar))) {
+            return asset('storage/' . $this->avatar);
+        }
+
+        // Return default avatar using UI Avatars service
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name ?? 'User') . '&color=7F9CF5&background=EBF4FF';
+    }
 }

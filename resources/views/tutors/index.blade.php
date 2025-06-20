@@ -41,20 +41,20 @@
                         </fieldset>
 
                         <fieldset class="space-y-2 md:col-span-1">
-                            <legend class="text-sm font-medium text-gray-900">Details</legend>
+                            <legend class="text-sm font-medium text-gray-900">{{ __('tutors.details') }}</legend>
                             <div>
-                                <label for="rating" class="block text-xs font-medium text-gray-700">Minimum Rating</label>
+                                <label for="rating" class="block text-xs font-medium text-gray-700">{{ __('tutors.min_rating') }}</label>
                                 <select name="rating" id="rating" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                    <option value="">Any Rating</option>
+                                    <option value="">{{ __('tutors.any_rating') }}</option>
                                     <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4+ Stars</option>
                                     <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3+ Stars</option>
                                     <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2+ Stars</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="experience" class="block text-xs font-medium text-gray-700">Minimum Experience</label>
+                                <label for="experience" class="block text-xs font-medium text-gray-700">{{ __('tutors.min_years') }}</label>
                                 <select name="experience" id="experience" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                    <option value="">Any Experience</option>
+                                    <option value="">{{ __('tutors.experience') }}</option>
                                     <option value="1" {{ request('experience') == '1' ? 'selected' : '' }}>1+ Years</option>
                                     <option value="3" {{ request('experience') == '3' ? 'selected' : '' }}>3+ Years</option>
                                     <option value="5" {{ request('experience') == '5' ? 'selected' : '' }}>5+ Years</option>
@@ -62,16 +62,16 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="day_of_week" class="block text-xs font-medium text-gray-700">Available On</label>
+                                <label for="day_of_week" class="block text-xs font-medium text-gray-700">{{ __('tutors.availability') }}</label>
                                 <select name="day_of_week" id="day_of_week" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                                    <option value="">Any Day</option>
-                                    <option value="monday" {{ request('day_of_week') == 'monday' ? 'selected' : '' }}>Monday</option>
-                                    <option value="tuesday" {{ request('day_of_week') == 'tuesday' ? 'selected' : '' }}>Tuesday</option>
-                                    <option value="wednesday" {{ request('day_of_week') == 'wednesday' ? 'selected' : '' }}>Wednesday</option>
-                                    <option value="thursday" {{ request('day_of_week') == 'thursday' ? 'selected' : '' }}>Thursday</option>
-                                    <option value="friday" {{ request('day_of_week') == 'friday' ? 'selected' : '' }}>Friday</option>
-                                    <option value="saturday" {{ request('day_of_week') == 'saturday' ? 'selected' : '' }}>Saturday</option>
-                                    <option value="sunday" {{ request('day_of_week') == 'sunday' ? 'selected' : '' }}>Sunday</option>
+                                    <option value="">{{ __('tutors.any_day') }}</option>
+                                    <option value="monday" {{ request('day_of_week') == 'monday' ? 'selected' : '' }}>{{ __('tutors.monday') }}</option>
+                                    <option value="tuesday" {{ request('day_of_week') == 'tuesday' ? 'selected' : '' }}>{{ __('tutors.tuesday') }}</option>
+                                    <option value="wednesday" {{ request('day_of_week') == 'wednesday' ? 'selected' : '' }}>{{ __('tutors.wednesday') }}</option>
+                                    <option value="thursday" {{ request('day_of_week') == 'thursday' ? 'selected' : '' }}>{{ __('tutors.thursday') }}</option>
+                                    <option value="friday" {{ request('day_of_week') == 'friday' ? 'selected' : '' }}>{{ __('tutors.friday') }}</option>
+                                    <option value="saturday" {{ request('day_of_week') == 'saturday' ? 'selected' : '' }}>{{ __('tutors.saturday') }}</option>
+                                    <option value="sunday" {{ request('day_of_week') == 'sunday' ? 'selected' : '' }}>{{ __('tutors.sunday') }}</option>
                                 </select>
                             </div>
                         </fieldset>
@@ -121,7 +121,7 @@
                                             <span class="ml-2 text-sm text-gray-600">({{ $tutor->reviews_count }} {{ $tutor->reviews_count == 1 ? __('tutors.review') : __('tutors.reviews') }})</span>
                                         </div>
                                     @else
-                                        <span class="text-sm text-gray-500 mt-1">{{ __('tutors.no_reviews') }}</span>
+                                        <span class="text-sm text-gray-500 mt-1">{{ __('tutors.no_reviews_yet') }}</span>
                                     @endif
                                 </div>
                             </div>

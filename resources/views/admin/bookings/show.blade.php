@@ -39,8 +39,8 @@
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Scheduled Time</dt>
                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
                             {{ Carbon\Carbon::parse($booking->start_time)->format('D, M d, Y ') }}
-                            from {{ Carbon\Carbon::parse($booking->start_time)->format('h:i A') }}
-                            to {{ Carbon\Carbon::parse($booking->end_time)->format('h:i A') }}
+                                                                    from {{ Carbon\Carbon::parse($booking->start_time)->format('H:i') }}
+                                        to {{ Carbon\Carbon::parse($booking->end_time)->format('H:i') }}
                         </dd>
                     </div>
                     <div>

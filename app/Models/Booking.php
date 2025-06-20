@@ -21,6 +21,10 @@ class Booking extends Model
         'meeting_link',
         'payment_status',
         'payment_intent_id',
+        'rejection_reason',
+        'rejection_description',
+        'cancellation_reason',
+        'cancellation_description',
     ];
 
     protected $casts = [

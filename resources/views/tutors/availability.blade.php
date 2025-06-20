@@ -31,7 +31,7 @@
                             <div class="space-y-4">
                                 @foreach([0, 1, 2, 3, 4, 5, 6] as $day)
                                     @php
-                                        $dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][$day];
+                                        $dayName = [__('tutors.sunday'), __('tutors.monday'), __('tutors.tuesday'), __('tutors.wednesday'), __('tutors.thursday'), __('tutors.friday'), __('tutors.saturday')][$day];
                                         $availability = $availabilities->where('day_of_week', $day)->first();
                                     @endphp
                                     <div class="bg-gray-50 p-4 rounded-lg">

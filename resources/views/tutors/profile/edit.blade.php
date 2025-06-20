@@ -44,7 +44,7 @@
                         </div>
 
                         <div class="education-section">
-                            <h3 class="text-lg font-medium mb-4">Education</h3>
+                            <h3 class="text-lg font-medium mb-4">{{ __('tutors.education') }}</h3>
                             <div id="education-entries">
                                 @if($tutor && $tutor->education)
                                     @foreach($tutor->education as $index => $education)

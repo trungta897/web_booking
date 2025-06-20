@@ -1,7 +1,7 @@
 <nav x-data="{ open: false }" class="bg-gray-900 border-b border-gray-700 dark:bg-gray-900 dark:border-gray-700 sticky top-0 z-50">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
@@ -11,7 +11,7 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                <div class="hidden space-x-6 sm:-my-px sm:ml-10 sm:flex items-center">
                     <x-nav-link :href="route('home')" :active="request()->routeIs('home')" class="nav-text-white hover:text-white transition-colors duration-300">
                         {{ __('common.home') }}
                     </x-nav-link>
@@ -34,15 +34,15 @@
                 </div>
             </div>
 
-            <div class="hidden sm:flex sm:items-center sm:ml-6">
+            <div class="hidden sm:flex sm:items-center sm:ml-6 space-x-4">
                 <!-- Language Switcher -->
-                <div class="mr-4">
+                <div>
                     <x-language-switcher />
                 </div>
 
                 @auth
                     <!-- Notifications -->
-                    <div class="relative mr-4">
+                    <div class="relative">
                         <a href="{{ route('notifications.index') }}" class="p-2 nav-text-white hover:text-white transition-colors duration-300">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -54,7 +54,7 @@
                     </div>
 
                     <!-- Messages -->
-                    <div class="relative mr-4">
+                    <div class="relative">
                         <a href="{{ route('messages.index') }}" class="p-2 nav-text-white hover:text-white transition-colors duration-300">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -66,7 +66,7 @@
                     </div>
 
                     <!-- Settings Dropdown -->
-                    <div class="ml-3 relative">
+                    <div class="relative">
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
                                 <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-800 hover:text-white focus:outline-none transition ease-in-out duration-150">
@@ -119,7 +119,7 @@
                         </x-dropdown>
                     </div>
                 @else
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-3">
                         <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 border border-white text-white rounded-full hover:bg-gray-800 transition-colors duration-300">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />

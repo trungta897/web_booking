@@ -16,7 +16,7 @@ return [
     'validation' => [
         'date_format_error' => 'Please enter date in correct format dd-mm-yyyy',
         'end_time_after_start' => 'End time must be after start time.',
-        'booking_advance_notice' => 'Booking must be at least 1 hour in advance.',
+        'booking_advance_notice' => 'Booking must be at least 30 minutes in advance.',
         'max_duration' => 'Booking duration cannot exceed 4 hours.',
         'pending_booking_exists' => 'You already have a pending booking with this tutor.',
     ],
@@ -26,9 +26,10 @@ return [
         'booking_cancelled' => 'Booking cancelled successfully.',
     ],
     'errors' => [
-        'booking_failed' => 'Failed to create booking. Please try again.',
+        'booking_failed' => 'Please choose time start 2 hours before or after your current booking with this tutor',
         'update_failed' => 'Failed to update booking. Please try again.',
         'cancel_failed' => 'Failed to cancel booking. Please try again.',
+        'cancellation_failed' => 'Booking cancellation failed. Please try again.',
         'tutor_not_available' => 'This tutor is currently not available for booking.',
         'cannot_cancel' => 'This booking cannot be cancelled.',
         'invalid_payment_state' => 'This booking is not eligible for payment.',

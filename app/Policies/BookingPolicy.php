@@ -12,18 +12,27 @@ class BookingPolicy
 
     public function view(User $user, Booking $booking)
     {
-        return $user->id === $booking->student_id || $user->id === $booking->tutor->user_id;
+        return $user->id === $booking->student_id || $user->id === $booking->tutor->user->id;
     }
 
     public function update(User $user, Booking $booking)
     {
-        // Only tutors can update booking status
-        return $user->id === $booking->tutor->user_id;
+                // Only tutors can update booking status
+        return $user->id === $booking->tutor->user->id;
     }
 
     public function delete(User $user, Booking $booking)
     {
-        // Only students can cancel their own bookings
-        return $user->id === $booking->student_id && $booking->status === 'pending';
+        // Students can cancel their own pending bookings
+        if ($user->id === $booking->student_id && $booking->status === 'pending') {
+            return true;
+        }
+
+        // Tutors can cancel/reject bookings assigned to them
+        if ($user->id === $booking->tutor->user->id && in_array($booking->status, ['pending', 'accepted'])) {
+            return true;
+        }
+
+        return false;
     }
 }

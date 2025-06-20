@@ -42,11 +42,11 @@
                                                 </svg>
                                             @endfor
                                         </div>
-                                        <span class="ml-2 text-sm text-gray-600">({{ $tutor->reviews_count }} reviews)</span>
+                                        <span class="ml-2 text-sm text-gray-600">({{ $tutor->reviews_count }} {{ $tutor->reviews_count == 1 ? __('tutors.review') : __('tutors.reviews') }})</span>
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-2xl font-bold text-gray-900">${{ number_format($tutor->hourly_rate, 2) }}/hr</div>
+                                    <div class="text-2xl font-bold text-gray-900">${{ number_format($tutor->hourly_rate, 2) }}{{ __('tutors.per_hour') }}</div>
                                     @auth
                                         @if(auth()->user()->role === 'student')
                                             <a href="{{ route('bookings.create', ['tutor' => $tutor->id]) }}" class="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -62,7 +62,7 @@
 
                     <!-- Subjects -->
                     <div class="mb-8">
-                        <h2 class="text-lg font-medium text-gray-900 mb-4">Subjects</h2>
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">{{ __('tutors.subjects') }}</h2>
                         <div class="flex flex-wrap gap-2">
                             @foreach($tutor->subjects as $subject)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
@@ -74,7 +74,7 @@
 
                     <!-- Education -->
                     <div class="mb-8">
-                        <h2 class="text-lg font-medium text-gray-900 mb-4">Education</h2>
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">{{ __('tutors.education') }}</h2>
                         <div class="space-y-4">
                             @if($tutor->education && count($tutor->education) > 0)
                                 @foreach($tutor->education as $education)
@@ -85,20 +85,20 @@
                                     </div>
                                 @endforeach
                             @else
-                                <p class="text-gray-500">No education information available</p>
+                                <p class="text-gray-500">{{ __('tutors.no_education_info') }}</p>
                             @endif
                         </div>
                     </div>
 
                     <!-- Availability -->
                     <div class="mb-8">
-                        <h2 class="text-lg font-medium text-gray-900 mb-4">Availability</h2>
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">{{ __('tutors.availability') }}</h2>
                         <div class="grid grid-cols-7 gap-2">
                             @foreach(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $day)
                                 <div class="text-center">
-                                    <div class="font-medium text-gray-900">{{ $day }}</div>
+                                    <div class="font-medium text-gray-900">{{ __('tutors.' . strtolower($day)) }}</div>
                                     <div class="text-sm text-gray-600" id="availability-{{ strtolower($day) }}">
-                                        Loading...
+                                        {{ __('tutors.loading') }}
                                     </div>
                                 </div>
                             @endforeach
@@ -107,7 +107,7 @@
 
                     <!-- Reviews -->
                     <div>
-                        <h2 class="text-lg font-medium text-gray-900 mb-4">Reviews</h2>
+                        <h2 class="text-lg font-medium text-gray-900 mb-4">{{ __('tutors.reviews') }}</h2>
                         <div class="space-y-6">
                             @forelse($tutor->reviews as $review)
                                 <div class="border-b border-gray-200 pb-6 last:border-0 last:pb-0">
@@ -136,7 +136,7 @@
                                         <p class="text-gray-600">{{ $review->comment }}</p>
                                     </div>
                                 @empty
-                                    <p class="text-gray-600">No reviews yet.</p>
+                                    <p class="text-gray-600">{{ __('tutors.no_reviews_yet') }}</p>
                                 @endforelse
                         </div>
 
@@ -169,7 +169,7 @@
                                                 <select name="booking_id" id="booking_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                                     @foreach($completedBookings as $booking)
                                                         <option value="{{ $booking->id }}">
-                                                            {{ $booking->subject->name }} - {{ $booking->start_time->format('M d, Y g:i A') }}
+                                                            {{ $booking->subject->name }} - {{ $booking->start_time->format('M d, Y H:i') }}
                                                         </option>
                                                     @endforeach
                                                 </select>
