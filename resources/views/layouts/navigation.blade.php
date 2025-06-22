@@ -42,15 +42,42 @@
 
                 @auth
                     <!-- Notifications -->
-                    <div class="relative">
-                        <a href="{{ route('notifications.index') }}" class="p-2 nav-text-white hover:text-white transition-colors duration-300">
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="p-2 nav-text-white hover:text-white transition-colors duration-300">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            @if(Auth::user()->unreadNotifications && Auth::user()->unreadNotifications->count() > 0)
-                            <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                            @if(Auth::user()->unreadNotificationsCount > 0)
+                                <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
                             @endif
-                        </a>
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-20" style="display: none;">
+                            <div class="py-2 px-4 text-sm font-medium text-gray-700 border-b">{{ __('common.notifications') }}</div>
+                            <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+                                @php
+                                    $notifications = Auth::user()->notifications()->latest()->take(5)->get();
+                                @endphp
+                                @forelse($notifications as $notification)
+                                    @php
+                                        $data = is_array($notification->data) ? $notification->data : json_decode($notification->data, true) ?? [];
+                                    @endphp
+                                    <a href="{{ route('notifications.show', $notification->id) }}" class="block px-4 py-3 text-sm text-gray-600 hover:bg-gray-100 {{ $notification->read_at ? 'opacity-75' : '' }} transition-colors duration-200">
+                                        <p class="font-medium">{{ $data['message'] ?? 'Notification' }}</p>
+                                        <p class="text-xs text-gray-500">{{ $notification->created_at->diffForHumans() }}</p>
+                                        @if(isset($data['link']) && $data['link'])
+                                            <div class="mt-1">
+                                                <span class="text-xs text-indigo-600">{{ __('common.click_to_view') }}</span>
+                                            </div>
+                                        @endif
+                                    </a>
+                                @empty
+                                    <div class="px-4 py-3 text-sm text-gray-500 text-center">
+                                        {{ __('common.no_notifications') }}
+                                    </div>
+                                @endforelse
+                                <a href="{{ route('notifications.index') }}" class="block px-4 py-2 text-center text-sm text-indigo-600 hover:text-indigo-800 bg-gray-50">{{ __('common.view_all_notifications') }}</a>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Messages -->
@@ -69,7 +96,7 @@
                     <div class="relative">
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
-                                <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-800 hover:text-white focus:outline-none transition ease-in-out duration-150">
+                                <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-800 hover:text-white focus:outline-none transition ease-in-out duration-150" title="{{ __('common.user_menu') }}">
                                     <div>{{ Auth::user()->name }}</div>
 
                                     <div class="ml-1">
@@ -138,7 +165,7 @@
 
             <!-- Hamburger -->
             <div class="-mr-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-200 hover:bg-gray-700 focus:outline-none focus:bg-gray-700 focus:text-white transition duration-150 ease-in-out">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-200 hover:bg-gray-700 focus:outline-none focus:bg-gray-700 focus:text-white transition duration-150 ease-in-out" title="{{ __('common.menu') }}" aria-label="{{ __('common.menu') }}">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -242,7 +269,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                             {{ __('common.notifications') }}
-                            @if(Auth::user()->unreadNotifications && Auth::user()->unreadNotifications->count() > 0)
+                            @if(Auth::user()->unreadNotificationsCount > 0)
                                 <span class="ml-1 inline-block h-2 w-2 rounded-full bg-red-500"></span>
                             @endif
                         </div>

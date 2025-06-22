@@ -95,21 +95,35 @@
                         <div x-data="{ open: false }" class="relative">
                             <button @click="open = !open" class="top-bar-icon-btn">
                                 <i class="fas fa-bell"></i>
-                                {{-- Add a badge for unread notifications later --}}
+                                @if(Auth::user()->unreadNotificationsCount > 0)
+                                    <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">{{ Auth::user()->unreadNotificationsCount }}</span>
+                                @endif
                             </button>
                             <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-700 rounded-md shadow-lg overflow-hidden z-20" style="display: none;">
                                 <div class="py-2 px-4 text-sm font-medium text-gray-700 dark:text-gray-200 border-b dark:border-gray-600">Notifications</div>
-                                <div class="divide-y divide-gray-100 dark:divide-gray-600">
-                                    {{-- Placeholder Notifications --}}
-                                    <a href="#" class="block px-4 py-3 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                        <p class="font-medium">New user registered</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">2 hours ago</p>
-                                    </a>
-                                    <a href="#" class="block px-4 py-3 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                        <p class="font-medium">Booking confirmed</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Yesterday</p>
-                                    </a>
-                                    <a href="#" class="block px-4 py-2 text-center text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">View all notifications</a>
+                                <div class="divide-y divide-gray-100 dark:divide-gray-600 max-h-96 overflow-y-auto">
+                                    @php
+                                        $notifications = Auth::user()->notifications()->latest()->take(5)->get();
+                                    @endphp
+                                    @forelse($notifications as $notification)
+                                        @php
+                                            $data = is_array($notification->data) ? $notification->data : json_decode($notification->data, true) ?? [];
+                                        @endphp
+                                        <a href="{{ route('notifications.show', $notification->id) }}" class="block px-4 py-3 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 {{ $notification->read_at ? 'opacity-75' : '' }} transition-colors duration-200">
+                                            <p class="font-medium">{{ $data['message'] ?? 'Notification' }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $notification->created_at->diffForHumans() }}</p>
+                                            @if(isset($data['link']) && $data['link'])
+                                                <div class="mt-1">
+                                                    <span class="text-xs text-indigo-600 dark:text-indigo-400">{{ __('common.click_to_view') }}</span>
+                                                </div>
+                                            @endif
+                                        </a>
+                                    @empty
+                                        <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                                            No notifications
+                                        </div>
+                                    @endforelse
+                                    <a href="{{ route('notifications.index') }}" class="block px-4 py-2 text-center text-sm text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 bg-gray-50 dark:bg-gray-600">View all notifications</a>
                                 </div>
                             </div>
                         </div>

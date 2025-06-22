@@ -61,12 +61,31 @@ class BookingStatusChanged extends Notification implements ShouldQueue
 
     public function toArray($notifiable)
     {
+        $status = ucfirst($this->booking->status);
+        $subject = $this->booking->subject->name;
+        $tutorName = $this->booking->tutor->user->name;
+        $studentName = $this->booking->student->name;
+        $date = $this->booking->start_time->format('F d, Y');
+        $time = $this->booking->start_time->format('h:i A') . ' - ' . $this->booking->end_time->format('h:i A');
+
+        if ($notifiable->id === $this->booking->student_id) {
+            $title = "Booking {$status}: {$subject}";
+            $message = "Your booking for {$subject} with {$tutorName} has been {$this->booking->status}.";
+        } else {
+            $title = "New Booking Request: {$subject}";
+            $message = "You have a new booking request from {$studentName} for {$subject}.";
+        }
+
         return [
             'booking_id' => $this->booking->id,
             'status' => $this->booking->status,
-            'subject' => $this->booking->subject->name,
+            'title' => $title,
+            'message' => $message,
+            'subject' => $subject,
             'date' => $this->booking->start_time->format('Y-m-d'),
             'time' => $this->booking->start_time->format('H:i'),
+            'action_url' => route('bookings.show', $this->booking),
+            'action_text' => 'View Booking',
         ];
     }
 }

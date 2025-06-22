@@ -14,10 +14,12 @@ class Message extends Model
         'receiver_id',
         'message',
         'read_at',
+        'is_read',
     ];
 
     protected $casts = [
         'read_at' => 'datetime',
+        'is_read' => 'boolean',
     ];
 
     public function sender()
@@ -38,6 +40,6 @@ class Message extends Model
      */
     public function scopeUnread($query)
     {
-        return $query->whereNull('read_at');
+        return $query->where('is_read', false);
     }
 }

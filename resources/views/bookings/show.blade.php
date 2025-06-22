@@ -106,17 +106,47 @@
                             </div>
                         @endif
 
+                        <!-- Transaction History -->
+                        @if($booking->transactions()->count() > 0)
+                            <div class="md:col-span-2">
+                                <h4 class="text-sm font-medium text-gray-500">{{ __('Payment History') }}</h4>
+                                <div class="mt-2 flex items-center space-x-4">
+                                    <span class="text-sm text-gray-900">
+                                        {{ __('Payment Method') }}: {{ $booking->payment_method_display ?? 'N/A' }}
+                                    </span>
+                                    <a href="{{ route('payments.transactions.view', $booking) }}"
+                                       class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-900">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        {{ __('View Transaction History') }}
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+
                         @if($booking->status === 'accepted' && $booking->payment_status !== 'paid' && auth()->user()->id === $booking->student_id)
                             <div class="md:col-span-2">
-                                <h4 class="text-sm font-medium text-gray-500">Payment</h4>
+                                <h4 class="text-sm font-medium text-gray-500">{{ __('Payment Required') }}</h4>
                                 <div class="mt-2">
-                                    <form id="payment-form" class="max-w-md">
-                                        <div id="payment-element" class="mb-4"></div>
-                                        <button id="submit-payment" class="w-full inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-blue-600 uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition">
-                                            Pay ${{ number_format($booking->price, 2) }}
-                                        </button>
-                                        <div id="payment-message" class="hidden mt-2 text-sm text-red-600"></div>
-                                    </form>
+                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <span class="text-sm text-blue-800">{{ __('This booking requires payment to confirm.') }}</span>
+                                        </div>
+                                        <div class="mt-3">
+                                            <a href="{{ route('bookings.payment', $booking) }}"
+                                               class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:from-blue-700 hover:to-purple-700 transition-all duration-200">
+                                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                                                    <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                                                </svg>
+                                                {{ __('Complete Payment') }} {{ $booking->display_amount }}
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         @endif

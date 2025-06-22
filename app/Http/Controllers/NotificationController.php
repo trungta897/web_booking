@@ -10,8 +10,23 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = Auth::user()->notifications()->paginate(20);
+        $notifications = Auth::user()->notifications()->latest()->paginate(20);
         return view('notifications.index', compact('notifications'));
+    }
+
+    public function show(DatabaseNotification $notification)
+    {
+        // Check if the notification belongs to the authenticated user
+        if ($notification->notifiable_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
+        // Mark as read if not already read
+        if (!$notification->read_at) {
+            $notification->markAsRead();
+        }
+
+        return view('notifications.show', compact('notification'));
     }
 
     public function markAsRead(DatabaseNotification $notification)

@@ -12,6 +12,14 @@ class Subject extends Model
     protected $fillable = [
         'name',
         'description',
+        'icon',
+        'category',
+        'level',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     public function tutors()
@@ -23,5 +31,21 @@ class Subject extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /**
+     * Scope a query to only include active subjects.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope a query to only include inactive subjects.
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
     }
 }

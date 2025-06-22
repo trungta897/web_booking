@@ -26,11 +26,6 @@ class Education extends Model
         'end_year' => 'integer',
     ];
 
-    // Removed tutorProfile() relationship
-    // public function tutorProfile(): BelongsTo
-    // {
-    //     return $this->belongsTo(TutorProfile::class);
-    // }
 
     public function tutor(): BelongsTo
     {

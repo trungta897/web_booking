@@ -20,7 +20,7 @@ class RoleSwitchController extends Controller
      * @param  string  $role
      * @return \Illuminate\Http\Response
      */
-    public function switchToRole(Request $request, $role)
+    public function switchToRole(Request $request, string $role)
     {
         $user = Auth::user();
 
@@ -31,7 +31,7 @@ class RoleSwitchController extends Controller
                 'user_role' => $user->role,
                 'requested_role' => $role
             ]);
-            return redirect()->back()->with('error', 'Only administrators can switch roles.');
+            return redirect()->back()->with('error', __('common.access_denied'));
         }
 
         // Validate the requested role
@@ -40,13 +40,14 @@ class RoleSwitchController extends Controller
                 'user_id' => $user->id,
                 'requested_role' => $role
             ]);
-            return redirect()->back()->with('error', 'Invalid role specified.');
+            return redirect()->back()->with('error', __('common.invalid_role'));
         }
 
         // If trying to switch to current actual role, just clear session
         if ($role === $user->role) {
             $request->session()->forget(['original_role', 'current_role']);
-            return redirect()->route('admin.dashboard')->with('success', 'Viewing as your normal role.');
+            Log::info("Admin user {$user->id} returned to original role");
+            return redirect()->route('admin.dashboard')->with('success', __('common.viewing_normal_role'));
         }
 
         // Store original role in session if not already stored
@@ -60,13 +61,16 @@ class RoleSwitchController extends Controller
         Log::info("Admin user {$user->id} switched to role: {$role}");
 
         // Determine where to redirect based on the new role
-        if ($role === 'admin') {
-            return redirect()->route('admin.dashboard')->with('success', 'Switched to admin role.');
-        } elseif ($role === 'tutor') {
-            return redirect()->route('dashboard')->with('success', 'Switched to tutor role.');
-        } else {
-            return redirect()->route('dashboard')->with('success', 'Switched to student role.');
-        }
+        $redirectRoute = match($role) {
+            'admin' => 'admin.dashboard',
+            'tutor' => 'dashboard',
+            'student' => 'dashboard',
+            default => 'dashboard'
+        };
+
+        $message = __('common.switched_to_role', ['role' => ucfirst($role)]);
+
+        return redirect()->route($redirectRoute)->with('success', $message);
     }
 
     /**
@@ -78,23 +82,37 @@ class RoleSwitchController extends Controller
     public function switchBack(Request $request)
     {
         $user = Auth::user();
-        $originalRole = $request->session()->get('original_role', 'admin');
 
         // Security check: Only session-switching users can switch back
         if (!$request->session()->has('current_role')) {
-            return redirect()->back()->with('error', 'You are not currently switching roles.');
+            return redirect()->back()->with('error', __('common.not_switching_roles'));
         }
+
+        // Security check: Only admins can use role switching
+        if ($user->role !== 'admin') {
+            Log::warning("Non-admin user {$user->id} attempted to switch back roles", [
+                'user_id' => $user->id,
+                'user_role' => $user->role
+            ]);
+            return redirect()->back()->with('error', __('common.access_denied'));
+        }
+
+        $originalRole = $request->session()->get('original_role', $user->role);
+        $currentRole = $request->session()->get('current_role');
 
         // Clear role switching session data
         $request->session()->forget(['original_role', 'current_role']);
 
-        Log::info("User {$user->id} switched back to original role: {$originalRole}");
+        Log::info("User {$user->id} switched back from role '{$currentRole}' to original role: {$originalRole}");
 
-        // Redirect based on original role
-        if ($originalRole === 'admin') {
-            return redirect()->route('admin.dashboard')->with('success', 'Returned to original role.');
-        } else {
-            return redirect()->route('dashboard')->with('success', 'Returned to original role.');
-        }
+        // Determine redirect route based on original role
+        $redirectRoute = match($originalRole) {
+            'admin' => 'admin.dashboard',
+            'tutor' => 'dashboard',
+            'student' => 'dashboard',
+            default => 'admin.dashboard' // Default to admin since only admins can switch
+        };
+
+        return redirect()->route($redirectRoute)->with('success', __('common.returned_to_original_role'));
     }
 }

@@ -40,12 +40,19 @@ class BookingStatusUpdated extends Notification implements ShouldQueue
 
     public function toArray($notifiable)
     {
+        $status = ucfirst($this->booking->status);
+        $subject = $this->booking->subject->name;
+        $date = $this->booking->start_time->format('F j, Y');
+        $time = $this->booking->start_time->format('g:i A');
+
         return [
             'booking_id' => $this->booking->id,
             'status' => $this->booking->status,
-            'subject' => $this->booking->subject->name,
-            'date' => $this->booking->start_time->format('F j, Y'),
-            'time' => $this->booking->start_time->format('g:i A'),
+            'title' => "Booking {$status}",
+            'message' => "Your booking for {$subject} on {$date} at {$time} has been {$this->booking->status}.",
+            'subject' => $subject,
+            'date' => $date,
+            'time' => $time,
             'action_url' => route('bookings.show', $this->booking),
             'action_text' => 'View Booking',
         ];

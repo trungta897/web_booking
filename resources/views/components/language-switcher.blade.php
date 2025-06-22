@@ -5,7 +5,9 @@
                 id="language-menu-button"
                 aria-expanded="true"
                 aria-haspopup="true"
-                onclick="toggleLanguageMenu()">
+                onclick="toggleLanguageMenu()"
+                title="{{ __('common.change_language') }}"
+                aria-label="{{ __('common.change_language') }}">
             @if(app()->getLocale() == 'vi')
                 <img src="https://flagcdn.com/w20/vn.png" class="w-4 h-3 mr-2" alt="Vietnamese">
                 Tiếng Việt

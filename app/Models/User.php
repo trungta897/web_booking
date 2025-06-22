@@ -96,25 +96,26 @@ class User extends Authenticatable
         return $this->hasMany(Review::class, 'reviewed_user_id');
     }
 
-    public function notifications()
+    // Using Laravel's built-in notification system
+    // notifications() and unreadNotifications are provided by Notifiable trait
+
+    /**
+     * Get unread notifications count - backup method for views
+     */
+    public function getUnreadNotificationsCountAttribute()
     {
-        return $this->hasMany(Notification::class);
+        return $this->unreadNotifications->count();
     }
 
-    public function unreadNotifications()
+    public function unreadMessages()
     {
-        return $this->notifications()->where('is_read', false);
+        return $this->hasMany(Message::class, 'receiver_id')->whereNull('read_at');
     }
 
     public function favoriteTutors()
     {
         return $this->belongsToMany(Tutor::class, 'favorite_tutors')
             ->withTimestamps();
-    }
-
-    public function unreadReceivedMessages()
-    {
-        return $this->receivedMessages()->unread();
     }
 
     // Helper methods

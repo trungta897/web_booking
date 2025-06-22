@@ -21,6 +21,12 @@ class Booking extends Model
         'meeting_link',
         'payment_status',
         'payment_intent_id',
+        'payment_method',
+        'vnpay_txn_ref',
+        'exchange_rate',
+        'currency',
+        'original_amount',
+        'payment_metadata',
         'rejection_reason',
         'rejection_description',
         'cancellation_reason',
@@ -31,6 +37,9 @@ class Booking extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'price' => 'decimal:2',
+        'exchange_rate' => 'decimal:4',
+        'original_amount' => 'decimal:2',
+        'payment_metadata' => 'array',
     ];
 
     // Add status constants
@@ -133,5 +142,46 @@ class Booking extends Model
     public function review()
     {
         return $this->hasOne(Review::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function completedTransactions()
+    {
+        return $this->transactions()->completed();
+    }
+
+    // Payment method helpers
+    public function isStripePayment()
+    {
+        return $this->payment_method === 'stripe';
+    }
+
+    public function isVnpayPayment()
+    {
+        return $this->payment_method === 'vnpay';
+    }
+
+    public function getDisplayAmountAttribute()
+    {
+        if ($this->currency === 'VND') {
+            return number_format($this->price, 0, ',', '.') . ' ₫';
+        }
+        return '$' . number_format($this->price, 2);
+    }
+
+    public function getPaymentMethodDisplayAttribute()
+    {
+        $methods = [
+            'stripe' => 'Stripe',
+            'vnpay' => 'VNPay',
+            'paypal' => 'PayPal',
+            'cash' => 'Tiền mặt',
+        ];
+
+        return $methods[$this->payment_method] ?? $this->payment_method;
     }
 }
