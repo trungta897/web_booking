@@ -17,7 +17,7 @@ class BookingPolicy
 
     public function update(User $user, Booking $booking)
     {
-                // Only tutors can update booking status
+        // Only tutors can update booking status
         return $user->id === $booking->tutor->user->id;
     }
 

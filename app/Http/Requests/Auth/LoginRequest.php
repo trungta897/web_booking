@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * @mixin \Illuminate\Http\Request
+ *
  * @method array only(array|mixed $keys)
  * @method bool boolean(string $key, bool $default = false)
  * @method string string(string $key, string $default = '')

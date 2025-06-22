@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 
 class ProfileController extends Controller
 {
     public function show()
     {
         $admin = Auth::user();
+
         return view('admin.profile.show', compact('admin'));
     }
 
@@ -37,4 +38,3 @@ class ProfileController extends Controller
         return redirect('/')->with('success', 'Your account has been suspended.');
     }
 }
- 

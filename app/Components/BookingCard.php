@@ -8,6 +8,7 @@ use Carbon\Carbon;
 class BookingCard
 {
     protected Booking $booking;
+
     protected array $options;
 
     public function __construct(Booking $booking, array $options = [])
@@ -18,7 +19,7 @@ class BookingCard
             'show_tutor_info' => true,
             'show_student_info' => false,
             'show_payment_status' => true,
-            'date_format' => 'd-m-Y H:i'
+            'date_format' => 'd-m-Y H:i',
         ], $options);
     }
 
@@ -32,7 +33,7 @@ class BookingCard
             'formatted_data' => $this->getFormattedData(),
             'status_info' => $this->getStatusInfo(),
             'actions' => $this->getAvailableActions(),
-            'options' => $this->options
+            'options' => $this->options,
         ];
     }
 
@@ -45,9 +46,9 @@ class BookingCard
             'start_time' => Carbon::parse($this->booking->start_time)->format($this->options['date_format']),
             'end_time' => Carbon::parse($this->booking->end_time)->format($this->options['date_format']),
             'duration' => $this->calculateDuration(),
-            'price' => number_format($this->booking->price, 2) . ' USD',
+            'price' => number_format($this->booking->price, 2).' USD',
             'status_text' => ucfirst($this->booking->status),
-            'payment_status_text' => ucfirst($this->booking->payment_status ?? 'unpaid')
+            'payment_status_text' => ucfirst($this->booking->payment_status ?? 'unpaid'),
         ];
     }
 
@@ -60,34 +61,34 @@ class BookingCard
             'pending' => [
                 'color' => 'warning',
                 'icon' => 'clock',
-                'text' => __('booking.status.pending')
+                'text' => __('booking.status.pending'),
             ],
             'accepted' => [
                 'color' => 'success',
                 'icon' => 'check',
-                'text' => __('booking.status.accepted')
+                'text' => __('booking.status.accepted'),
             ],
             'rejected' => [
                 'color' => 'danger',
                 'icon' => 'times',
-                'text' => __('booking.status.rejected')
+                'text' => __('booking.status.rejected'),
             ],
             'cancelled' => [
                 'color' => 'secondary',
                 'icon' => 'ban',
-                'text' => __('booking.status.cancelled')
+                'text' => __('booking.status.cancelled'),
             ],
             'completed' => [
                 'color' => 'primary',
                 'icon' => 'check-circle',
-                'text' => __('booking.status.completed')
-            ]
+                'text' => __('booking.status.completed'),
+            ],
         ];
 
         return $statusConfig[$this->booking->status] ?? [
             'color' => 'secondary',
             'icon' => 'question',
-            'text' => ucfirst($this->booking->status)
+            'text' => ucfirst($this->booking->status),
         ];
     }
 
@@ -96,14 +97,14 @@ class BookingCard
      */
     protected function getAvailableActions(): array
     {
-        if (!$this->options['show_actions']) {
+        if (! $this->options['show_actions']) {
             return [];
         }
 
         $actions = [];
         $user = \Illuminate\Support\Facades\Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return $actions;
         }
 
@@ -113,7 +114,7 @@ class BookingCard
             'label' => __('common.view'),
             'route' => route('bookings.show', $this->booking),
             'class' => 'btn-outline-primary',
-            'icon' => 'eye'
+            'icon' => 'eye',
         ];
 
         // Actions based on booking status and user role
@@ -126,7 +127,7 @@ class BookingCard
                         'route' => route('bookings.update', $this->booking),
                         'class' => 'btn-success',
                         'icon' => 'check',
-                        'method' => 'PATCH'
+                        'method' => 'PATCH',
                     ];
                     $actions[] = [
                         'type' => 'reject',
@@ -134,7 +135,7 @@ class BookingCard
                         'route' => route('bookings.update', $this->booking),
                         'class' => 'btn-danger',
                         'icon' => 'times',
-                        'method' => 'PATCH'
+                        'method' => 'PATCH',
                     ];
                 }
                 break;
@@ -147,7 +148,7 @@ class BookingCard
                             'label' => __('booking.actions.pay'),
                             'route' => route('bookings.payment', $this->booking),
                             'class' => 'btn-primary',
-                            'icon' => 'credit-card'
+                            'icon' => 'credit-card',
                         ];
                     }
                 }
@@ -160,20 +161,20 @@ class BookingCard
                         'class' => 'btn-warning',
                         'icon' => 'ban',
                         'method' => 'DELETE',
-                        'confirm' => __('booking.confirm.cancel')
+                        'confirm' => __('booking.confirm.cancel'),
                     ];
                 }
                 break;
 
             case 'completed':
                 if ($user->role === 'student' && $this->booking->student_id === $user->id) {
-                    if (!$this->booking->review) {
+                    if (! $this->booking->review) {
                         $actions[] = [
                             'type' => 'review',
                             'label' => __('booking.actions.review'),
-                            'route' => route('tutors.show', $this->booking->tutor) . '#review',
+                            'route' => route('tutors.show', $this->booking->tutor).'#review',
                             'class' => 'btn-info',
-                            'icon' => 'star'
+                            'icon' => 'star',
                         ];
                     }
                 }
@@ -223,7 +224,7 @@ class BookingCard
      */
     public function getTimeUntilStart(): string
     {
-        if (!$this->isUpcoming()) {
+        if (! $this->isUpcoming()) {
             return '';
         }
 
@@ -247,7 +248,7 @@ class BookingCard
      */
     public function getUrgencyLevel(): string
     {
-        if (!$this->isUpcoming()) {
+        if (! $this->isUpcoming()) {
             return 'none';
         }
 

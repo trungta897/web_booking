@@ -26,7 +26,6 @@ class Education extends Model
         'end_year' => 'integer',
     ];
 
-
     public function tutor(): BelongsTo
     {
         return $this->belongsTo(Tutor::class, 'tutor_id'); // Ensure foreign key is specified if not default

@@ -22,7 +22,6 @@ class PaymentReceived extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      *
-     * @param \App\Models\Booking $booking
      * @return void
      */
     public function __construct(Booking $booking)
@@ -33,7 +32,7 @@ class PaymentReceived extends Notification implements ShouldQueue
     /**
      * Get the notification's delivery channels.
      *
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      * @return array
      */
     public function via($notifiable)
@@ -44,7 +43,7 @@ class PaymentReceived extends Notification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      *
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable)
@@ -69,7 +68,7 @@ class PaymentReceived extends Notification implements ShouldQueue
     /**
      * Get the array representation of the notification.
      *
-     * @param mixed $notifiable
+     * @param  mixed  $notifiable
      * @return array
      */
     public function toArray($notifiable)
@@ -78,7 +77,7 @@ class PaymentReceived extends Notification implements ShouldQueue
 
         return [
             'title' => 'Payment Received',
-            'message' => "Payment of $".$amount." received from {$this->booking->student->name} for {$this->booking->subject->name} session.",
+            'message' => 'Payment of $'.$amount." received from {$this->booking->student->name} for {$this->booking->subject->name} session.",
             'booking_id' => $this->booking->id,
             'student_id' => $this->booking->student_id,
             'subject' => $this->booking->subject->name,

@@ -5,7 +5,6 @@ namespace App\Repositories;
 use App\Contracts\Repositories\SubjectRepositoryInterface;
 use App\Models\Subject;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class SubjectRepository extends BaseRepository implements SubjectRepositoryInterface
 {
@@ -53,7 +52,7 @@ class SubjectRepository extends BaseRepository implements SubjectRepositoryInter
      */
     public function searchByName(string $name): Collection
     {
-        return $this->query()->where('name', 'like', '%' . $name . '%')
+        return $this->query()->where('name', 'like', '%'.$name.'%')
             ->active()
             ->orderBy('name')
             ->get();
@@ -81,9 +80,9 @@ class SubjectRepository extends BaseRepository implements SubjectRepositoryInter
             'total_subjects' => $this->count(),
             'active_subjects' => $this->query()->active()->count(),
             'inactive_subjects' => $this->query()->inactive()->count(),
-            'average_tutors_per_subject' => $this->all()->avg(function($subject) {
+            'average_tutors_per_subject' => $this->all()->avg(function ($subject) {
                 return $subject->tutors()->count();
-            })
+            }),
         ];
     }
 
@@ -94,19 +93,21 @@ class SubjectRepository extends BaseRepository implements SubjectRepositoryInter
     {
         $subject = $this->findById($subjectId);
 
-        if (!$subject) {
+        if (! $subject) {
             return [];
         }
 
         return [
             'total_tutors' => $subject->tutors()->count(),
-            'active_tutors' => $subject->tutors()->whereHas('user', function($q) {
+            'active_tutors' => $subject->tutors()->whereHas('user', function ($q) {
                 $q->where('account_status', 'active');
             })->count(),
             'total_bookings' => $subject->bookings()->count(),
             'completed_bookings' => $subject->bookings()->where('status', 'completed')->count(),
             'average_rating' => $subject->tutors()->with('reviews')->get()
-                ->flatMap->reviews->avg('rating'),
+                ->flatMap(function ($tutor) {
+                    return $tutor->reviews;
+                })->avg('rating'),
             'average_price' => $subject->tutors()->avg('hourly_rate'),
         ];
     }

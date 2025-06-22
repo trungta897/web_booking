@@ -3,11 +3,11 @@
 namespace App\Repositories;
 
 use App\Contracts\Repositories\TutorRepositoryInterface;
-use App\Models\Tutor;
 use App\Models\Subject;
+use App\Models\Tutor;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
 
 class TutorRepository extends BaseRepository implements TutorRepositoryInterface
 {
@@ -40,14 +40,14 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
     protected function applyFilters(Builder $query, array $filters): Builder
     {
         // Filter by subject
-        if (!empty($filters['subject'])) {
+        if (! empty($filters['subject'])) {
             $query->whereHas('subjects', function ($q) use ($filters) {
                 $q->where('subjects.id', $filters['subject']);
             });
         }
 
         // Filter by price range
-        if (!empty($filters['price_range'])) {
+        if (! empty($filters['price_range'])) {
             $range = explode('-', $filters['price_range']);
             if (count($range) === 2) {
                 $query->whereBetween('hourly_rate', [$range[0], $range[1]]);
@@ -57,27 +57,27 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
         }
 
         // Filter by minimum rating
-        if (!empty($filters['rating'])) {
+        if (! empty($filters['rating'])) {
             $query->having('reviews_avg_rating', '>=', $filters['rating']);
         }
 
         // Filter by location
-        if (!empty($filters['location'])) {
+        if (! empty($filters['location'])) {
             $query->whereHas('user', function ($q) use ($filters) {
-                $q->where('users.address', 'like', '%' . $filters['location'] . '%');
+                $q->where('users.address', 'like', '%'.$filters['location'].'%');
             });
         }
 
         // Filter by availability on a specific day
-        if (!empty($filters['day_of_week'])) {
-            $query->whereHas('availability', function($q) use ($filters) {
+        if (! empty($filters['day_of_week'])) {
+            $query->whereHas('availability', function ($q) use ($filters) {
                 $q->where('day_of_week', $filters['day_of_week'])
-                  ->where('is_available', true);
+                    ->where('is_available', true);
             });
         }
 
         // Filter by experience level
-        if (!empty($filters['experience'])) {
+        if (! empty($filters['experience'])) {
             $query->where('experience_years', '>=', $filters['experience']);
         }
 
@@ -119,11 +119,11 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
             'subjects',
             'education',
             'reviews.student',
-            'availability'
+            'availability',
         ])
-        ->withCount('reviews')
-        ->withAvg('reviews', 'rating')
-        ->find($id);
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->find($id);
     }
 
     /**
@@ -148,10 +148,10 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
         return $this->query()->whereHas('subjects', function ($q) use ($subjectId) {
             $q->where('subjects.id', $subjectId);
         })
-        ->with(['user', 'subjects', 'reviews'])
-        ->withCount('reviews')
-        ->withAvg('reviews', 'rating')
-        ->paginate($perPage);
+            ->with(['user', 'subjects', 'reviews'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->paginate($perPage);
     }
 
     /**
@@ -160,12 +160,12 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
     public function searchTutorsByName(string $name, int $perPage = 12): LengthAwarePaginator
     {
         return $this->query()->whereHas('user', function ($q) use ($name) {
-            $q->where('name', 'like', '%' . $name . '%');
+            $q->where('name', 'like', '%'.$name.'%');
         })
-        ->with(['user', 'subjects', 'reviews'])
-        ->withCount('reviews')
-        ->withAvg('reviews', 'rating')
-        ->paginate($perPage);
+            ->with(['user', 'subjects', 'reviews'])
+            ->withCount('reviews')
+            ->withAvg('reviews', 'rating')
+            ->paginate($perPage);
     }
 
     /**
@@ -175,12 +175,12 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
     {
         return $this->query()->whereHas('availability', function ($q) use ($dayOfWeek, $startTime, $endTime) {
             $q->where('day_of_week', $dayOfWeek)
-              ->where('is_available', true)
-              ->where('start_time', '<=', $startTime)
-              ->where('end_time', '>=', $endTime);
+                ->where('is_available', true)
+                ->where('start_time', '<=', $startTime)
+                ->where('end_time', '>=', $endTime);
         })
-        ->with(['user', 'subjects'])
-        ->get();
+            ->with(['user', 'subjects'])
+            ->get();
     }
 
     /**
@@ -190,7 +190,7 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
     {
         $tutor = $this->findById($tutorId);
 
-        if (!$tutor) {
+        if (! $tutor) {
             return [];
         }
 
@@ -210,7 +210,7 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
     public function calculateResponseRate(int $tutorId): float
     {
         $tutor = $this->findById($tutorId);
-        if (!$tutor) {
+        if (! $tutor) {
             return 0;
         }
 

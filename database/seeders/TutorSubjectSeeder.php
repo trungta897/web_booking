@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Tutor;
 use App\Models\Subject;
+use App\Models\Tutor;
+use Illuminate\Database\Seeder;
 
 class TutorSubjectSeeder extends Seeder
 {
@@ -18,6 +18,7 @@ class TutorSubjectSeeder extends Seeder
 
         if ($subjects->isEmpty() || $tutors->isEmpty()) {
             $this->command->warn('No tutors or subjects found. Please seed users, tutors, and subjects first.');
+
             return;
         }
 
@@ -49,11 +50,11 @@ class TutorSubjectSeeder extends Seeder
             foreach ($randomSubjects as $subject) {
                 $syncData[$subject->id] = [
                     'hourly_rate' => $tutor->hourly_rate ?? 50.00,
-                    'description' => 'Proficient in ' . $subject->name
+                    'description' => 'Proficient in '.$subject->name,
                 ];
             }
             $tutor->subjects()->sync($syncData);
-            $this->command->info("Assigned $subjectCount subjects to tutor '{$tutor->user->name}' (ID: {$tutor->id}, Rate: ".$tutor->hourly_rate.").");
+            $this->command->info("Assigned $subjectCount subjects to tutor '{$tutor->user->name}' (ID: {$tutor->id}, Rate: ".$tutor->hourly_rate.').');
         }
         $this->command->info('Tutors now have subjects assigned based on pricing.');
     }

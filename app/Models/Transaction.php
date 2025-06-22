@@ -32,21 +32,33 @@ class Transaction extends Model
 
     // Constants
     const PAYMENT_METHOD_STRIPE = 'stripe';
+
     const PAYMENT_METHOD_VNPAY = 'vnpay';
+
     const PAYMENT_METHOD_PAYPAL = 'paypal';
+
     const PAYMENT_METHOD_MOMO = 'momo';
+
     const PAYMENT_METHOD_ZALOPAY = 'zalopay';
+
     const PAYMENT_METHOD_BANK_TRANSFER = 'bank_transfer';
 
     const TYPE_PAYMENT = 'payment';
+
     const TYPE_REFUND = 'refund';
+
     const TYPE_PARTIAL_REFUND = 'partial_refund';
 
     const STATUS_PENDING = 'pending';
+
     const STATUS_PROCESSING = 'processing';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_FAILED = 'failed';
+
     const STATUS_CANCELLED = 'cancelled';
+
     const STATUS_REFUNDED = 'refunded';
 
     // Relationships

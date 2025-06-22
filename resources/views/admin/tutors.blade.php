@@ -1,7 +1,7 @@
 <x-admin-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Manage Tutors') }}
+            {{ __('admin.manage_tutors') }}
         </h2>
     </x-slot>
 
@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Tutor List</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('admin.tutor_list') }}</h3>
 
                     <!-- Search and Filters (Optional - can be added later) -->
                     {{--
@@ -30,12 +30,12 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subjects</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('admin.name') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('admin.email') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('admin.subjects') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('admin.status') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('admin.joined') }}</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('admin.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -51,7 +51,7 @@
                                                 @if($tutorUser->tutor && $tutorUser->tutor->subjects->count() > 0)
                                                     {{ $tutorUser->tutor->subjects->pluck('name')->implode(', ') }}
                                                 @else
-                                                    N/A
+                                                    {{ __('admin.na') }}
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
@@ -64,19 +64,19 @@
                                                     'dark:bg-yellow-700 dark:text-yellow-100' => $tutorUser->account_status === 'suspended',
                                                     'dark:bg-red-700 dark:text-red-100' => $tutorUser->account_status === 'banned',
                                                 ])>
-                                                    {{ ucfirst($tutorUser->account_status) }}
+                                                    {{ __('admin.' . $tutorUser->account_status) }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $tutorUser->created_at->format('M d, Y') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="{{ route('admin.tutors.show', $tutorUser) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">View</a>
-                                                <form method="POST" action="{{ route('admin.tutors.suspend', $tutorUser) }}" class="inline-block" onsubmit="return confirm('Are you sure you want to {{ $tutorUser->account_status === 'suspended' ? 'reinstate' : 'suspend' }} this tutor?');">
+                                                <a href="{{ route('admin.tutors.show', $tutorUser) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">{{ __('admin.view') }}</a>
+                                                <form method="POST" action="{{ route('admin.tutors.suspend', $tutorUser) }}" class="inline-block" onsubmit="return confirm('{{ $tutorUser->account_status === 'suspended' ? __('admin.confirm_reinstate') : __('admin.confirm_suspend') }}');">
                                                     @csrf
                                                     @method('PATCH')
                                                     <button type="submit" class="{{ $tutorUser->account_status === 'suspended' ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900' }}">
-                                                        {{ $tutorUser->account_status === 'suspended' ? 'Reinstate' : 'Suspend' }}
+                                                        {{ $tutorUser->account_status === 'suspended' ? __('admin.reinstate') : __('admin.suspend') }}
                                                     </button>
                                                 </form>
                                             </td>
@@ -89,7 +89,7 @@
                             {{ $tutors->links() }}
                         </div>
                     @else
-                        <p class="text-gray-500">No tutors found.</p>
+                        <p class="text-gray-500">{{ __('admin.no_tutors_found') }}</p>
                     @endif
                 </div>
             </div>

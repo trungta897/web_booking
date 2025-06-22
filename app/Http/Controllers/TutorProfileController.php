@@ -2,83 +2,132 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tutor;
+use App\Http\Requests\TutorProfileRequest;
 use App\Models\Subject;
-use Illuminate\Http\Request;
+use App\Models\Tutor;
+use App\Services\TutorService;
+use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class TutorProfileController extends Controller
 {
-    public function show()
+    protected TutorService $tutorService;
+
+    public function __construct(TutorService $tutorService)
     {
-        $tutor = Auth::user()->tutor;
-        if (!$tutor) {
+        $this->tutorService = $tutorService;
+    }
+
+    /**
+     * Display tutor profile
+     */
+    public function show(): View
+    {
+        $user = Auth::user();
+        $tutor = $user->tutor;
+
+        if (! $tutor instanceof Tutor) {
             return view('tutors.profile.show', compact('tutor'));
         }
-        $tutor->load('user', 'subjects', 'education');
-        return view('tutors.profile.show', compact('tutor'));
+
+        $profileData = $this->tutorService->getTutorProfileData($tutor);
+
+        return view('tutors.profile.show', $profileData);
     }
 
-    public function edit()
+    /**
+     * Show edit profile form
+     */
+    public function edit(): View|RedirectResponse
     {
-        $tutor = Auth::user()->tutor;
-        if (!$tutor) {
-            abort(404, 'Tutor profile not found. Please create one.');
+        $user = Auth::user();
+        $tutor = $user->tutor;
+
+        if (! $tutor instanceof Tutor) {
+            return redirect()->route('profile.edit')
+                ->with('info', __('Please create your tutor profile first'));
         }
-        $tutor->load('user', 'subjects', 'education');
-        $subjects = Subject::all();
-        return view('tutors.profile.edit', compact('tutor', 'subjects'));
+
+        $editData = $this->tutorService->getEditProfileData($tutor);
+
+        return view('tutors.profile.edit', $editData);
     }
 
-    public function update(Request $request)
+    /**
+     * Show create profile form
+     */
+    public function create(): View
     {
-        $tutor = Auth::user()->tutor;
-        if (!$tutor) {
-            abort(404, 'Tutor profile not found.');
+        $subjects = Subject::where('is_active', true)->get();
+
+        return view('tutors.profile.create', compact('subjects'));
+    }
+
+    /**
+     * Store new tutor profile
+     */
+    public function store(TutorProfileRequest $request): RedirectResponse
+    {
+        try {
+            $this->tutorService->createTutorProfile(Auth::user(), $request->validated());
+
+            return redirect()->route('tutor.profile.show')
+                ->with('success', __('Tutor profile created successfully'));
+
+        } catch (Exception $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
         }
+    }
 
-        $validated = $request->validate([
-            'hourly_rate' => ['required', 'numeric', 'min:0'],
-            'experience_years' => ['required', 'integer', 'min:0'],
-            'bio' => ['required', 'string', 'max:1000'],
-            'specialization' => ['nullable', 'string', 'max:255'],
-            'is_available' => ['sometimes', 'boolean'],
-            'subjects' => ['required', 'array'],
-            'subjects.*' => ['exists:subjects,id'],
-            'education' => ['sometimes', 'array'],
-            'education.*.degree' => ['required_with:education', 'string', 'max:255'],
-            'education.*.institution' => ['required_with:education', 'string', 'max:255'],
-            'education.*.field_of_study' => ['nullable', 'string', 'max:255'],
-            'education.*.start_year' => ['required_with:education', 'numeric', 'min:1900', 'max:' . date('Y')],
-            'education.*.end_year' => ['nullable', 'numeric', 'min:1900', 'max:' . (date('Y') + 10)],
-            'education.*.description' => ['nullable', 'string', 'max:500'],
-        ]);
+    /**
+     * Update tutor profile
+     */
+    public function update(TutorProfileRequest $request): RedirectResponse
+    {
+        try {
+            $tutor = Auth::user()->tutor()->first();
 
-        $tutorData = [
-            'hourly_rate' => $validated['hourly_rate'],
-            'experience_years' => $validated['experience_years'],
-            'bio' => $validated['bio'],
-            'specialization' => $validated['specialization'] ?? $tutor->specialization,
-        ];
-        if ($request->has('is_available')) {
-            $tutorData['is_available'] = $request->boolean('is_available');
-        }
-
-        $tutor->update($tutorData);
-
-        if ($request->has('subjects')) {
-            $tutor->subjects()->sync($validated['subjects']);
-        }
-
-        if ($request->has('education')) {
-            $tutor->education()->delete();
-            foreach ($validated['education'] as $eduData) {
-                $tutor->education()->create($eduData);
+            if (! $tutor) {
+                return redirect()->route('profile.edit')
+                    ->with('error', __('Tutor profile not found'));
             }
-        }
 
-        return redirect()->route('tutor.profile.show')
-            ->with('success', 'Profile updated successfully.');
+            $this->tutorService->updateTutorProfile($tutor, $request->validated());
+
+            return redirect()->route('tutor.profile.show')
+                ->with('success', __('Profile updated successfully'));
+
+        } catch (Exception $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Delete tutor profile
+     */
+    public function destroy(): RedirectResponse
+    {
+        try {
+            $tutor = Auth::user()->tutor()->first();
+
+            if (! $tutor) {
+                return redirect()->route('tutor.dashboard')
+                    ->with('error', __('No tutor profile found'));
+            }
+
+            $this->tutorService->deleteTutorProfile($tutor);
+
+            return redirect()->route('tutor.dashboard')
+                ->with('success', __('Tutor profile deleted successfully'));
+
+        } catch (Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 }

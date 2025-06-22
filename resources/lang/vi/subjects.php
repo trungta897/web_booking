@@ -65,5 +65,5 @@ return [
         'Nursing' => 'Nghiên cứu chăm sóc sức khỏe, giải phẫu, sinh lý và chăm sóc bệnh nhân',
         'Medicine' => 'Học khoa học y tế, giải phẫu và các nguyên tắc cơ bản về chăm sóc sức khỏe',
         'Test Preparation' => 'Chuẩn bị cho các kỳ thi tiêu chuẩn như SAT, ACT, GRE và nhiều hơn nữa',
-    ]
+    ],
 ];

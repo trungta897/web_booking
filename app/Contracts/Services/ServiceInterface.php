@@ -2,6 +2,8 @@
 
 namespace App\Contracts\Services;
 
+use Exception;
+
 interface ServiceInterface
 {
     /**
@@ -27,5 +29,5 @@ interface ServiceInterface
     /**
      * Handle service errors
      */
-    public function handleError(\Exception $e, string $context = ''): void;
+    public function handleError(Exception $e, string $context = ''): void;
 }

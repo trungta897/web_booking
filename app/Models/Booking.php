@@ -44,12 +44,17 @@ class Booking extends Model
 
     // Add status constants
     const STATUS_PENDING = 'pending';
+
     const STATUS_ACCEPTED = 'accepted';
+
     const STATUS_REJECTED = 'rejected';
+
     const STATUS_CANCELLED = 'cancelled';
 
     const PAYMENT_STATUS_PENDING = 'pending';
+
     const PAYMENT_STATUS_PAID = 'paid';
+
     const PAYMENT_STATUS_FAILED = 'failed';
 
     // Add scopes for common queries
@@ -111,7 +116,7 @@ class Booking extends Model
 
     public function canBeReviewed()
     {
-        return $this->isAccepted() && $this->end_time->isPast() && !$this->review;
+        return $this->isAccepted() && $this->end_time->isPast() && ! $this->review;
     }
 
     public function student()
@@ -144,6 +149,11 @@ class Booking extends Model
         return $this->hasOne(Review::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
@@ -165,12 +175,18 @@ class Booking extends Model
         return $this->payment_method === 'vnpay';
     }
 
+    public function getTotalAmountAttribute()
+    {
+        return $this->price;
+    }
+
     public function getDisplayAmountAttribute()
     {
         if ($this->currency === 'VND') {
-            return number_format($this->price, 0, ',', '.') . ' ₫';
+            return number_format($this->price, 0, ',', '.').' ₫';
         }
-        return '$' . number_format($this->price, 2);
+
+        return '$'.number_format($this->price, 2);
     }
 
     public function getPaymentMethodDisplayAttribute()

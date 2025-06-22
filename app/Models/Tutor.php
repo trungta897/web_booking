@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class Tutor extends Model
 {
@@ -32,7 +32,7 @@ class Tutor extends Model
     public function subjects()
     {
         return $this->belongsToMany(Subject::class, 'subject_tutor', 'tutor_id', 'subject_id')
-                    ->withPivot(['hourly_rate', 'description']);
+            ->withPivot(['hourly_rate', 'description']);
     }
 
     public function reviews()
@@ -64,8 +64,8 @@ class Tutor extends Model
     /**
      * Check if the tutor is available at the given time slot
      *
-     * @param string $startTime
-     * @param string $endTime
+     * @param  string  $startTime
+     * @param  string  $endTime
      * @return bool
      */
     public function isTimeSlotAvailable($startTime, $endTime)
@@ -85,6 +85,7 @@ class Tutor extends Model
 
         if ($availabilities->isEmpty()) {
             \Illuminate\Support\Facades\Log::info('No availability records found for this day.');
+
             return false;
         }
 
@@ -99,25 +100,29 @@ class Tutor extends Model
                 break;
             }
         }
-        \Illuminate\Support\Facades\Log::info('Availability match found: ' . ($found ? 'Yes' : 'No'));
-        if (!$found) return false;
+        \Illuminate\Support\Facades\Log::info('Availability match found: '.($found ? 'Yes' : 'No'));
+        if (! $found) {
+            return false;
+        }
 
         // Check overlapping bookings như cũ
         $overlappingBookingsExist = $this->bookings()
             ->whereIn('status', ['accepted', 'pending'])
             ->where(function ($query) use ($startDateTime, $endDateTime) {
-                $query->where(function($q) use ($startDateTime, $endDateTime) {
+                $query->where(function ($q) use ($startDateTime, $endDateTime) {
                     $q->where('start_time', '<', $endDateTime)
-                      ->where('end_time', '>', $startDateTime);
+                        ->where('end_time', '>', $startDateTime);
                 });
             })
             ->exists();
-        \Illuminate\Support\Facades\Log::info('Overlapping bookings check found: ' . ($overlappingBookingsExist ? 'Yes' : 'No'));
+        \Illuminate\Support\Facades\Log::info('Overlapping bookings check found: '.($overlappingBookingsExist ? 'Yes' : 'No'));
         if ($overlappingBookingsExist) {
             \Illuminate\Support\Facades\Log::info('Result: Not available (Overlapping booking found).');
+
             return false;
         }
         \Illuminate\Support\Facades\Log::info('Result: Available.');
+
         return true;
     }
 
@@ -130,7 +135,7 @@ class Tutor extends Model
     public function isAvailableForBooking()
     {
         // Check if tutor is marked as available
-        if (!$this->is_available) {
+        if (! $this->is_available) {
             return false;
         }
 
@@ -139,23 +144,22 @@ class Tutor extends Model
             ->where('is_available', true)
             ->exists();
 
-        if (!$hasAvailability) {
+        if (! $hasAvailability) {
             return false;
         }
 
         // Check if tutor has any active subjects
         $hasSubjects = $this->subjects()->exists();
 
-        if (!$hasSubjects) {
+        if (! $hasSubjects) {
             return false;
         }
 
         // Check if tutor's account is active
-        if (!$this->user || $this->user->account_status !== 'active') {
+        if (! $this->user || $this->user->account_status !== 'active') {
             return false;
         }
 
         return true;
     }
 }
-

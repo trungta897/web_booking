@@ -2,52 +2,115 @@
 
 namespace App\Services;
 
-use App\Contracts\Services\BookingServiceInterface;
 use App\Models\Booking;
-use App\Models\User;
 use App\Models\Tutor;
-use App\Repositories\BookingRepository;
+use App\Models\User;
+use App\Notifications\BookingCancelled;
 use App\Notifications\BookingStatusChanged;
 use App\Notifications\BookingStatusUpdated;
-use App\Notifications\BookingCancelled;
+use App\Repositories\BookingRepository;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 
-class BookingService extends BaseService implements BookingServiceInterface
+class BookingService extends BaseService
 {
     protected BookingRepository $bookingRepository;
 
     public function __construct()
     {
-        $this->bookingRepository = new BookingRepository(new Booking());
+        $this->bookingRepository = new BookingRepository(new Booking);
     }
 
     /**
-     * Create a new booking
+     * Get user bookings with filters
      */
-    public function createBooking(array $data): Booking
+    public function getUserBookings(User $user, array $filters = []): LengthAwarePaginator
     {
-        return $this->executeTransaction(function () use ($data) {
-            $tutor = Tutor::findOrFail($data['tutor_id']);
+        $query = $user->role === 'tutor'
+            ? Booking::where('tutor_id', $user->tutor->id)
+            : Booking::where('student_id', $user->id);
 
-            // Validate booking constraints
-            $this->validateBookingConstraints($data);
+        return $query->with(['tutor.user', 'student', 'subject'])
+            ->latest()
+            ->paginate(10);
+    }
 
-            // Calculate price
-            $price = $this->calculateBookingPrice($tutor, $data['start_time'], $data['end_time']);
+    /**
+     * Get create booking form data
+     */
+    public function getCreateBookingData(Tutor $tutor): array
+    {
+        $subjects = $tutor->subjects;
+
+        // Set default start and end times in GMT+7 (Asia/Ho_Chi_Minh)
+        $nowInHanoi = Carbon::now('Asia/Ho_Chi_Minh');
+        $defaultStart = $nowInHanoi->copy()->addHours(2);
+        $defaultEnd = $nowInHanoi->copy()->addHours(4);
+
+        // For display format (dd-mm-yyyy)
+        $oldStartDateDisplay = old('start_date_display', $defaultStart->format('d-m-Y'));
+        $oldEndDateDisplay = old('end_date_display', $defaultEnd->format('d-m-Y'));
+
+        // For hidden backend format (yyyy-mm-dd)
+        $oldStartDate = old('start_date', $defaultStart->format('Y-m-d'));
+        $oldStartTime = old('start_time_only', $defaultStart->format('H:i'));
+        $oldEndDate = old('end_date', $defaultEnd->format('Y-m-d'));
+        $oldEndTime = old('end_time_only', $defaultEnd->format('H:i'));
+
+        // Combined datetime values for JavaScript
+        $oldStartDateTime = old('start_time', $defaultStart->format('Y-m-d\TH:i'));
+        $oldEndDateTime = old('end_time', $defaultEnd->format('Y-m-d\TH:i'));
+
+        return [
+            'subjects' => $subjects,
+            'oldStartDateDisplay' => $oldStartDateDisplay,
+            'oldEndDateDisplay' => $oldEndDateDisplay,
+            'oldStartDate' => $oldStartDate,
+            'oldStartTime' => $oldStartTime,
+            'oldEndDate' => $oldEndDate,
+            'oldEndTime' => $oldEndTime,
+            'oldStartDateTime' => $oldStartDateTime,
+            'oldEndDateTime' => $oldEndDateTime,
+        ];
+    }
+
+    /**
+     * Create booking with validation
+     */
+    public function createBooking(array $data, Tutor $tutor, User $student): Booking
+    {
+        return $this->executeTransaction(function () use ($data, $tutor, $student) {
+            // Check if student has any pending bookings with this tutor
+            $hasPendingBooking = Booking::where('student_id', $student->id)
+                ->where('tutor_id', $tutor->id)
+                ->where('status', Booking::STATUS_PENDING)
+                ->exists();
+
+            if ($hasPendingBooking) {
+                throw new Exception(__('booking.validation.pending_booking_exists'));
+            }
+
+            // Calculate price based on duration and tutor's hourly rate
+            $startTime = Carbon::parse($data['start_time']);
+            $endTime = Carbon::parse($data['end_time']);
+            $duration = $endTime->diffInMinutes($startTime);
+            $hours = $duration / 60;
+            $price = $hours * $tutor->hourly_rate;
 
             // Create booking
-            $booking = Booking::create([
-                'student_id' => $data['student_id'] ?? Auth::id(),
-                'tutor_id' => $tutor->id,
-                'subject_id' => $data['subject_id'],
-                'start_time' => $data['start_time'],
-                'end_time' => $data['end_time'],
-                'notes' => $data['notes'] ?? null,
-                'price' => $price,
-                'status' => 'pending',
-            ]);
+            $booking = new Booking;
+            $booking->student_id = $student->id;
+            $booking->tutor_id = $tutor->id;
+            $booking->subject_id = $data['subject_id'];
+            $booking->start_time = $data['start_time'];
+            $booking->end_time = $data['end_time'];
+            $booking->notes = $data['notes'] ?? null;
+            $booking->price = $price;
+            $booking->status = Booking::STATUS_PENDING;
+            $booking->save();
 
             // Send notification to tutor
             $tutor->user->notify(new BookingStatusChanged($booking));
@@ -55,7 +118,7 @@ class BookingService extends BaseService implements BookingServiceInterface
             $this->logActivity('Booking created', [
                 'booking_id' => $booking->id,
                 'tutor_id' => $tutor->id,
-                'student_id' => $booking->student_id
+                'student_id' => $student->id,
             ]);
 
             return $booking;
@@ -63,89 +126,146 @@ class BookingService extends BaseService implements BookingServiceInterface
     }
 
     /**
-     * Update booking status
+     * Get booking details with related data
      */
-    public function updateBookingStatus(int $bookingId, string $status, ?string $rejectionReason = null): bool
+    public function getBookingDetails(Booking $booking): Booking
     {
-        return $this->executeTransaction(function () use ($bookingId, $status, $rejectionReason) {
-            $booking = Booking::findOrFail($bookingId);
-            $oldStatus = $booking->status;
+        return $booking->load(['tutor.user', 'student', 'subject', 'review']);
+    }
 
-            // Validate status change
-            $this->validateStatusChange($booking, $status);
+    /**
+     * Update booking status with validation
+     */
+    public function updateBookingStatus(Booking $booking, array $data): bool
+    {
+        return $this->executeTransaction(function () use ($booking, $data) {
+            // Additional validation for status changes
+            if (isset($data['status'])) {
+                if ($data['status'] === Booking::STATUS_ACCEPTED && ! $booking->isPending()) {
+                    throw new Exception('Only pending bookings can be accepted.');
+                }
 
-            // Update booking
-            $updateData = ['status' => $status];
-            if ($rejectionReason && $status === 'rejected') {
-                $updateData['rejection_reason'] = $rejectionReason;
+                if ($data['status'] === Booking::STATUS_CANCELLED && ! $booking->canBeCancelled()) {
+                    throw new Exception('This booking cannot be cancelled.');
+                }
             }
 
-            $result = $booking->update($updateData);
+            $booking->update($data);
 
-            // Send notifications based on status
-            $this->sendStatusChangeNotification($booking, $oldStatus, $status);
+            // Send notification to student
+            if (isset($data['status'])) {
+                if ($data['status'] === Booking::STATUS_REJECTED) {
+                    $booking->student->notify(new BookingCancelled($booking, 'tutor'));
+                } else {
+                    $booking->student->notify(new BookingStatusUpdated($booking));
+                }
+            }
 
             $this->logActivity('Booking status updated', [
                 'booking_id' => $booking->id,
-                'old_status' => $oldStatus,
-                'new_status' => $status
+                'status' => $data['status'] ?? 'N/A',
             ]);
 
-            return $result;
+            return true;
         });
     }
 
     /**
-     * Cancel booking
+     * Cancel booking with notification
      */
-    public function cancelBooking(int $bookingId, int $cancelledBy, ?string $reason = null): bool
+    public function cancelBooking(Booking $booking, User $user): bool
     {
-        return $this->executeTransaction(function () use ($bookingId, $cancelledBy, $reason) {
-            $booking = Booking::findOrFail($bookingId);
-            $cancelledByUser = User::findOrFail($cancelledBy);
-
-            if (!$booking->canBeCancelled()) {
-                throw new Exception('This booking cannot be cancelled');
+        return $this->executeTransaction(function () use ($booking, $user) {
+            if (! $booking->canBeCancelled()) {
+                throw new Exception('This booking cannot be cancelled.');
             }
 
-            $result = $booking->update([
-                'status' => 'cancelled',
-                'cancellation_reason' => $reason,
-                'cancelled_by' => $cancelledByUser->role,
-                'cancelled_at' => Carbon::now(),
+            $validated = request()->validate([
+                'cancellation_reason' => 'required|string|max:100',
+                'cancellation_description' => 'nullable|string|max:500',
             ]);
 
-            // Send cancellation notification
-            if ($cancelledByUser->role === 'tutor') {
-                $booking->student->notify(new BookingCancelled($booking, $cancelledByUser));
+            $booking->update([
+                'status' => Booking::STATUS_CANCELLED,
+                'cancellation_reason' => $validated['cancellation_reason'],
+                'cancellation_description' => $validated['cancellation_description'] ?? null,
+            ]);
+
+            // Send notification to the other party
+            if ($user->id === $booking->student_id) {
+                // Student cancelled, notify tutor
+                $booking->tutor->user->notify(new BookingCancelled($booking, 'student'));
             } else {
-                $booking->tutor->user->notify(new BookingCancelled($booking, $cancelledByUser));
+                // Tutor cancelled, notify student
+                $booking->student->notify(new BookingCancelled($booking, 'tutor'));
             }
 
             $this->logActivity('Booking cancelled', [
                 'booking_id' => $booking->id,
-                'cancelled_by' => $cancelledByUser->role,
-                'reason' => $reason
+                'cancelled_by' => $user->role,
             ]);
 
-            return $result;
+            return true;
         });
     }
 
     /**
-     * Get user bookings with filters
+     * Get student profile data for tutor
      */
-    public function getUserBookings(int $userId, string $role, array $filters = []): \Illuminate\Pagination\LengthAwarePaginator
+    public function getStudentProfileData(Booking $booking): array
     {
-        return $this->bookingRepository->getBookingsForUser($userId, $role, $filters);
+        $student = $booking->student;
+
+        // Get all bookings between this tutor and student
+        $allBookings = Booking::where('tutor_id', $booking->tutor_id)
+            ->where('student_id', $student->id)
+            ->with(['subject'])
+            ->orderBy('start_time', 'desc')
+            ->get();
+
+        // Get student's reviews for this tutor
+        $reviews = \App\Models\Review::where('student_id', $student->id)
+            ->whereHas('booking', function ($query) use ($booking) {
+                $query->where('tutor_id', $booking->tutor_id);
+            })
+            ->with(['booking.subject'])
+            ->latest()
+            ->get();
+
+        return [
+            'booking' => $booking,
+            'student' => $student,
+            'allBookings' => $allBookings,
+            'reviews' => $reviews,
+        ];
+    }
+
+    /**
+     * Get user transactions
+     */
+    public function getUserTransactions(User $user): LengthAwarePaginator
+    {
+        $query = $user->role === 'tutor'
+            ? Booking::where('tutor_id', $user->tutor->id)
+            : Booking::where('student_id', $user->id);
+
+        return $query->with(['tutor.user', 'student', 'subject'])
+            ->whereIn('status', ['completed', 'paid'])
+            ->latest()
+            ->paginate(10);
     }
 
     /**
      * Get upcoming bookings for tutor
      */
-    public function getUpcomingBookingsForTutor(int $tutorId): \Illuminate\Database\Eloquent\Collection
+    public function getUpcomingBookingsForTutor(int $tutorId): Collection
     {
-        return $this->bookingRepository->getUpcomingBookingsForTutor($tutorId);
+        return Booking::where('tutor_id', $tutorId)
+            ->where('status', 'confirmed')
+            ->where('start_time', '>', Carbon::now())
+            ->with(['student', 'subject'])
+            ->orderBy('start_time')
+            ->get();
     }
 
     /**
@@ -153,27 +273,40 @@ class BookingService extends BaseService implements BookingServiceInterface
      */
     public function getTutorEarnings(int $tutorId, ?int $year = null, ?int $month = null): array
     {
-        $totalEarnings = $this->bookingRepository->getTutorTotalEarnings($tutorId);
+        $totalEarnings = Booking::where('tutor_id', $tutorId)
+            ->where('status', 'completed')
+            ->where('payment_status', 'paid')
+            ->sum('price');
 
         $monthlyEarnings = 0;
         if ($year && $month) {
-            $monthlyEarnings = $this->bookingRepository->getTutorMonthlyEarnings($tutorId, $year, $month);
+            $monthlyEarnings = Booking::where('tutor_id', $tutorId)
+                ->where('status', 'completed')
+                ->where('payment_status', 'paid')
+                ->whereYear('start_time', $year)
+                ->whereMonth('start_time', $month)
+                ->sum('price');
         }
 
         return [
             'total_earnings' => $totalEarnings,
             'monthly_earnings' => $monthlyEarnings,
-            'formatted_total' => $this->formatCurrency($totalEarnings),
-            'formatted_monthly' => $this->formatCurrency($monthlyEarnings),
+            'formatted_total' => number_format($totalEarnings, 0, ',', '.').' VNĐ',
+            'formatted_monthly' => number_format($monthlyEarnings, 0, ',', '.').' VNĐ',
         ];
     }
 
     /**
      * Get bookings needing review
      */
-    public function getBookingsNeedingReview(int $studentId): \Illuminate\Database\Eloquent\Collection
+    public function getBookingsNeedingReview(int $studentId): Collection
     {
-        return $this->bookingRepository->getBookingsNeedingReview($studentId);
+        return Booking::where('student_id', $studentId)
+            ->where('status', 'completed')
+            ->whereDoesntHave('review')
+            ->with(['tutor.user', 'subject'])
+            ->orderBy('end_time', 'desc')
+            ->get();
     }
 
     /**
@@ -222,11 +355,11 @@ class BookingService extends BaseService implements BookingServiceInterface
      */
     protected function validateStatusChange(Booking $booking, string $newStatus): void
     {
-        if ($newStatus === 'accepted' && !$booking->isPending()) {
+        if ($newStatus === 'accepted' && ! $booking->isPending()) {
             throw new Exception('Only pending bookings can be accepted');
         }
 
-        if ($newStatus === 'cancelled' && !$booking->canBeCancelled()) {
+        if ($newStatus === 'cancelled' && ! $booking->canBeCancelled()) {
             throw new Exception('This booking cannot be cancelled');
         }
     }

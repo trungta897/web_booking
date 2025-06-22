@@ -4,11 +4,11 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\BookingRepositoryInterface;
 use App\Models\Booking;
-use App\Models\User;
 use App\Models\Tutor;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Carbon\Carbon;
 
 class BookingRepository extends BaseRepository implements BookingRepositoryInterface
 {
@@ -23,7 +23,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     public function getBookingsForUser(int $userId, string $role, array $filters = []): LengthAwarePaginator
     {
         $query = $role === 'tutor'
-            ? $this->query()->whereHas('tutor', function($q) use ($userId) {
+            ? $this->query()->whereHas('tutor', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
             })
             : $this->query()->where('student_id', $userId);
@@ -181,5 +181,16 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
         }
 
         return $query->latest()->paginate($filters['per_page'] ?? 15);
+    }
+
+    /**
+     * Get all bookings for a student
+     */
+    public function getStudentBookings(int $studentId): Collection
+    {
+        return $this->query()->where('student_id', $studentId)
+            ->with(['tutor.user', 'subject'])
+            ->orderBy('start_time', 'desc')
+            ->get();
     }
 }

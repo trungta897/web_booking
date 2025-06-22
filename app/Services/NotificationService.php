@@ -4,11 +4,12 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Repositories\NotificationRepository;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Notifications\DatabaseNotification;
-use Illuminate\Support\Facades\Auth;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService extends BaseService
 {
@@ -16,17 +17,15 @@ class NotificationService extends BaseService
 
     public function __construct()
     {
-        $this->notificationRepository = new NotificationRepository(new DatabaseNotification());
+        $this->notificationRepository = new NotificationRepository(new DatabaseNotification);
     }
 
     /**
-     * Get notifications for user
+     * Get notifications for user with User object
      */
-    public function getUserNotifications(?int $userId = null, int $perPage = 15): LengthAwarePaginator
+    public function getUserNotifications(User $user, int $perPage = 15): LengthAwarePaginator
     {
-        $userId = $userId ?? Auth::id();
-
-        return $this->notificationRepository->getNotificationsForUser($userId, $perPage);
+        return $this->notificationRepository->getNotificationsForUser($user->id, $perPage);
     }
 
     /**
@@ -40,83 +39,55 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Count unread notifications for user
+     * Count unread notifications for user with User object
      */
-    public function getUnreadCount(?int $userId = null): int
+    public function getUnreadCount(User $user): int
     {
-        $userId = $userId ?? Auth::id();
-
-        return $this->notificationRepository->countUnreadNotificationsForUser($userId);
+        return $this->notificationRepository->countUnreadNotificationsForUser($user->id);
     }
 
     /**
-     * Mark notification as read
+     * Mark notification as read with DatabaseNotification object
      */
-    public function markAsRead(string $notificationId, ?int $userId = null): bool
+    public function markAsRead(DatabaseNotification $notification): bool
     {
-        $userId = $userId ?? Auth::id();
+        if (! $notification->read_at) {
+            $notification->markAsRead();
 
-        // Verify notification belongs to user
-        $notification = DatabaseNotification::where('id', $notificationId)
-            ->where('notifiable_id', $userId)
-            ->where('notifiable_type', User::class)
-            ->first();
-
-        if (!$notification) {
-            throw new Exception(__('Notification not found or access denied'));
-        }
-
-        $result = $this->notificationRepository->markAsRead($notificationId);
-
-        if ($result) {
             $this->logActivity('Notification marked as read', [
-                'notification_id' => $notificationId,
-                'user_id' => $userId
+                'notification_id' => $notification->id,
+                'user_id' => $notification->notifiable_id,
             ]);
         }
 
-        return $result;
+        return true;
     }
 
     /**
-     * Mark all notifications as read for user
+     * Mark all notifications as read with User object
      */
-    public function markAllAsRead(?int $userId = null): bool
+    public function markAllAsRead(User $user): bool
     {
-        $userId = $userId ?? Auth::id();
-
-        $this->notificationRepository->markAllAsReadForUser($userId);
+        $this->notificationRepository->markAllAsReadForUser($user->id);
 
         $this->logActivity('All notifications marked as read', [
-            'user_id' => $userId
+            'user_id' => $user->id,
         ]);
 
         return true;
     }
 
     /**
-     * Delete notification
+     * Delete notification with DatabaseNotification object
      */
-    public function deleteNotification(string $notificationId, ?int $userId = null): bool
+    public function deleteNotification(DatabaseNotification $notification): bool
     {
-        $userId = $userId ?? Auth::id();
-
-        // Verify notification belongs to user
-        $notification = DatabaseNotification::where('id', $notificationId)
-            ->where('notifiable_id', $userId)
-            ->where('notifiable_type', User::class)
-            ->first();
-
-        if (!$notification) {
-            throw new Exception(__('Notification not found or access denied'));
-        }
-
-        $result = $this->notificationRepository->deleteNotification($notificationId);
+        $result = $notification->delete();
 
         if ($result) {
             $this->logActivity('Notification deleted', [
-                'notification_id' => $notificationId,
-                'user_id' => $userId
+                'notification_id' => $notification->id,
+                'user_id' => $notification->notifiable_id,
             ]);
         }
 
@@ -124,17 +95,15 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Delete all notifications for user
+     * Delete all notifications with User object
      */
-    public function deleteAllNotifications(?int $userId = null): bool
+    public function deleteAllNotifications(User $user): bool
     {
-        $userId = $userId ?? Auth::id();
-
-        $result = $this->notificationRepository->deleteAllForUser($userId);
+        $result = $this->notificationRepository->deleteAllForUser($user->id);
 
         if ($result) {
             $this->logActivity('All notifications deleted', [
-                'user_id' => $userId
+                'user_id' => $user->id,
             ]);
         }
 
@@ -179,8 +148,8 @@ class NotificationService extends BaseService
                 'total' => number_format($stats['total']),
                 'unread' => number_format($stats['unread']),
                 'read' => number_format($stats['read']),
-                'unread_percentage' => $stats['unread_percentage'] . '%'
-            ]
+                'unread_percentage' => $stats['unread_percentage'].'%',
+            ],
         ];
     }
 
@@ -196,7 +165,7 @@ class NotificationService extends BaseService
             ->where('notifiable_type', User::class)
             ->first();
 
-        if (!$notification) {
+        if (! $notification) {
             throw new Exception(__('Notification not found or access denied'));
         }
 
@@ -208,7 +177,7 @@ class NotificationService extends BaseService
             'title' => $data['title'] ?? __('Notification'),
             'message' => $data['message'] ?? '',
             'action_url' => $data['action_url'] ?? null,
-            'is_read' => !is_null($notification->read_at),
+            'is_read' => ! is_null($notification->read_at),
             'created_at' => $notification->created_at,
             'time_ago' => $notification->created_at->diffForHumans(),
             'formatted_date' => $notification->created_at->format('d-m-Y H:i'),
@@ -228,10 +197,22 @@ class NotificationService extends BaseService
                 try {
                     switch ($operation) {
                         case 'mark_read':
-                            $success = $this->markAsRead($notificationId, $userId);
+                            $notification = DatabaseNotification::where('id', $notificationId)
+                                ->where('notifiable_id', $userId)->first();
+                            if ($notification) {
+                                $success = $this->markAsRead($notification);
+                            } else {
+                                $success = false;
+                            }
                             break;
                         case 'delete':
-                            $success = $this->deleteNotification($notificationId, $userId);
+                            $notification = DatabaseNotification::where('id', $notificationId)
+                                ->where('notifiable_id', $userId)->first();
+                            if ($notification) {
+                                $success = $this->deleteNotification($notification);
+                            } else {
+                                $success = false;
+                            }
                             break;
                         default:
                             throw new Exception(__('Invalid operation'));
@@ -250,7 +231,7 @@ class NotificationService extends BaseService
             $this->logActivity('Bulk notification operation', [
                 'operation' => $operation,
                 'user_id' => $userId,
-                'results' => $results
+                'results' => $results,
             ]);
 
             return $results;
@@ -270,14 +251,14 @@ class NotificationService extends BaseService
             $this->logActivity('Old notifications cleaned', [
                 'user_id' => $userId,
                 'deleted_count' => $deletedCount,
-                'days_old' => $daysOld
+                'days_old' => $daysOld,
             ]);
         }
 
         return $deletedCount;
     }
 
-        /**
+    /**
      * Send custom notification to user
      * TODO: Create CustomNotification class
      */
@@ -290,14 +271,14 @@ class NotificationService extends BaseService
 
             $this->logActivity('Custom notification sent', [
                 'user_id' => $userId,
-                'title' => $title
+                'title' => $title,
             ]);
 
             return true;
         } catch (Exception $e) {
             $this->logError('Failed to send custom notification', $e, [
                 'user_id' => $userId,
-                'title' => $title
+                'title' => $title,
             ]);
 
             return false;
@@ -305,11 +286,15 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Handle errors specific to notification service
+     * Handle errors consistently
      */
-    public function handleError(\Exception $e, string $context = ''): void
+    public function handleError(Exception $e, string $context = ''): void
     {
-        $this->logError($context ?: 'Notification service error occurred', $e);
-        throw $e;
+        Log::error("NotificationService Error: {$context}", [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'user_id' => Auth::id(),
+        ]);
     }
 }

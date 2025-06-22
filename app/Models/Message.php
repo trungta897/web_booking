@@ -35,7 +35,7 @@ class Message extends Model
     /**
      * Scope a query to only include unread messages.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeUnread($query)

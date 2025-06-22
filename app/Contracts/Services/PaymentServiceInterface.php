@@ -3,23 +3,24 @@
 namespace App\Contracts\Services;
 
 use App\Models\Booking;
+use App\Services\PaymentResult;
 
 interface PaymentServiceInterface extends ServiceInterface
 {
     /**
      * Create Stripe payment intent
      */
-    public function createStripePaymentIntent(Booking $booking): array;
+    public function createStripePaymentIntent(Booking $booking): PaymentResult;
 
     /**
      * Confirm Stripe payment
      */
-    public function confirmStripePayment(string $paymentIntentId, Booking $booking): array;
+    public function confirmStripePayment(Booking $booking, array $paymentData = []): bool;
 
     /**
      * Create VNPay payment
      */
-    public function createVnpayPayment(Booking $booking, string $returnUrl): string;
+    public function createVnpayPayment(Booking $booking, string $returnUrl): PaymentResult;
 
     /**
      * Handle VNPay return
@@ -35,4 +36,19 @@ interface PaymentServiceInterface extends ServiceInterface
      * Get payment history for booking
      */
     public function getPaymentHistory(Booking $booking): array;
+
+    /**
+     * Handle Stripe webhook
+     */
+    public function handleStripeWebhook(\Illuminate\Http\Request $request): void;
+
+    /**
+     * Handle VNPay IPN
+     */
+    public function handleVnpayIpn(array $ipnData): void;
+
+    /**
+     * Get booking transactions
+     */
+    public function getBookingTransactions(Booking $booking): \Illuminate\Database\Eloquent\Collection;
 }

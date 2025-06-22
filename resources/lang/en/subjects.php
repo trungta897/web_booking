@@ -65,5 +65,5 @@ return [
         'Nursing' => 'Study healthcare, anatomy, physiology, and patient care',
         'Medicine' => 'Learn medical sciences, anatomy, and healthcare fundamentals',
         'Test Preparation' => 'Prepare for standardized tests like SAT, ACT, GRE, and more',
-    ]
+    ],
 ];

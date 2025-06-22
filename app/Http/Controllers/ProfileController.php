@@ -2,61 +2,121 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProfileUpdateRequest;
+use App\Services\UserService;
+use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    protected UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     /**
-     * Display the user's profile form.
+     * Display the user's profile form
      */
-    public function edit()
+    public function edit(): View
     {
         $user = Auth::user();
+
         return view('profile.edit', compact('user'));
     }
 
     /**
-     * Update the user's profile information.
+     * Update the user's profile information
      */
-    public function update(Request $request)
+    public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $user = Auth::user();
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'phone_number' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        try {
+            $this->userService->updateProfile(Auth::user(), $request->validated());
 
-        $data = $request->only(['name', 'email', 'phone_number', 'address']);
+            return redirect()->route('profile.edit')
+                ->with('success', __('Profile updated successfully'));
 
-        if ($request->hasFile('avatar')) {
-            if ($user->avatar) {
-                Storage::delete('public/avatars/' . $user->avatar);
-            }
-            $avatarName = time() . '.' . $request->avatar->extension();
-            $request->avatar->storeAs('public/avatars', $avatarName);
-            $data['avatar'] = $avatarName;
+        } catch (Exception $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
         }
-
-        $user->update($data);
-
-        return redirect()->route('profile.edit')->with('success', 'Profile updated successfully.');
     }
 
     /**
-     * Delete the user's account.
+     * Update user password
      */
-    public function destroy()
+    public function updatePassword(Request $request): RedirectResponse
     {
-        $user = Auth::user();
-        if ($user->avatar) {
-            Storage::delete('public/avatars/' . $user->avatar);
+        try {
+            $validated = $request->validate([
+                'current_password' => 'required|current_password',
+                'password' => 'required|min:8|confirmed',
+            ]);
+
+            $this->userService->updatePassword(Auth::user(), $validated);
+
+            return back()->with('success', __('Password updated successfully'));
+
+        } catch (Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
-        $user->delete();
-        return redirect('/');
+    }
+
+    /**
+     * Delete the user's account
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        try {
+            $request->validate([
+                'password' => 'required|current_password',
+            ]);
+
+            $this->userService->deleteAccount(Auth::user());
+
+            return redirect('/')->with('success', __('Account deleted successfully'));
+
+        } catch (Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Upload avatar
+     */
+    public function uploadAvatar(Request $request): RedirectResponse
+    {
+        try {
+            $validated = $request->validate([
+                'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+
+            $this->userService->uploadAvatar(Auth::user(), $validated['avatar']);
+
+            return back()->with('success', __('Avatar uploaded successfully'));
+
+        } catch (Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Remove avatar
+     */
+    public function removeAvatar(): RedirectResponse
+    {
+        try {
+            $this->userService->removeAvatar(Auth::user());
+
+            return back()->with('success', __('Avatar removed successfully'));
+
+        } catch (Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 }

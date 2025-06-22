@@ -31,6 +31,7 @@ class BookingSeeder extends Seeder
 
         if ($students->isEmpty() || $tutors->isEmpty() || $subjects->isEmpty()) {
             $this->command->info('BookingSeeder: Missing students, tutors, or subjects. Skipping booking creation.');
+
             return;
         }
 
@@ -71,7 +72,7 @@ class BookingSeeder extends Seeder
                 'start_time' => $startTime,
                 'end_time' => $endTime,
                 'status' => $status,
-                'notes' => 'Need help with ' . $subject->name . ' concepts.',
+                'notes' => 'Need help with '.$subject->name.' concepts.',
                 'price' => $tutor->hourly_rate * $startTime->diffInHours($endTime),
                 'created_at' => $startTime->copy()->subDays(rand(1, 5)),
                 'updated_at' => $startTime->copy()->subDays(rand(0, 3)),
@@ -108,7 +109,7 @@ class BookingSeeder extends Seeder
                 'start_time' => $startTime,
                 'end_time' => $endTime,
                 'status' => $status,
-                'notes' => 'Need help with ' . $subject->name . ' homework.',
+                'notes' => 'Need help with '.$subject->name.' homework.',
                 'price' => $tutor->hourly_rate * $startTime->diffInHours($endTime),
                 'created_at' => $startTime->copy()->subDays(rand(0, 1)),
                 'updated_at' => $startTime->copy(),
@@ -142,7 +143,7 @@ class BookingSeeder extends Seeder
                 'start_time' => $startTime,
                 'end_time' => $endTime,
                 'status' => $status,
-                'notes' => 'Need help with upcoming ' . $subject->name . ' exam.',
+                'notes' => 'Need help with upcoming '.$subject->name.' exam.',
                 'price' => $tutor->hourly_rate * $startTime->diffInHours($endTime),
                 'created_at' => Carbon::now()->subDays(rand(0, 3)),
                 'updated_at' => Carbon::now()->subDays(rand(0, 1)),

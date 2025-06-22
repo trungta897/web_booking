@@ -77,5 +77,5 @@ return [
         'subjects_section' => 'Subjects',
         'connect_with_us' => 'Connect With Us',
         'copyright' => '© 2025 TutorHub. All rights reserved.',
-    ]
+    ],
 ];

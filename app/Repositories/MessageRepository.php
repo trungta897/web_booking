@@ -22,19 +22,19 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
     {
         return $this->query()
             ->select('messages.*')
-            ->where(function($query) use ($userId) {
+            ->where(function ($query) use ($userId) {
                 $query->where('sender_id', $userId)
-                      ->orWhere('receiver_id', $userId);
+                    ->orWhere('receiver_id', $userId);
             })
             ->with(['sender', 'receiver'])
             ->orderBy('created_at', 'desc')
             ->get()
-            ->groupBy(function($message) use ($userId) {
+            ->groupBy(function ($message) use ($userId) {
                 return $message->sender_id === $userId
                     ? $message->receiver_id
                     : $message->sender_id;
             })
-            ->map(function($messages) {
+            ->map(function ($messages) {
                 return $messages->first();
             })
             ->values();
@@ -46,13 +46,13 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
     public function getMessagesBetweenUsers(int $user1Id, int $user2Id, int $perPage = 20): LengthAwarePaginator
     {
         return $this->query()
-            ->where(function($query) use ($user1Id, $user2Id) {
+            ->where(function ($query) use ($user1Id, $user2Id) {
                 $query->where('sender_id', $user1Id)
-                      ->where('receiver_id', $user2Id);
+                    ->where('receiver_id', $user2Id);
             })
-            ->orWhere(function($query) use ($user1Id, $user2Id) {
+            ->orWhere(function ($query) use ($user1Id, $user2Id) {
                 $query->where('sender_id', $user2Id)
-                      ->where('receiver_id', $user1Id);
+                    ->where('receiver_id', $user1Id);
             })
             ->with(['sender', 'receiver'])
             ->orderBy('created_at', 'asc')
@@ -94,7 +94,7 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
             ->where('is_read', false)
             ->update([
                 'is_read' => true,
-                'read_at' => now()
+                'read_at' => now(),
             ]);
     }
 
@@ -104,13 +104,13 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
     public function getLatestMessageBetweenUsers(int $user1Id, int $user2Id): ?Message
     {
         return $this->query()
-            ->where(function($query) use ($user1Id, $user2Id) {
+            ->where(function ($query) use ($user1Id, $user2Id) {
                 $query->where('sender_id', $user1Id)
-                      ->where('receiver_id', $user2Id);
+                    ->where('receiver_id', $user2Id);
             })
-            ->orWhere(function($query) use ($user1Id, $user2Id) {
+            ->orWhere(function ($query) use ($user1Id, $user2Id) {
                 $query->where('sender_id', $user2Id)
-                      ->where('receiver_id', $user1Id);
+                    ->where('receiver_id', $user1Id);
             })
             ->latest()
             ->first();
@@ -122,11 +122,11 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
     public function searchMessages(int $userId, string $query): Collection
     {
         return $this->query()
-            ->where(function($q) use ($userId) {
+            ->where(function ($q) use ($userId) {
                 $q->where('sender_id', $userId)
-                  ->orWhere('receiver_id', $userId);
+                    ->orWhere('receiver_id', $userId);
             })
-            ->where('content', 'like', '%' . $query . '%')
+            ->where('content', 'like', '%'.$query.'%')
             ->with(['sender', 'receiver'])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -146,7 +146,7 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
             'total_received' => $totalReceived,
             'total_messages' => $totalSent + $totalReceived,
             'unread_count' => $unreadCount,
-            'unique_conversations' => $this->getConversationsForUser($userId)->count()
+            'unique_conversations' => $this->getConversationsForUser($userId)->count(),
         ];
     }
 }

@@ -70,11 +70,11 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     public function searchUsers(string $query, int $perPage = 15): LengthAwarePaginator
     {
         return $this->query()->where(function ($q) use ($query) {
-            $q->where('name', 'like', '%' . $query . '%')
-              ->orWhere('email', 'like', '%' . $query . '%');
+            $q->where('name', 'like', '%'.$query.'%')
+                ->orWhere('email', 'like', '%'.$query.'%');
         })
-        ->latest()
-        ->paginate($perPage);
+            ->latest()
+            ->paginate($perPage);
     }
 
     /**
@@ -84,7 +84,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         $user = $this->findById($userId);
 
-        if (!$user) {
+        if (! $user) {
             return collect();
         }
 
@@ -102,15 +102,17 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         $user = $this->findById($userId);
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
         if ($user->favoriteTutors()->where('tutor_id', $tutorId)->exists()) {
             $user->favoriteTutors()->detach($tutorId);
+
             return false; // Removed from favorites
         } else {
             $user->favoriteTutors()->attach($tutorId);
+
             return true; // Added to favorites
         }
     }
@@ -132,7 +134,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         $user = $this->findById($userId);
 
-        if (!$user) {
+        if (! $user) {
             return [];
         }
 
@@ -184,7 +186,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         $user = $this->findById($userId);
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -198,7 +200,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         $user = $this->findById($userId);
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -212,7 +214,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         $user = $this->findById($userId);
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 

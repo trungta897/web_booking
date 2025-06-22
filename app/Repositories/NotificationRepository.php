@@ -5,8 +5,8 @@ namespace App\Repositories;
 use App\Contracts\Repositories\NotificationRepositoryInterface;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class NotificationRepository extends BaseRepository implements NotificationRepositoryInterface
 {
@@ -139,7 +139,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
             'total' => $total,
             'unread' => $unread,
             'read' => $read,
-            'unread_percentage' => $total > 0 ? round(($unread / $total) * 100, 2) : 0
+            'unread_percentage' => $total > 0 ? round(($unread / $total) * 100, 2) : 0,
         ];
     }
 

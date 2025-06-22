@@ -28,7 +28,7 @@ return new class extends Migration
                 'exchange_rate',
                 'currency',
                 'original_amount',
-                'payment_metadata'
+                'payment_metadata',
             ]);
         });
     }

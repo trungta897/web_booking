@@ -2,107 +2,107 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MessageRequest;
 use App\Models\Message;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Services\MessageService;
+use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class MessageController extends Controller
 {
-    public function index()
+    protected MessageService $messageService;
+
+    public function __construct(MessageService $messageService)
     {
-        // Get all users the current user has exchanged messages with
-        $userConversations = $this->getUserConversations();
+        $this->messageService = $messageService;
+    }
+
+    /**
+     * Display conversations list
+     */
+    public function index(): View
+    {
+        $userConversations = $this->messageService->getConversationPreviews(Auth::id());
 
         return view('messages.index', compact('userConversations'));
     }
 
-    public function store(Request $request)
+    /**
+     * Store new message
+     */
+    public function store(MessageRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'receiver_id' => 'required|exists:users,id',
-            'message' => 'required|string|max:1000',
-        ]);
+        try {
+            $this->messageService->sendMessage(Auth::user(), $request->validated());
 
-        $message = Message::create([
-            'sender_id' => Auth::id(),
-            'receiver_id' => $validated['receiver_id'],
-            'message' => $validated['message'],
-        ]);
+            return back()->with('success', __('Message sent successfully'));
 
-        return back()->with('success', 'Message sent successfully.');
-    }
-
-    public function show(User $user)
-    {
-        // Mark all messages from this user as read
-        Message::where('sender_id', $user->id)
-              ->where('receiver_id', Auth::id())
-              ->whereNull('read_at')
-              ->update(['read_at' => now()]);
-
-        $messages = Message::where(function($query) use ($user) {
-            $query->where('sender_id', Auth::id())
-                  ->where('receiver_id', $user->id);
-        })->orWhere(function($query) use ($user) {
-            $query->where('sender_id', $user->id)
-                  ->where('receiver_id', Auth::id());
-        })
-        ->with(['sender', 'receiver'])
-        ->latest()
-        ->paginate(20);
-
-        return view('messages.show', compact('messages', 'user'));
-    }
-
-    private function getUserConversations()
-    {
-        $userId = Auth::id();
-
-        // Get latest message with each user
-        $latestMessages = DB::table('messages as m1')
-            ->select('m1.*')
-            ->join(DB::raw('(
-                SELECT
-                    CASE
-                        WHEN sender_id = ' . $userId . ' THEN receiver_id
-                        ELSE sender_id
-                    END as user_id,
-                    MAX(created_at) as max_created_at
-                FROM messages
-                WHERE sender_id = ' . $userId . ' OR receiver_id = ' . $userId . '
-                GROUP BY user_id
-            ) as m2'), function($join) use ($userId) {
-                $join->on(function($query) use ($userId) {
-                    $query->on(DB::raw('CASE WHEN m1.sender_id = ' . $userId . ' THEN m1.receiver_id ELSE m1.sender_id END'), '=', 'm2.user_id')
-                          ->on('m1.created_at', '=', 'm2.max_created_at');
-                });
-            })
-            ->orderBy('m1.created_at', 'desc')
-            ->get();
-
-        // Get user details and unread counts
-        $conversations = [];
-        foreach ($latestMessages as $message) {
-            $otherUserId = $message->sender_id == $userId ? $message->receiver_id : $message->sender_id;
-
-            $user = User::with(['tutor' => function($query) {
-                $query->with('subjects');
-            }])->find($otherUserId);
-
-            $unreadCount = Message::where('sender_id', $otherUserId)
-                ->where('receiver_id', $userId)
-                ->whereNull('read_at')
-                ->count();
-
-            $conversations[] = [
-                'user' => $user,
-                'last_message' => $message,
-                'unread_count' => $unreadCount
-            ];
+        } catch (Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
+    }
 
-        return $conversations;
+    /**
+     * Display conversation with specific user
+     */
+    public function show(User $user): View|RedirectResponse
+    {
+        try {
+            $conversationData = $this->messageService->getConversationWith($user->id);
+
+            return view('messages.show', [
+                'user' => $user,
+                'messages' => $conversationData['messages'],
+                'unread_count' => $conversationData['unread_count'],
+            ]);
+
+        } catch (Exception $e) {
+            return redirect()->route('messages.index')
+                ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Mark message as read
+     */
+    public function markAsRead(Message $message): RedirectResponse
+    {
+        try {
+            // Check if user is the receiver
+            if ($message->receiver_id !== Auth::id()) {
+                throw new Exception(__('Unauthorized action'));
+            }
+
+            if (! $message->read_at) {
+                $message->update(['read_at' => now()]);
+            }
+
+            return back()->with('success', __('Message marked as read'));
+
+        } catch (Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Delete message
+     */
+    public function destroy(Message $message): RedirectResponse
+    {
+        try {
+            $result = $this->messageService->deleteMessage($message, Auth::user());
+
+            if ($result) {
+                return back()->with('success', __('Message deleted successfully'));
+            }
+
+            return back()->withErrors(['error' => __('Failed to delete message')]);
+
+        } catch (Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 }

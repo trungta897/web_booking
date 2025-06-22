@@ -2,431 +2,271 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\SubjectRequest;
 use App\Models\Booking;
-use App\Models\User;
 use App\Models\Subject;
-use App\Models\Tutor;
+use App\Models\User;
+use App\Services\AdminService;
+use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class AdminController extends Controller
 {
-    /**
-     * Display the admin dashboard.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function dashboard()
+    protected AdminService $adminService;
+
+    public function __construct(AdminService $adminService)
     {
-        // Explicitly define stats for the view
-        $totalStudents = User::where('role', 'student')->count();
-        $totalTutors = User::where('role', 'tutor')->count();
-        $totalAdmins = User::where('role', 'admin')->count();
-        $activeBookings = Booking::where('status', 'accepted')->count(); // Assuming 'active' means 'accepted'
-        $totalRevenue = Booking::where('payment_status', 'paid')->sum('price');
-
-        // Get recent bookings
-        $recent_bookings = Booking::with(['student', 'tutor.user', 'subject'])
-            ->latest()
-            ->take(5)
-            ->get();
-
-        // Get popular subjects
-        $popular_subjects = Subject::withCount('tutors')
-            ->withCount('bookings')
-            ->orderByDesc('bookings_count')
-            ->take(5)
-            ->get();
-
-        // Get top rated tutor users (User model with tutor role)
-        $topRatedTutorUsers = User::where('role', 'tutor')
-            ->with('tutor')
-            ->withAvg('reviewsReceived', 'rating')
-            ->orderByDesc('reviews_received_avg_rating')
-            ->take(6)
-            ->get();
-
-        // Get recently joined users
-        $recentUsers = User::latest()->take(5)->get();
-
-        return view('admin.dashboard', compact(
-            'totalStudents',
-            'totalTutors',
-            'totalAdmins',
-            'activeBookings',
-            'totalRevenue',
-            'recent_bookings',
-            'popular_subjects',
-            'topRatedTutorUsers',
-            'recentUsers'
-        ));
+        $this->adminService = $adminService;
     }
 
     /**
-     * Display list of tutors for admin.
-     *
-     * @param Request $request
-     * @return \Illuminate\View\View
+     * Display the admin dashboard
      */
-    public function tutors(Request $request)
+    public function dashboard(): View
     {
-        $query = User::where('role', 'tutor')
-            ->with('tutor.subjects');
+        try {
+            $stats = $this->adminService->getDashboardStats();
+            $recentBookings = $this->adminService->getRecentBookings();
 
-        // Apply search filter
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
+            return view('admin.dashboard', [
+                'totalStudents' => $stats['users']['students'] ?? 0,
+                'totalTutors' => $stats['users']['tutors'] ?? 0,
+                'totalAdmins' => $stats['users']['admins'] ?? 0,
+                'activeBookings' => $stats['bookings']['total'] ?? 0,
+                'totalRevenue' => $stats['revenue']['total'] ?? 0,
+                'recentBookings' => $recentBookings,
+            ]);
+        } catch (Exception $e) {
+            return view('admin.dashboard', [
+                'totalStudents' => 0,
+                'totalTutors' => 0,
+                'totalAdmins' => 0,
+                'activeBookings' => 0,
+                'totalRevenue' => 0,
+                'recentBookings' => collect(),
+                'popularSubjects' => collect(),
+                'topTutors' => collect(),
+                'recentUsers' => collect(),
+                'error' => 'Failed to load dashboard data: ' . $e->getMessage(),
+            ]);
         }
+    }
 
-        $tutors = $query->latest()->paginate(10);
+    /**
+     * Display list of tutors
+     */
+    public function tutors(Request $request): View
+    {
+        $search = $request->get('search');
+        $tutors = $this->adminService->getTutors($search);
 
         return view('admin.tutors', compact('tutors'));
     }
 
     /**
-     * Display the specified tutor.
-     *
-     * @param  \App\Models\User  $user // Type hint for the User model, which should be a tutor
-     * @return \Illuminate\View\View
+     * Display tutor details
      */
-    public function showTutor(User $user)
+    public function showTutor(User $user): View
     {
-        // Ensure the user is a tutor and load related data
-        if ($user->role !== 'tutor') {
-            abort(404, 'Tutor not found.');
-        }
-        $user->load('tutor.subjects', 'tutorBookings.student', 'tutorBookings.subject', 'reviewsReceived.reviewer');
-        // Calculate average rating
-        $averageRating = $user->reviewsReceived->avg('rating');
+        try {
+            $tutorData = $this->adminService->getTutorDetails($user);
 
-        return view('admin.tutors.show', compact('user', 'averageRating'));
-    }
-
-    /**
-     * Suspend or reinstate the specified tutor account.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function suspendTutor(User $user)
-    {
-        // Ensure the user is a tutor
-        if ($user->role !== 'tutor') {
-            return redirect()->route('admin.tutors')->with('error', 'User is not a tutor.');
-        }
-
-        if ($user->account_status === 'suspended') {
-            $user->account_status = 'active';
-            $user->save();
-            // Additionally, you might want to re-verify the tutor or reset their availability
-            // For example: $user->tutor->update(['is_verified' => true, 'is_available' => true]);
-            return redirect()->route('admin.tutors')->with('success', 'Tutor account reinstated successfully.');
-        } else {
-            $user->account_status = 'suspended';
-            $user->save();
-            // You might want to also mark the tutor as unavailable
-            // For example: $user->tutor->update(['is_available' => false]);
-            return redirect()->route('admin.tutors')->with('success', 'Tutor account suspended successfully.');
+            return view('admin.tutors.show', $tutorData);
+        } catch (Exception $e) {
+            abort(404, $e->getMessage());
         }
     }
 
     /**
-     * Display list of students for admin.
-     *
-     * @param Request $request
-     * @return \Illuminate\View\View
+     * Toggle tutor suspension status
      */
-    public function students(Request $request)
+    public function suspendTutor(User $user): RedirectResponse
     {
-        $query = User::where('role', 'student');
+        try {
+            $this->adminService->toggleUserStatus($user);
+            $status = $user->fresh()->account_status;
+            $message = $status === 'suspended'
+                ? 'Tutor account suspended successfully'
+                : 'Tutor account reinstated successfully';
 
-        // Apply search filter
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
+            return redirect()->route('admin.tutors')->with('success', $message);
+        } catch (Exception $e) {
+            return redirect()->route('admin.tutors')->with('error', $e->getMessage());
         }
+    }
 
-        $students = $query->latest()->paginate(10);
+    /**
+     * Display list of students
+     */
+    public function students(Request $request): View
+    {
+        $search = $request->get('search');
+        $students = $this->adminService->getStudents($search);
 
         return view('admin.students', compact('students'));
     }
 
     /**
-     * Display the specified student.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\View\View
+     * Display student details
      */
-    public function showStudent(User $user)
+    public function showStudent(User $user): View
     {
-        // Ensure the user is a student
-        if ($user->role !== 'student') {
-            abort(404, 'Student not found.');
-        }
-        // Eager load bookings for the student
-        $user->load('studentBookings.tutor.user', 'studentBookings.subject');
-        return view('admin.students.show', compact('user'));
-    }
+        try {
+            $studentData = $this->adminService->getStudentDetails($user);
 
-    /**
-     * Suspend the specified student account.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function suspendStudent(User $user)
-    {
-        // Ensure the user is a student
-        if ($user->role !== 'student') {
-            return redirect()->route('admin.students')->with('error', 'User is not a student.');
-        }
-
-        if ($user->account_status === 'suspended') {
-            $user->account_status = 'active';
-            $user->save();
-            return redirect()->route('admin.students')->with('success', 'Student account reinstated successfully.');
-        } else {
-            $user->account_status = 'suspended';
-            $user->save();
-            return redirect()->route('admin.students')->with('success', 'Student account suspended successfully.');
+            return view('admin.students.show', $studentData);
+        } catch (Exception $e) {
+            abort(404, $e->getMessage());
         }
     }
 
     /**
-     * Display the specified booking.
-     *
-     * @param  \App\Models\Booking  $booking
-     * @return \Illuminate\View\View
+     * Toggle student suspension status
      */
-    public function showBooking(Booking $booking)
+    public function suspendStudent(User $user): RedirectResponse
     {
-        $booking->load('student', 'tutor.user', 'subject', 'review'); // Eager load related models
-        return view('admin.bookings.show', compact('booking'));
+        try {
+            $this->adminService->toggleUserStatus($user);
+            $status = $user->fresh()->account_status;
+            $message = $status === 'suspended'
+                ? 'Student account suspended successfully'
+                : 'Student account reinstated successfully';
+
+            return redirect()->route('admin.students')->with('success', $message);
+        } catch (Exception $e) {
+            return redirect()->route('admin.students')->with('error', $e->getMessage());
+        }
     }
 
     /**
-     * Display list of bookings for admin.
-     *
-     * @param Request $request
-     * @return \Illuminate\View\View
+     * Display list of bookings
      */
-    public function bookings(Request $request)
+    public function bookings(Request $request): View
     {
-        $query = Booking::with(['student', 'tutor.user', 'subject']);
-
-        // Apply filters
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('payment_status')) {
-            $query->where('payment_status', $request->payment_status);
-        }
-
-        $bookings = $query->latest()->paginate(10);
+        $search = $request->get('search');
+        $bookings = $this->adminService->getBookings($search);
 
         return view('admin.bookings', compact('bookings'));
     }
 
     /**
-     * Display list of subjects for admin.
-     *
-     * @param Request $request
-     * @return \Illuminate\View\View
+     * Display booking details
      */
-    public function subjects(Request $request)
+    public function showBooking(Booking $booking): View
     {
-        $query = Subject::withCount('tutors')->withCount('bookings');
+        $booking = $this->adminService->getBookingDetails($booking);
 
-        // Apply search filter
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where('name', 'like', "%{$search}%");
-        }
+        return view('admin.bookings.show', compact('booking'));
+    }
 
-        $subjects = $query->orderBy('name')->paginate(10);
+    /**
+     * Display list of subjects
+     */
+    public function subjects(Request $request): View
+    {
+        $search = $request->get('search');
+        $subjects = $this->adminService->getSubjects($search);
 
         return view('admin.subjects', compact('subjects'));
     }
 
     /**
-     * Store a newly created subject in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Show create subject form
      */
-    public function storeSubject(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:subjects,name',
-        ]);
-
-        Subject::create($request->only('name'));
-
-        return redirect()->route('admin.subjects')->with('success', 'Subject created successfully.');
-    }
-
-    /**
-     * Show the form for creating a new subject.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function createSubject()
+    public function createSubject(): View
     {
         return view('admin.subjects.create');
     }
 
     /**
-     * Update the specified subject in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Subject  $subject
-     * @return \Illuminate\Http\RedirectResponse
+     * Store new subject
      */
-    public function updateSubject(Request $request, Subject $subject)
+    public function storeSubject(SubjectRequest $request): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:subjects,name,'. $subject->id,
-        ]);
+        try {
+            $this->adminService->createSubject($request->validated());
 
-        $subject->update($request->only('name'));
-
-        return redirect()->route('admin.subjects')->with('success', 'Subject updated successfully.');
+            return redirect()->route('admin.subjects')->with('success', 'Subject created successfully');
+        } catch (Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
     }
 
     /**
-     * Show the form for editing the specified subject.
-     *
-     * @param  \App\Models\Subject  $subject
-     * @return \Illuminate\View\View
+     * Show subject details
      */
-    public function editSubject(Subject $subject)
+    public function showSubject(Subject $subject): View
+    {
+        $subject->load(['tutors.user', 'bookings.student']);
+
+        return view('admin.subjects.show', compact('subject'));
+    }
+
+    /**
+     * Show edit subject form
+     */
+    public function editSubject(Subject $subject): View
     {
         return view('admin.subjects.edit', compact('subject'));
     }
 
     /**
-     * Remove the specified subject from storage.
-     *
-     * @param  \App\Models\Subject  $subject
-     * @return \Illuminate\Http\RedirectResponse
+     * Update subject
      */
-    public function destroySubject(Subject $subject)
+    public function updateSubject(SubjectRequest $request, Subject $subject): RedirectResponse
     {
-        // Optional: Add checks here if the subject is associated with tutors/bookings
-        // and handle accordingly (e.g., prevent deletion or disassociate)
         try {
-            $subject->delete();
-            return redirect()->route('admin.subjects')->with('success', 'Subject deleted successfully.');
-        } catch (\Illuminate\Database\QueryException $e) {
-            // Handle potential foreign key constraint violations if not handled by cascading deletes
-            return redirect()->route('admin.subjects')->with('error', 'Could not delete subject. It might be in use.');
+            $this->adminService->updateSubject($subject, $request->validated());
+
+            return redirect()->route('admin.subjects')->with('success', 'Subject updated successfully');
+        } catch (Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
         }
     }
 
     /**
-     * Show the form for confirming deletion of the specified subject.
-     *
-     * @param  \App\Models\Subject  $subject
-     * @return \Illuminate\View\View
+     * Show delete confirmation
      */
-    public function confirmDeleteSubject(Subject $subject)
+    public function confirmDeleteSubject(Subject $subject): View
     {
+        $subject->load(['tutors', 'bookings']);
+
         return view('admin.subjects.confirm-delete', compact('subject'));
     }
 
     /**
-     * Display the specified subject.
-     *
-     * @param  \App\Models\Subject  $subject
-     * @return \Illuminate\View\View
+     * Delete subject
      */
-    public function showSubject(Subject $subject)
+    public function destroySubject(Subject $subject): RedirectResponse
     {
-        $subject->load('tutors.user', 'bookings.student', 'bookings.tutor.user'); // Eager load related tutors and bookings
-        return view('admin.subjects.show', compact('subject'));
+        try {
+            $this->adminService->deleteSubject($subject);
+
+            return redirect()->route('admin.subjects')->with('success', 'Subject deleted successfully');
+        } catch (Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     /**
-     * Display admin reports page.
-     *
-     * @return \Illuminate\View\View
+     * Display reports
      */
-    public function reports()
+    public function reports(): View
     {
-        // Bookings by month
-        $bookings_by_month = DB::table('bookings')
-            ->select(DB::raw('DATE_FORMAT(start_time, "%Y-%m") as month'), DB::raw('COUNT(*) as count'))
-            ->where('start_time', '>=', now()->subYear())
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
+        $reportsData = $this->adminService->getReportsData();
 
-        // Revenue by month
-        $revenue_by_month = DB::table('bookings')
-            ->select(DB::raw('DATE_FORMAT(start_time, "%Y-%m") as month'), DB::raw('SUM(price) as revenue'))
-            ->where('payment_status', 'paid')
-            ->where('start_time', '>=', now()->subYear())
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
-
-        // Bookings by subject
-        $bookings_by_subject = DB::table('bookings')
-            ->join('subjects', 'bookings.subject_id', '=', 'subjects.id')
-            ->select('subjects.name', DB::raw('COUNT(*) as count'))
-            ->groupBy('subjects.name')
-            ->orderByDesc('count')
-            ->take(10)
-            ->get();
-
-        return view('admin.reports', compact(
-            'bookings_by_month',
-            'revenue_by_month',
-            'bookings_by_subject'
-        ));
+        return view('admin.reports', $reportsData);
     }
 
     /**
-     * Display list of reviews for admin.
-     *
-     * @param Request $request
-     * @return \Illuminate\View\View
+     * Display reviews
      */
-    public function reviews(Request $request)
+    public function reviews(Request $request): View
     {
-        $query = DB::table('reviews')
-            ->join('users as students', 'reviews.student_id', '=', 'students.id')
-            ->join('users as tutors', 'reviews.tutor_id', '=', 'tutors.id')
-            ->select(
-                'reviews.*',
-                'students.name as student_name',
-                'students.profile_photo_url as student_photo',
-                'tutors.name as tutor_name'
-            );
-
-        // Apply filters
-        if ($request->filled('rating')) {
-            $query->where('rating', $request->rating);
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('students.name', 'like', "%{$search}%")
-                  ->orWhere('tutors.name', 'like', "%{$search}%")
-                  ->orWhere('reviews.comment', 'like', "%{$search}%");
-            });
-        }
-
-        $reviews = $query->latest()->paginate(10);
+        $search = $request->get('search');
+        $reviews = $this->adminService->getReviews($search);
 
         return view('admin.reviews', compact('reviews'));
     }

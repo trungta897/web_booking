@@ -77,5 +77,5 @@ return [
         'subjects_section' => 'Môn Học',
         'connect_with_us' => 'Kết Nối Với Chúng Tôi',
         'copyright' => '© 2025 TutorHub. Tất cả quyền được bảo lưu.',
-    ]
+    ],
 ];

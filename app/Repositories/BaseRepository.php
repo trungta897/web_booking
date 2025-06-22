@@ -3,14 +3,15 @@
 namespace App\Repositories;
 
 use App\Contracts\Repositories\RepositoryInterface;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 abstract class BaseRepository implements RepositoryInterface
 {
     protected $model;
+
     protected $query;
 
     public function __construct(Model $model)
@@ -73,6 +74,7 @@ abstract class BaseRepository implements RepositoryInterface
     public function update(int $id, array $data): bool
     {
         $model = $this->findById($id);
+
         return $model ? $model->update($data) : false;
     }
 
@@ -82,6 +84,7 @@ abstract class BaseRepository implements RepositoryInterface
     public function delete(int $id): bool
     {
         $model = $this->findById($id);
+
         return $model ? $model->delete() : false;
     }
 
@@ -92,6 +95,7 @@ abstract class BaseRepository implements RepositoryInterface
     {
         $result = $this->query->paginate($perPage);
         $this->resetQuery();
+
         return $result;
     }
 
@@ -101,6 +105,7 @@ abstract class BaseRepository implements RepositoryInterface
     public function with(array $relations): self
     {
         $this->query = $this->query->with($relations);
+
         return $this;
     }
 
@@ -110,6 +115,7 @@ abstract class BaseRepository implements RepositoryInterface
     public function where(string $column, $operator = null, $value = null): self
     {
         $this->query = $this->query->where($column, $operator, $value);
+
         return $this;
     }
 
@@ -119,6 +125,7 @@ abstract class BaseRepository implements RepositoryInterface
     public function orderBy(string $column, string $direction = 'asc'): self
     {
         $this->query = $this->query->orderBy($column, $direction);
+
         return $this;
     }
 
@@ -129,6 +136,7 @@ abstract class BaseRepository implements RepositoryInterface
     {
         $result = $this->query->first();
         $this->resetQuery();
+
         return $result;
     }
 
@@ -139,6 +147,7 @@ abstract class BaseRepository implements RepositoryInterface
     {
         $result = $this->query->count();
         $this->resetQuery();
+
         return $result;
     }
 
@@ -180,6 +189,7 @@ abstract class BaseRepository implements RepositoryInterface
     public function latest(string $column = 'created_at'): self
     {
         $this->query = $this->query->latest($column);
+
         return $this;
     }
 
@@ -189,6 +199,7 @@ abstract class BaseRepository implements RepositoryInterface
     public function oldest(string $column = 'created_at'): self
     {
         $this->query = $this->query->oldest($column);
+
         return $this;
     }
 

@@ -2,34 +2,37 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Booking;
+use App\Models\Review;
 use App\Models\Subject;
 use App\Models\Tutor;
-use App\Models\Review;
-use App\Repositories\UserRepository;
+use App\Models\User;
 use App\Repositories\BookingRepository;
-use App\Repositories\TutorRepository;
 use App\Repositories\SubjectRepository;
+use App\Repositories\TutorRepository;
+use App\Repositories\UserRepository;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
-use Exception;
 
 class AdminService extends BaseService
 {
     protected UserRepository $userRepository;
+
     protected BookingRepository $bookingRepository;
+
     protected TutorRepository $tutorRepository;
+
     protected SubjectRepository $subjectRepository;
 
     public function __construct()
     {
-        $this->userRepository = new UserRepository(new User());
-        $this->bookingRepository = new BookingRepository(new Booking());
-        $this->tutorRepository = new TutorRepository(new Tutor());
-        $this->subjectRepository = new SubjectRepository(new Subject());
+        $this->userRepository = new UserRepository(new User);
+        $this->bookingRepository = new BookingRepository(new Booking);
+        $this->tutorRepository = new TutorRepository(new Tutor);
+        $this->subjectRepository = new SubjectRepository(new Subject);
     }
 
     /**
@@ -49,7 +52,7 @@ class AdminService extends BaseService
                 'revenue' => $revenueStats,
                 'system' => $systemStats,
                 'recent_activities' => $this->getRecentActivities(),
-                'formatted_stats' => $this->formatDashboardStats($userStats, $bookingStats, $revenueStats)
+                'formatted_stats' => $this->formatDashboardStats($userStats, $bookingStats, $revenueStats),
             ];
         });
     }
@@ -59,11 +62,11 @@ class AdminService extends BaseService
      */
     public function getAllUsers(array $filters = []): LengthAwarePaginator
     {
-        if (isset($filters['search']) && !empty($filters['search'])) {
+        if (isset($filters['search']) && ! empty($filters['search'])) {
             return $this->userRepository->searchUsers($filters['search'], $filters['per_page'] ?? 15);
         }
 
-        if (isset($filters['role']) && !empty($filters['role'])) {
+        if (isset($filters['role']) && ! empty($filters['role'])) {
             // Use pagination instead of collection
             return $this->userRepository->where('role', $filters['role'])
                 ->latest()
@@ -119,7 +122,7 @@ class AdminService extends BaseService
             $this->logActivity('User suspension toggled', [
                 'user_id' => $userId,
                 'old_status' => $user->account_status,
-                'new_status' => $newStatus
+                'new_status' => $newStatus,
             ]);
 
             return $user->fresh();
@@ -140,7 +143,7 @@ class AdminService extends BaseService
                     ->whereIn('status', ['pending', 'accepted'])
                     ->count();
             } else {
-                $activeBookings = Booking::whereHas('tutor', function($q) use ($userId) {
+                $activeBookings = Booking::whereHas('tutor', function ($q) use ($userId) {
                     $q->where('user_id', $userId);
                 })->whereIn('status', ['pending', 'accepted'])->count();
             }
@@ -155,7 +158,7 @@ class AdminService extends BaseService
                 $this->logActivity('User deleted', [
                     'user_id' => $userId,
                     'email' => $user->email,
-                    'role' => $user->role
+                    'role' => $user->role,
                 ]);
             }
 
@@ -181,7 +184,7 @@ class AdminService extends BaseService
             'completed' => $completed,
             'cancelled' => $cancelled,
             'completion_rate' => $total > 0 ? round(($completed / $total) * 100, 2) : 0,
-            'cancellation_rate' => $total > 0 ? round(($cancelled / $total) * 100, 2) : 0
+            'cancellation_rate' => $total > 0 ? round(($cancelled / $total) * 100, 2) : 0,
         ];
     }
 
@@ -204,7 +207,7 @@ class AdminService extends BaseService
             ->where('payment_status', 'paid')
             ->whereBetween('created_at', [
                 Carbon::now()->startOfWeek(),
-                Carbon::now()->endOfWeek()
+                Carbon::now()->endOfWeek(),
             ])
             ->sum('price');
 
@@ -216,8 +219,8 @@ class AdminService extends BaseService
             'formatted' => [
                 'total' => $this->formatCurrency($totalRevenue),
                 'monthly' => $this->formatCurrency($monthlyRevenue),
-                'weekly' => $this->formatCurrency($weeklyRevenue)
-            ]
+                'weekly' => $this->formatCurrency($weeklyRevenue),
+            ],
         ];
     }
 
@@ -232,7 +235,7 @@ class AdminService extends BaseService
             'total_reviews' => Review::count(),
             'average_rating' => Review::avg('rating'),
             'storage_used' => $this->getStorageUsage(),
-            'cache_size' => $this->getCacheSize()
+            'cache_size' => $this->getCacheSize(),
         ];
     }
 
@@ -250,7 +253,7 @@ class AdminService extends BaseService
                     'type' => 'booking',
                     'message' => "New booking: {$booking->student->name} booked {$booking->subject->name} with {$booking->tutor->user->name}",
                     'timestamp' => $booking->created_at,
-                    'url' => route('admin.bookings.show', $booking)
+                    'url' => route('admin.bookings.show', $booking),
                 ];
             });
 
@@ -262,7 +265,7 @@ class AdminService extends BaseService
                     'type' => 'user',
                     'message' => "New {$user->role} registered: {$user->name}",
                     'timestamp' => $user->created_at,
-                    'url' => '#'
+                    'url' => '#',
                 ];
             });
 
@@ -291,7 +294,7 @@ class AdminService extends BaseService
                 'date' => $date->format('Y-m-d'),
                 'formatted_date' => $date->format('d-m-Y'),
                 'revenue' => $revenue,
-                'formatted_revenue' => $this->formatCurrency($revenue)
+                'formatted_revenue' => $this->formatCurrency($revenue),
             ];
         }
 
@@ -308,14 +311,14 @@ class AdminService extends BaseService
                 'total' => number_format($userStats['total_users']),
                 'students' => number_format($userStats['students']),
                 'tutors' => number_format($userStats['tutors']),
-                'active' => number_format($userStats['active_users'])
+                'active' => number_format($userStats['active_users']),
             ],
             'bookings' => [
                 'total' => number_format($bookingStats['total']),
-                'completion_rate' => $bookingStats['completion_rate'] . '%',
-                'cancellation_rate' => $bookingStats['cancellation_rate'] . '%'
+                'completion_rate' => $bookingStats['completion_rate'].'%',
+                'cancellation_rate' => $bookingStats['cancellation_rate'].'%',
             ],
-            'revenue' => $revenueStats['formatted']
+            'revenue' => $revenueStats['formatted'],
         ];
     }
 
@@ -379,5 +382,349 @@ class AdminService extends BaseService
     {
         // Implementation would generate CSV content
         return "Name,Email,Subjects,Rating,Bookings,Created At\n";
+    }
+
+    /**
+     * Get recent bookings for dashboard
+     */
+    public function getRecentBookings(int $limit = 5): Collection
+    {
+        return Booking::with(['student', 'tutor.user', 'subject'])
+            ->latest()
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Get popular subjects
+     */
+    public function getPopularSubjects(int $limit = 5): Collection
+    {
+        return Subject::withCount(['tutors', 'bookings'])
+            ->orderByDesc('bookings_count')
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Get top rated tutors
+     */
+    public function getTopRatedTutors(int $limit = 6): Collection
+    {
+        return User::where('role', 'tutor')
+            ->with('tutor')
+            ->withAvg('reviewsReceived', 'rating')
+            ->orderByDesc('reviews_received_avg_rating')
+            ->take($limit)
+            ->get();
+    }
+
+    /**
+     * Get recently joined users
+     */
+    public function getRecentUsers(int $limit = 5): Collection
+    {
+        return User::latest()->take($limit)->get();
+    }
+
+    /**
+     * Get tutors with search and pagination
+     */
+    public function getTutors(?string $search = null, int $perPage = 10): LengthAwarePaginator
+    {
+        $query = User::where('role', 'tutor')
+            ->with(['tutor.subjects', 'reviewsReceived'])
+            ->withAvg('reviewsReceived', 'rating')
+            ->withCount('reviewsReceived');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->latest()->paginate($perPage);
+    }
+
+    /**
+     * Get students with search and pagination
+     */
+    public function getStudents(?string $search = null, int $perPage = 10): LengthAwarePaginator
+    {
+        $query = User::where('role', 'student')
+            ->withCount('studentBookings');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->latest()->paginate($perPage);
+    }
+
+    /**
+     * Get tutor details with related data
+     */
+    public function getTutorDetails(User $user): array
+    {
+        if ($user->role !== 'tutor') {
+            throw new Exception('User is not a tutor');
+        }
+
+        $user->load([
+            'tutor.subjects',
+            'tutorBookings.student',
+            'tutorBookings.subject',
+            'reviewsReceived.reviewer',
+        ]);
+
+        $averageRating = $user->reviewsReceived->avg('rating');
+        $totalBookings = $user->tutorBookings->count();
+        $completedBookings = $user->tutorBookings->where('status', 'completed')->count();
+
+        return [
+            'user' => $user,
+            'average_rating' => $averageRating,
+            'total_bookings' => $totalBookings,
+            'completed_bookings' => $completedBookings,
+        ];
+    }
+
+    /**
+     * Get student details with related data
+     */
+    public function getStudentDetails(User $user): array
+    {
+        if ($user->role !== 'student') {
+            throw new Exception('User is not a student');
+        }
+
+        $user->load([
+            'studentBookings.tutor.user',
+            'studentBookings.subject',
+        ]);
+
+        $totalBookings = $user->studentBookings->count();
+        $totalSpent = $user->studentBookings->where('status', 'completed')->sum('price');
+
+        return [
+            'user' => $user,
+            'total_bookings' => $totalBookings,
+            'total_spent' => $totalSpent,
+        ];
+    }
+
+    /**
+     * Toggle user account status
+     */
+    public function toggleUserStatus(User $user): bool
+    {
+        return $this->executeTransaction(function () use ($user) {
+            $oldStatus = $user->account_status;
+            $newStatus = $oldStatus === 'suspended' ? 'active' : 'suspended';
+
+            $user->update(['account_status' => $newStatus]);
+
+            // Additional logic for tutors
+            if ($user->role === 'tutor' && $user->tutor) {
+                $user->tutor->update([
+                    'is_available' => $newStatus === 'active',
+                ]);
+            }
+
+            $this->logActivity('User status changed', [
+                'user_id' => $user->id,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'role' => $user->role,
+            ]);
+
+            return true;
+        });
+    }
+
+    /**
+     * Get bookings with search and pagination
+     */
+    public function getBookings(?string $search = null, int $perPage = 10): LengthAwarePaginator
+    {
+        $query = Booking::with(['student', 'tutor.user', 'subject']);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('student', function ($sq) use ($search) {
+                    $sq->where('name', 'like', "%{$search}%");
+                })
+                    ->orWhereHas('tutor.user', function ($tq) use ($search) {
+                        $tq->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('subject', function ($subq) use ($search) {
+                        $subq->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $query->latest()->paginate($perPage);
+    }
+
+    /**
+     * Get booking details
+     */
+    public function getBookingDetails(Booking $booking): Booking
+    {
+        return $booking->load([
+            'student',
+            'tutor.user',
+            'subject',
+            'reviews',
+        ]);
+    }
+
+    /**
+     * Get subjects with search and pagination
+     */
+    public function getSubjects(?string $search = null, int $perPage = 10): LengthAwarePaginator
+    {
+        $query = Subject::withCount(['tutors', 'bookings']);
+
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        return $query->latest()->paginate($perPage);
+    }
+
+    /**
+     * Create new subject
+     */
+    public function createSubject(array $data): Subject
+    {
+        return $this->executeTransaction(function () use ($data) {
+            $subject = Subject::create([
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'icon' => $data['icon'] ?? null,
+                'is_active' => $data['is_active'] ?? true,
+            ]);
+
+            $this->logActivity('Subject created', [
+                'subject_id' => $subject->id,
+                'name' => $subject->name,
+            ]);
+
+            return $subject;
+        });
+    }
+
+    /**
+     * Update subject
+     */
+    public function updateSubject(Subject $subject, array $data): bool
+    {
+        return $this->executeTransaction(function () use ($subject, $data) {
+            $oldData = $subject->toArray();
+
+            $subject->update([
+                'name' => $data['name'],
+                'description' => $data['description'] ?? $subject->description,
+                'icon' => $data['icon'] ?? $subject->icon,
+                'is_active' => $data['is_active'] ?? $subject->is_active,
+            ]);
+
+            $this->logActivity('Subject updated', [
+                'subject_id' => $subject->id,
+                'old_data' => $oldData,
+                'new_data' => $subject->fresh()->toArray(),
+            ]);
+
+            return true;
+        });
+    }
+
+    /**
+     * Delete subject
+     */
+    public function deleteSubject(Subject $subject): bool
+    {
+        return $this->executeTransaction(function () use ($subject) {
+            // Check if subject has active bookings or tutors
+            $activeBookings = $subject->bookings()->whereIn('status', ['pending', 'confirmed'])->count();
+            $activeTutors = $subject->tutors()->count();
+
+            if ($activeBookings > 0) {
+                throw new Exception('Cannot delete subject with active bookings');
+            }
+
+            if ($activeTutors > 0) {
+                throw new Exception('Cannot delete subject with active tutors');
+            }
+
+            $subjectData = $subject->toArray();
+            $result = $subject->delete();
+
+            if ($result) {
+                $this->logActivity('Subject deleted', [
+                    'subject_data' => $subjectData,
+                ]);
+            }
+
+            return $result;
+        });
+    }
+
+    /**
+     * Get reports data
+     */
+    public function getReportsData(): array
+    {
+        $stats = $this->getDashboardStats();
+
+        // Monthly booking statistics
+        $monthlyBookings = Booking::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        // Revenue by month
+        $monthlyRevenue = Booking::selectRaw('MONTH(created_at) as month, SUM(price) as revenue')
+            ->where('payment_status', 'paid')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        return [
+            'stats' => $stats,
+            'monthly_bookings' => $monthlyBookings,
+            'monthly_revenue' => $monthlyRevenue,
+            'popular_subjects' => $this->getPopularSubjects(10),
+            'top_tutors' => $this->getTopRatedTutors(10),
+        ];
+    }
+
+    /**
+     * Get reviews with pagination
+     */
+    public function getReviews(?string $search = null, int $perPage = 10): LengthAwarePaginator
+    {
+        $query = Review::with(['student', 'tutor.user', 'booking.subject']);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('comment', 'like', "%{$search}%")
+                    ->orWhereHas('student', function ($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('tutor.user', function ($tq) use ($search) {
+                        $tq->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $query->latest()->paginate($perPage);
     }
 }

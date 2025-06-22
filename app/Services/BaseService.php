@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Contracts\Services\ServiceInterface;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 abstract class BaseService implements ServiceInterface
 {
@@ -24,7 +24,7 @@ abstract class BaseService implements ServiceInterface
             return $result;
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error(get_class($this) . ' error: ' . $e->getMessage());
+            Log::error(get_class($this).' error: '.$e->getMessage());
             throw $e;
         }
     }
@@ -34,21 +34,21 @@ abstract class BaseService implements ServiceInterface
      */
     public function logActivity(string $action, array $data = []): void
     {
-        Log::info(get_class($this) . ': ' . $action, $data);
+        Log::info(get_class($this).': '.$action, $data);
     }
 
     /**
      * Log service error
      */
-    protected function logError(string $message, Exception $e = null, array $context = []): void
+    protected function logError(string $message, ?Exception $e = null, array $context = []): void
     {
         $errorContext = array_merge($context, [
             'message' => $message,
             'exception' => $e ? $e->getMessage() : null,
-            'trace' => $e ? $e->getTraceAsString() : null
+            'trace' => $e ? $e->getTraceAsString() : null,
         ]);
 
-        Log::error(get_class($this) . ' Error: ' . $message, $errorContext);
+        Log::error(get_class($this).' Error: '.$message, $errorContext);
     }
 
     /**
@@ -56,7 +56,7 @@ abstract class BaseService implements ServiceInterface
      */
     public function formatCurrency(float $amount): string
     {
-        return number_format($amount, 2) . ' VND';
+        return number_format($amount, 2).' VND';
     }
 
     /**
@@ -70,7 +70,7 @@ abstract class BaseService implements ServiceInterface
     /**
      * Handle service errors
      */
-    public function handleError(\Exception $e, string $context = ''): void
+    public function handleError(Exception $e, string $context = ''): void
     {
         $this->logError($context ?: 'Service error occurred', $e);
         throw $e;

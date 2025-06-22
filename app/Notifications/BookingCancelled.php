@@ -4,7 +4,6 @@ namespace App\Notifications;
 
 use App\Models\Booking;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -13,6 +12,7 @@ class BookingCancelled extends Notification
     use Queueable;
 
     public $booking;
+
     public $cancelledBy;
 
     /**
@@ -46,9 +46,9 @@ class BookingCancelled extends Notification
         return (new MailMessage)
             ->subject($subject)
             ->line('A booking has been cancelled.')
-            ->line('Subject: ' . $this->booking->subject->name)
-            ->line('Date: ' . $this->booking->start_time->format('d/m/Y H:i'))
-            ->line('Reason: ' . ($this->booking->cancellation_reason ?? 'No reason provided'))
+            ->line('Subject: '.$this->booking->subject->name)
+            ->line('Date: '.$this->booking->start_time->format('d/m/Y H:i'))
+            ->line('Reason: '.($this->booking->cancellation_reason ?? 'No reason provided'))
             ->action('View Booking', route('bookings.show', $this->booking))
             ->line('Thank you for using our tutoring platform!');
     }
@@ -69,7 +69,7 @@ class BookingCancelled extends Notification
             'message' => __('notifications.booking_cancelled_message', [
                 'subject' => $this->booking->subject->name,
                 'date' => $this->booking->start_time->format('d/m/Y H:i'),
-                'reason' => $this->booking->cancellation_reason ?? __('notifications.no_reason_provided')
+                'reason' => $this->booking->cancellation_reason ?? __('notifications.no_reason_provided'),
             ]),
             'action_url' => route('bookings.show', $this->booking),
         ];

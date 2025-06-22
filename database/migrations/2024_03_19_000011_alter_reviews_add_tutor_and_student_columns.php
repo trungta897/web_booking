@@ -9,25 +9,25 @@ return new class extends Migration
     public function up()
     {
         Schema::table('reviews', function (Blueprint $table) {
-            if (!Schema::hasColumn('reviews', 'tutor_id')) {
+            if (! Schema::hasColumn('reviews', 'tutor_id')) {
                 $table->foreignId('tutor_id')->constrained('users');
             }
-            if (!Schema::hasColumn('reviews', 'student_id')) {
+            if (! Schema::hasColumn('reviews', 'student_id')) {
                 $table->foreignId('student_id')->constrained('users');
             }
-            if (!Schema::hasColumn('reviews', 'booking_id')) {
+            if (! Schema::hasColumn('reviews', 'booking_id')) {
                 $table->foreignId('booking_id')->constrained('bookings');
             }
-            if (!Schema::hasColumn('reviews', 'rating')) {
+            if (! Schema::hasColumn('reviews', 'rating')) {
                 $table->integer('rating');
             }
-            if (!Schema::hasColumn('reviews', 'comment')) {
+            if (! Schema::hasColumn('reviews', 'comment')) {
                 $table->text('comment');
             }
         });
 
         // Add unique constraint if it doesn't exist
-        if (!Schema::hasIndex('reviews', 'reviews_tutor_id_student_id_booking_id_unique')) {
+        if (! Schema::hasIndex('reviews', 'reviews_tutor_id_student_id_booking_id_unique')) {
             Schema::table('reviews', function (Blueprint $table) {
                 $table->unique(['tutor_id', 'student_id', 'booking_id'], 'reviews_tutor_id_student_id_booking_id_unique');
             });

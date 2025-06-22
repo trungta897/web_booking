@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 class TutorCard
 {
     protected Tutor $tutor;
+
     protected array $options;
 
     public function __construct(Tutor $tutor, array $options = [])
@@ -19,7 +20,7 @@ class TutorCard
             'show_subjects' => true,
             'show_price' => true,
             'show_experience' => true,
-            'show_location' => false
+            'show_location' => false,
         ], $options);
     }
 
@@ -34,7 +35,7 @@ class TutorCard
             'rating_info' => $this->getRatingInfo(),
             'subjects' => $this->getSubjects(),
             'actions' => $this->getAvailableActions(),
-            'options' => $this->options
+            'options' => $this->options,
         ];
     }
 
@@ -45,11 +46,11 @@ class TutorCard
     {
         return [
             'name' => $this->tutor->user->name,
-            'hourly_rate' => number_format($this->tutor->hourly_rate, 2) . ' USD/hour',
-            'experience' => $this->tutor->experience_years . ' years experience',
+            'hourly_rate' => number_format($this->tutor->hourly_rate, 2).' USD/hour',
+            'experience' => $this->tutor->experience_years.' years experience',
             'location' => $this->tutor->user->address ?? 'Not specified',
             'bio' => $this->tutor->bio ? \Illuminate\Support\Str::limit($this->tutor->bio, 150) : 'No bio available',
-            'avatar' => $this->tutor->user->avatar ?? '/images/default-avatar.png'
+            'avatar' => $this->tutor->user->avatar ?? '/images/default-avatar.png',
         ];
     }
 
@@ -66,8 +67,8 @@ class TutorCard
             'reviews_count' => $reviewsCount,
             'stars' => $this->generateStars($averageRating),
             'rating_text' => $averageRating > 0 ?
-                number_format($averageRating, 1) . ' (' . $reviewsCount . ' reviews)' :
-                'No reviews yet'
+                number_format($averageRating, 1).' ('.$reviewsCount.' reviews)' :
+                'No reviews yet',
         ];
     }
 
@@ -80,7 +81,7 @@ class TutorCard
             return [
                 'id' => $subject->id,
                 'name' => $subject->name,
-                'icon' => $subject->icon ?? 'book'
+                'icon' => $subject->icon ?? 'book',
             ];
         })->toArray();
     }
@@ -90,7 +91,7 @@ class TutorCard
      */
     protected function getAvailableActions(): array
     {
-        if (!$this->options['show_actions']) {
+        if (! $this->options['show_actions']) {
             return [];
         }
 
@@ -103,7 +104,7 @@ class TutorCard
             'label' => __('tutors.actions.view_profile'),
             'route' => route('tutors.show', $this->tutor),
             'class' => 'btn-outline-primary',
-            'icon' => 'user'
+            'icon' => 'user',
         ];
 
         if ($user && $user->role === 'student') {
@@ -113,7 +114,7 @@ class TutorCard
                 'label' => __('tutors.actions.book_session'),
                 'route' => route('bookings.create', $this->tutor),
                 'class' => 'btn-primary',
-                'icon' => 'calendar-plus'
+                'icon' => 'calendar-plus',
             ];
 
             // Favorite/Unfavorite action
@@ -125,7 +126,7 @@ class TutorCard
                 'class' => $isFavorite ? 'btn-warning' : 'btn-outline-warning',
                 'icon' => $isFavorite ? 'heart-fill' : 'heart',
                 'method' => 'POST',
-                'data_favorite' => $isFavorite ? 'true' : 'false'
+                'data_favorite' => $isFavorite ? 'true' : 'false',
             ];
 
             // Message action
@@ -134,7 +135,7 @@ class TutorCard
                 'label' => __('tutors.actions.message'),
                 'route' => route('messages.create', ['tutor' => $this->tutor->id]),
                 'class' => 'btn-info',
-                'icon' => 'chat'
+                'icon' => 'chat',
             ];
         }
 
@@ -199,7 +200,7 @@ class TutorCard
             ->first();
 
         if ($todaySlot) {
-            return 'Today at ' . $todaySlot->start_time;
+            return 'Today at '.$todaySlot->start_time;
         }
 
         // Check next 7 days
@@ -214,7 +215,7 @@ class TutorCard
                 ->first();
 
             if ($slot) {
-                return $date->format('M j') . ' at ' . $slot->start_time;
+                return $date->format('M j').' at '.$slot->start_time;
             }
         }
 
@@ -254,21 +255,21 @@ class TutorCard
                 'type' => 'premium',
                 'label' => 'Premium Tutor',
                 'class' => 'badge-gold',
-                'icon' => 'award'
+                'icon' => 'award',
             ];
         } elseif ($rating >= 4.5 && $reviewsCount >= 20) {
             return [
                 'type' => 'verified',
                 'label' => 'Verified Tutor',
                 'class' => 'badge-blue',
-                'icon' => 'check-circle'
+                'icon' => 'check-circle',
             ];
         } elseif ($experience >= 5) {
             return [
                 'type' => 'experienced',
                 'label' => 'Experienced',
                 'class' => 'badge-green',
-                'icon' => 'clock'
+                'icon' => 'clock',
             ];
         }
 

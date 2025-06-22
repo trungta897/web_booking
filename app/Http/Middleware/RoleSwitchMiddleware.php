@@ -11,7 +11,6 @@ class RoleSwitchMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
      * @param  string  $role  The role that should be allowed to access this route
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
@@ -19,7 +18,7 @@ class RoleSwitchMiddleware
     public function handle(Request $request, Closure $next, string $role)
     {
         // Check if the user is authenticated
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 

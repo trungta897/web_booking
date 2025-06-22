@@ -10,8 +10,11 @@ use Illuminate\Support\Facades\Log;
 class VnpayService
 {
     protected $vnpTmnCode;
+
     protected $vnpHashSecret;
+
     protected $vnpUrl;
+
     protected $vnpReturnUrl;
 
     public function __construct()
@@ -28,7 +31,7 @@ class VnpayService
     public function createPaymentUrl(Booking $booking, $ipAddr = null)
     {
         // Tạo transaction reference
-        $txnRef = 'BOOKING_' . $booking->id . '_' . time();
+        $txnRef = 'BOOKING_'.$booking->id.'_'.time();
 
         // Cập nhật booking với txn_ref
         $booking->update([
@@ -50,42 +53,42 @@ class VnpayService
 
         // Tham số VNPay
         $vnpData = [
-            "vnp_Version" => "2.1.0",
-            "vnp_Command" => "pay",
-            "vnp_TmnCode" => $this->vnpTmnCode,
-            "vnp_Amount" => $booking->price * 100, // VNPay tính bằng VND * 100
-            "vnp_CurrCode" => "VND",
-            "vnp_TxnRef" => $txnRef,
-            "vnp_OrderInfo" => "Thanh toan hoc phi - " . $booking->subject->name . " - " . $booking->tutor->user->name,
-            "vnp_OrderType" => "other",
-            "vnp_Locale" => app()->getLocale() === 'vi' ? 'vn' : 'en',
-            "vnp_ReturnUrl" => $this->vnpReturnUrl,
-            "vnp_IpAddr" => $ipAddr ?? request()->ip(),
-            "vnp_CreateDate" => Carbon::now()->format('YmdHis'),
-            "vnp_ExpireDate" => Carbon::now()->addMinutes(30)->format('YmdHis'),
+            'vnp_Version' => '2.1.0',
+            'vnp_Command' => 'pay',
+            'vnp_TmnCode' => $this->vnpTmnCode,
+            'vnp_Amount' => $booking->price * 100, // VNPay tính bằng VND * 100
+            'vnp_CurrCode' => 'VND',
+            'vnp_TxnRef' => $txnRef,
+            'vnp_OrderInfo' => 'Thanh toan hoc phi - '.$booking->subject->name.' - '.$booking->tutor->user->name,
+            'vnp_OrderType' => 'other',
+            'vnp_Locale' => app()->getLocale() === 'vi' ? 'vn' : 'en',
+            'vnp_ReturnUrl' => $this->vnpReturnUrl,
+            'vnp_IpAddr' => $ipAddr ?? request()->ip(),
+            'vnp_CreateDate' => Carbon::now()->format('YmdHis'),
+            'vnp_ExpireDate' => Carbon::now()->addMinutes(30)->format('YmdHis'),
         ];
 
         // Sắp xếp và tạo query string
         ksort($vnpData);
-        $query = "";
+        $query = '';
         $i = 0;
-        $hashdata = "";
+        $hashdata = '';
 
         foreach ($vnpData as $key => $value) {
             if ($i == 1) {
-                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+                $hashdata .= '&'.urlencode($key).'='.urlencode($value);
             } else {
-                $hashdata .= urlencode($key) . "=" . urlencode($value);
+                $hashdata .= urlencode($key).'='.urlencode($value);
                 $i = 1;
             }
-            $query .= urlencode($key) . "=" . urlencode($value) . '&';
+            $query .= urlencode($key).'='.urlencode($value).'&';
         }
 
-        $vnpUrl = $this->vnpUrl . "?" . $query;
+        $vnpUrl = $this->vnpUrl.'?'.$query;
 
         if (isset($this->vnpHashSecret)) {
             $vnpSecureHash = hash_hmac('sha512', $hashdata, $this->vnpHashSecret);
-            $vnpUrl .= 'vnp_SecureHash=' . $vnpSecureHash;
+            $vnpUrl .= 'vnp_SecureHash='.$vnpSecureHash;
         }
 
         return $vnpUrl;
@@ -105,9 +108,9 @@ class VnpayService
 
         foreach ($vnpData as $key => $value) {
             if ($i == 1) {
-                $hashData .= '&' . urlencode($key) . "=" . urlencode($value);
+                $hashData .= '&'.urlencode($key).'='.urlencode($value);
             } else {
-                $hashData .= urlencode($key) . "=" . urlencode($value);
+                $hashData .= urlencode($key).'='.urlencode($value);
                 $i = 1;
             }
         }
@@ -118,14 +121,23 @@ class VnpayService
     }
 
     /**
+     * Validate IPN data from VNPay (alias for verifyIpn)
+     */
+    public function validateIPN(array $ipnData): bool
+    {
+        return $this->verifyIpn($ipnData);
+    }
+
+    /**
      * Xử lý kết quả thanh toán từ VNPay
      */
     public function handlePaymentResult($vnpData)
     {
         try {
             // Verify security hash
-            if (!$this->verifyIpn($vnpData)) {
+            if (! $this->verifyIpn($vnpData)) {
                 Log::error('VNPay IPN verification failed', $vnpData);
+
                 return ['success' => false, 'message' => 'Invalid signature'];
             }
 
@@ -136,8 +148,9 @@ class VnpayService
 
             // Tìm booking
             $booking = Booking::where('vnpay_txn_ref', $txnRef)->first();
-            if (!$booking) {
-                Log::error('Booking not found for VNPay txn_ref: ' . $txnRef);
+            if (! $booking) {
+                Log::error('Booking not found for VNPay txn_ref: '.$txnRef);
+
                 return ['success' => false, 'message' => 'Booking not found'];
             }
 
@@ -174,7 +187,7 @@ class VnpayService
                 return [
                     'success' => true,
                     'booking' => $booking,
-                    'message' => 'Payment successful'
+                    'message' => 'Payment successful',
                 ];
             } else {
                 // Thanh toán thất bại
@@ -196,18 +209,18 @@ class VnpayService
                 return [
                     'success' => false,
                     'booking' => $booking,
-                    'message' => $this->getResponseMessage($responseCode)
+                    'message' => $this->getResponseMessage($responseCode),
                 ];
             }
         } catch (\Exception $e) {
-            Log::error('VNPay payment processing error: ' . $e->getMessage(), [
+            Log::error('VNPay payment processing error: '.$e->getMessage(), [
                 'vnp_data' => $vnpData,
                 'trace' => $e->getTraceAsString(),
             ]);
 
             return [
                 'success' => false,
-                'message' => 'Payment processing error'
+                'message' => 'Payment processing error',
             ];
         }
     }
@@ -247,7 +260,7 @@ class VnpayService
         $transaction = Transaction::create([
             'booking_id' => $booking->id,
             'user_id' => $booking->student_id,
-            'transaction_id' => 'REFUND_' . $booking->id . '_' . time(),
+            'transaction_id' => 'REFUND_'.$booking->id.'_'.time(),
             'payment_method' => Transaction::PAYMENT_METHOD_VNPAY,
             'type' => $amount < $booking->price ? Transaction::TYPE_PARTIAL_REFUND : Transaction::TYPE_REFUND,
             'amount' => $refundAmount,

@@ -2,38 +2,32 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-
-// Models
-use App\Models\User;
 use App\Models\Booking;
-use App\Models\Tutor;
-use App\Models\Subject;
 use App\Models\Message;
-use Illuminate\Notifications\DatabaseNotification;
-
-// Repositories
-use App\Repositories\BaseRepository;
-use App\Repositories\UserRepository;
+use App\Models\Subject;
+// Models
+use App\Models\Tutor;
+use App\Models\User;
 use App\Repositories\BookingRepository;
-use App\Repositories\TutorRepository;
-use App\Repositories\SubjectRepository;
 use App\Repositories\MessageRepository;
 use App\Repositories\NotificationRepository;
-
-// Services
-use App\Services\BaseService;
+use App\Repositories\SubjectRepository;
+// Repositories
+use App\Repositories\TutorRepository;
+use App\Repositories\UserRepository;
+use App\Services\AdminService;
 use App\Services\BookingService;
-use App\Services\TutorService;
-use App\Services\PaymentService;
-use App\Services\SubjectService;
 use App\Services\MessageService;
 use App\Services\NotificationService;
-use App\Services\AdminService;
+// Services
+use App\Services\PaymentService;
+use App\Services\SubjectService;
+use App\Services\TutorService;
 use App\Services\VnpayService;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,68 +40,68 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             \App\Contracts\Repositories\UserRepositoryInterface::class,
             function ($app) {
-                return new UserRepository(new User());
+                return new UserRepository(new User);
             }
         );
 
         $this->app->bind(
             \App\Contracts\Repositories\BookingRepositoryInterface::class,
             function ($app) {
-                return new BookingRepository(new Booking());
+                return new BookingRepository(new Booking);
             }
         );
 
         $this->app->bind(
             \App\Contracts\Repositories\TutorRepositoryInterface::class,
             function ($app) {
-                return new TutorRepository(new Tutor());
+                return new TutorRepository(new Tutor);
             }
         );
 
         $this->app->bind(
             \App\Contracts\Repositories\SubjectRepositoryInterface::class,
             function ($app) {
-                return new SubjectRepository(new Subject());
+                return new SubjectRepository(new Subject);
             }
         );
 
         $this->app->bind(
             \App\Contracts\Repositories\MessageRepositoryInterface::class,
             function ($app) {
-                return new MessageRepository(new Message());
+                return new MessageRepository(new Message);
             }
         );
 
         $this->app->bind(
             \App\Contracts\Repositories\NotificationRepositoryInterface::class,
             function ($app) {
-                return new NotificationRepository(new DatabaseNotification());
+                return new NotificationRepository(new DatabaseNotification);
             }
         );
 
         // Register concrete Repositories for backward compatibility
         $this->app->singleton(UserRepository::class, function ($app) {
-            return new UserRepository(new User());
+            return new UserRepository(new User);
         });
 
         $this->app->singleton(BookingRepository::class, function ($app) {
-            return new BookingRepository(new Booking());
+            return new BookingRepository(new Booking);
         });
 
         $this->app->singleton(TutorRepository::class, function ($app) {
-            return new TutorRepository(new Tutor());
+            return new TutorRepository(new Tutor);
         });
 
         $this->app->singleton(SubjectRepository::class, function ($app) {
-            return new SubjectRepository(new Subject());
+            return new SubjectRepository(new Subject);
         });
 
         $this->app->singleton(MessageRepository::class, function ($app) {
-            return new MessageRepository(new Message());
+            return new MessageRepository(new Message);
         });
 
         $this->app->singleton(NotificationRepository::class, function ($app) {
-            return new NotificationRepository(new DatabaseNotification());
+            return new NotificationRepository(new DatabaseNotification);
         });
 
         // Bind Service Interfaces to Implementations
@@ -148,11 +142,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Register concrete Services for backward compatibility
         $this->app->singleton(BookingService::class, function ($app) {
-            return new BookingService();
+            return new BookingService;
         });
 
         $this->app->singleton(TutorService::class, function ($app) {
-            return new TutorService();
+            return new TutorService;
         });
 
         $this->app->singleton(PaymentService::class, function ($app) {
@@ -160,23 +154,23 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(SubjectService::class, function ($app) {
-            return new SubjectService();
+            return new SubjectService;
         });
 
         $this->app->singleton(MessageService::class, function ($app) {
-            return new MessageService();
+            return new MessageService;
         });
 
         $this->app->singleton(NotificationService::class, function ($app) {
-            return new NotificationService();
+            return new NotificationService;
         });
 
         $this->app->singleton(AdminService::class, function ($app) {
-            return new AdminService();
+            return new AdminService;
         });
 
         $this->app->singleton(VnpayService::class, function ($app) {
-            return new VnpayService();
+            return new VnpayService;
         });
 
         // Register helper aliases for easier access
@@ -226,12 +220,13 @@ class AppServiceProvider extends ServiceProvider
         // Composer for navigation - inject unread counts
         view()->composer('layouts.navigation', function ($view) {
             if (Auth::check()) {
+                $user = Auth::user();
                 $notificationService = app(NotificationService::class);
                 $messageService = app(MessageService::class);
 
                 $view->with([
-                    'unreadNotifications' => $notificationService->getUnreadCount(),
-                    'unreadMessages' => $messageService->getUnreadCount(),
+                    'unreadNotifications' => $notificationService->getUnreadCount($user),
+                    'unreadMessages' => $messageService->getUnreadCount($user->id),
                 ]);
             }
         });
@@ -266,11 +261,12 @@ class AppServiceProvider extends ServiceProvider
             $tutorService = app(TutorService::class);
             $tutor = Tutor::find($tutorId);
 
-            if (!$tutor) {
+            if (! $tutor) {
                 return false;
             }
 
             $result = $tutorService->checkTutorAvailability($tutor, $day);
+
             return $result['available'];
         });
 
@@ -284,7 +280,8 @@ class AppServiceProvider extends ServiceProvider
             $tutorId = $parameters[1];
 
             $bookingRepository = app(BookingRepository::class);
-            return !$bookingRepository->hasPendingBookingWithTutor($studentId, $tutorId);
+
+            return ! $bookingRepository->hasPendingBookingWithTutor($studentId, $tutorId);
         });
 
         // Add validation messages

@@ -6,13 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Carbon;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -184,6 +183,7 @@ class User extends Authenticatable
         $totalSeconds = $query->get()->sum(function ($booking) {
             $start = Carbon::parse($booking->start_time);
             $end = Carbon::parse($booking->end_time);
+
             return $end->diffInSeconds($start);
         });
 
@@ -197,11 +197,11 @@ class User extends Authenticatable
      */
     public function getProfilePhotoUrlAttribute()
     {
-        if ($this->avatar && file_exists(public_path('storage/' . $this->avatar))) {
-            return asset('storage/' . $this->avatar);
+        if ($this->avatar && file_exists(public_path('storage/'.$this->avatar))) {
+            return asset('storage/'.$this->avatar);
         }
 
         // Return default avatar using UI Avatars service
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name ?? 'User') . '&color=7F9CF5&background=EBF4FF';
+        return 'https://ui-avatars.com/api/?name='.urlencode($this->name ?? 'User').'&color=7F9CF5&background=EBF4FF';
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class Availability extends Model
 {
@@ -74,13 +74,13 @@ class Availability extends Model
     /**
      * Check if a given time slot falls within this availability window
      *
-     * @param string|Carbon $startTime
-     * @param string|Carbon $endTime
+     * @param  string|Carbon  $startTime
+     * @param  string|Carbon  $endTime
      * @return bool
      */
     public function isTimeSlotAvailable($startTime, $endTime)
     {
-        if (!$this->is_available) {
+        if (! $this->is_available) {
             return false;
         }
 

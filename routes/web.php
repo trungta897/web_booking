@@ -1,21 +1,22 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\TutorProfileController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TutorController;
-use App\Http\Controllers\SubjectController;
-use App\Http\Controllers\PageController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\FavoriteController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleSwitchController;
-use App\Http\Controllers\LanguageController;
-use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\TutorController;
+use App\Http\Controllers\TutorProfileController;
+use Illuminate\Support\Facades\Route;
 
 // Language switching route (available to all users)
 Route::get('/language/{locale}', [LanguageController::class, 'switchLanguage'])->name('language.switch');
@@ -38,9 +39,13 @@ Route::middleware('guest')->group(function () {
 // Protected routes (require authentication)
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/tutor/dashboard', function () {
-        return view('tutors.dashboard');
-    })->middleware(\App\Http\Middleware\RoleSwitchMiddleware::class . ':tutor')->name('tutor.dashboard');
+    Route::get('/tutor/dashboard', [TutorController::class, 'dashboard'])
+        ->middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':tutor')
+        ->name('tutor.dashboard');
+
+    Route::get('/student/dashboard', [StudentController::class, 'dashboard'])
+        ->middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':student')
+        ->name('student.dashboard');
 
     // Role switching routes
     Route::get('/role-switch/{role}', [RoleSwitchController::class, 'switchToRole'])->name('role.switch');
@@ -52,7 +57,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Tutor profile routes
-    Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class . ':tutor')->group(function () {
+    Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':tutor')->group(function () {
         Route::get('/tutor/profile', [TutorProfileController::class, 'show'])->name('tutor.profile.show');
         Route::get('/tutor/profile/edit', [TutorProfileController::class, 'edit'])->name('tutor.profile.edit');
         Route::put('/tutor/profile', [TutorProfileController::class, 'update'])->name('tutor.profile.update');
@@ -96,7 +101,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Tutor availability routes
     Route::get('/tutors/{tutor}/availability/{day}', [TutorController::class, 'checkAvailability'])->name('tutors.availability');
-    Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class . ':tutor')->group(function () {
+    Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':tutor')->group(function () {
         Route::get('/availability', [TutorController::class, 'availability'])->name('tutor.availability');
         Route::post('/availability', [TutorController::class, 'updateAvailability'])->name('tutor.availability.update');
     });
@@ -108,7 +113,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Admin routes - Moved to separate domain
-Route::domain(config('app.admin_domain'))->middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class . ':admin'])->group(function () {
+Route::domain(config('app.admin_domain'))->middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class.':admin', \App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/tutors', [AdminController::class, 'tutors'])->name('admin.tutors');
     Route::get('/students', [AdminController::class, 'students'])->name('admin.students');
@@ -131,7 +136,7 @@ Route::domain(config('app.admin_domain'))->middleware(['auth', \App\Http\Middlew
 });
 
 // Fallback for backward compatibility - these will be redirected by middleware
-Route::middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class . ':admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class.':admin', \App\Http\Middleware\SetLocale::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
     // Tutors
@@ -176,7 +181,7 @@ Route::get('/test-relationships', function () {
 
     return response()->json([
         'tutor' => $tutor,
-        'subject' => $subject
+        'subject' => $subject,
     ]);
 })->name('test.relationships');
 
@@ -187,7 +192,5 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::post('/tutors/{tutor}/favorite', [TutorController::class, 'toggleFavorite'])->name('tutors.favorite');
     Route::get('/tutors/{tutor}/availability/{day}', [TutorController::class, 'checkAvailability'])->name('tutors.availability');
 });
-
-
 
 require __DIR__.'/auth.php';

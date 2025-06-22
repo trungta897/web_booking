@@ -10,8 +10,8 @@ return [
             'features' => [
                 'Dạy kèm 1:1',
                 'Các môn học cơ bản',
-                'Hỗ trợ qua email'
-            ]
+                'Hỗ trợ qua email',
+            ],
         ],
         'standard' => [
             'title' => 'Tiêu Chuẩn: $25-$40/giờ',
@@ -19,8 +19,8 @@ return [
                 'Dạy kèm 1:1',
                 'Tất cả môn học',
                 'Hỗ trợ 24/7',
-                'Theo dõi tiến độ'
-            ]
+                'Theo dõi tiến độ',
+            ],
         ],
         'premium' => [
             'title' => 'Cao Cấp: $40+/giờ',
@@ -29,9 +29,9 @@ return [
                 'Tất cả môn học',
                 'Hỗ trợ ưu tiên 24/7',
                 'Theo dõi tiến độ nâng cao',
-                'Tài liệu học tập tùy chỉnh'
-            ]
-        ]
+                'Tài liệu học tập tùy chỉnh',
+            ],
+        ],
     ],
 
     'faq' => [
@@ -39,20 +39,20 @@ return [
         'questions' => [
             [
                 'question' => 'Làm thế nào để chọn gói phù hợp?',
-                'answer' => 'Hãy xem xét mục tiêu học tập và ngân sách của bạn. Gói Cơ Bản phù hợp cho việc học thỉnh thoảng, Tiêu Chuẩn cho việc học thường xuyên, và Cao Cấp cho việc học chuyên sâu.'
+                'answer' => 'Hãy xem xét mục tiêu học tập và ngân sách của bạn. Gói Cơ Bản phù hợp cho việc học thỉnh thoảng, Tiêu Chuẩn cho việc học thường xuyên, và Cao Cấp cho việc học chuyên sâu.',
             ],
             [
                 'question' => 'Tôi có thể thay đổi gói sau này không?',
-                'answer' => 'Có, bạn có thể nâng cấp hoặc hạ cấp gói bất cứ lúc nào. Thay đổi sẽ được áp dụng trong chu kỳ thanh toán tiếp theo.'
+                'answer' => 'Có, bạn có thể nâng cấp hoặc hạ cấp gói bất cứ lúc nào. Thay đổi sẽ được áp dụng trong chu kỳ thanh toán tiếp theo.',
             ],
             [
                 'question' => 'Bạn chấp nhận những phương thức thanh toán nào?',
-                'answer' => 'Chúng tôi chấp nhận tất cả các thẻ tín dụng chính, PayPal và chuyển khoản ngân hàng. Tất cả thanh toán đều an toàn và được mã hóa.'
+                'answer' => 'Chúng tôi chấp nhận tất cả các thẻ tín dụng chính, PayPal và chuyển khoản ngân hàng. Tất cả thanh toán đều an toàn và được mã hóa.',
             ],
             [
                 'question' => 'Có cam kết tối thiểu nào không?',
-                'answer' => 'Không, không có cam kết tối thiểu. Bạn có thể đặt buổi học khi cần và hủy bất cứ lúc nào.'
-            ]
-        ]
-    ]
+                'answer' => 'Không, không có cam kết tối thiểu. Bạn có thể đặt buổi học khi cần và hủy bất cứ lúc nào.',
+            ],
+        ],
+    ],
 ];

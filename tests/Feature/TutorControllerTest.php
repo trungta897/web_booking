@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use App\Models\Subject;
 use App\Models\Tutor;
 use App\Models\User;
-use App\Models\Subject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class TutorControllerTest extends TestCase
 {
@@ -68,7 +68,7 @@ class TutorControllerTest extends TestCase
         $tutor->reviews()->create([
             'student_id' => $user->id,
             'rating' => 5,
-            'comment' => 'Great tutor!'
+            'comment' => 'Great tutor!',
         ]);
 
         $response = $this->get(route('tutors.index', ['rating' => 4]));
@@ -84,7 +84,7 @@ class TutorControllerTest extends TestCase
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => bcrypt('password'),
-            'role' => 'student'
+            'role' => 'student',
         ]);
         $user->save();
 
@@ -115,7 +115,7 @@ class TutorControllerTest extends TestCase
             'day_of_week' => 'monday',
             'start_time' => '09:00',
             'end_time' => '17:00',
-            'is_available' => true
+            'is_available' => true,
         ]);
 
         $response = $this->get(route('tutors.availability', ['tutor' => $tutor, 'day' => 'monday']));
@@ -123,7 +123,7 @@ class TutorControllerTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'available' => true,
-                'slots' => ['09:00 - 17:00']
+                'slots' => ['09:00 - 17:00'],
             ]);
     }
 }

@@ -5,9 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\Response;
 
 class SetLocale
@@ -26,7 +25,7 @@ class SetLocale
         $locale = $request->session()->get('locale', Config::get('app.locale', 'vi'));
 
         // Validate locale
-        if (!in_array($locale, $availableLocales)) {
+        if (! in_array($locale, $availableLocales)) {
             $locale = 'vi';
         }
 
@@ -34,7 +33,7 @@ class SetLocale
         App::setLocale($locale);
 
         // Store in session for persistence if not already set
-        if (!$request->session()->has('locale')) {
+        if (! $request->session()->has('locale')) {
             $request->session()->put('locale', $locale);
         }
 

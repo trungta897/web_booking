@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Tutor;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+
 // Removed unused imports for Subject, Availability, Hash if they are not used elsewhere in this file specifically for TutorSeeder logic
 
 class TutorSeeder extends Seeder
@@ -172,6 +173,7 @@ class TutorSeeder extends Seeder
 
         if ($tutorUsers->isEmpty()) {
             $this->command->info('TutorSeeder: No users with role \'tutor\' found. Skipping tutor profile creation.');
+
             return;
         }
 
@@ -190,6 +192,6 @@ class TutorSeeder extends Seeder
             );
         }
 
-        $this->command->info('TutorSeeder: Processed tutor profiles for ' . $tutorUsers->count() . ' users.');
+        $this->command->info('TutorSeeder: Processed tutor profiles for '.$tutorUsers->count().' users.');
     }
 }

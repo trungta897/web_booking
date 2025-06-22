@@ -3,360 +3,228 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
-use App\Models\User;
-use App\Models\Transaction;
-use App\Notifications\PaymentReceived;
+use App\Services\PaymentService;
 use App\Services\VnpayService;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Stripe\Exception\ApiErrorException;
-use Stripe\StripeClient;
+use Illuminate\View\View;
 
 class PaymentController extends Controller
 {
-    protected $stripe;
-    protected $vnpayService;
+    protected PaymentService $paymentService;
 
-    public function __construct(VnpayService $vnpayService)
+    protected VnpayService $vnpayService;
+
+    public function __construct(PaymentService $paymentService, VnpayService $vnpayService)
     {
-        $this->stripe = new StripeClient(config('services.stripe.secret'));
+        $this->paymentService = $paymentService;
         $this->vnpayService = $vnpayService;
     }
 
     /**
-     * Create a payment intent for a booking
-     *
-     * @param Request $request
-     * @param Booking $booking
-     * @return \Illuminate\Http\JsonResponse
+     * Create Stripe payment intent
      */
-    public function createIntent(Request $request, Booking $booking)
+    public function createIntent(Request $request, Booking $booking): JsonResponse
     {
-        // Check if the booking belongs to the authenticated user
-        if ($booking->student_id !== Auth::id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        // Check if the booking is in a valid state for payment
-        if ($booking->status !== 'accepted' || $booking->payment_status === 'paid') {
-            return response()->json(['error' => 'Invalid booking status for payment'], 400);
-        }
-
         try {
-            // Create a payment intent
-            $amount = $booking->price * 100; // Convert to cents for Stripe
-            $paymentIntent = $this->stripe->paymentIntents->create([
-                'amount' => (int)$amount,
-                'currency' => 'usd',
-                'metadata' => [
-                    'booking_id' => $booking->id,
-                    'student_id' => $booking->student_id,
-                    'tutor_id' => $booking->tutor_id,
-                ],
-            ]);
+            $this->authorizeBookingAccess($booking);
+            $this->validateBookingForPayment($booking);
 
-            // Update booking with payment intent ID
-            $booking->update([
-                'payment_intent_id' => $paymentIntent->id,
-                'payment_status' => 'pending',
-            ]);
+            $result = $this->paymentService->createStripePaymentIntent($booking);
+
+            if (!$result->success) {
+                return response()->json(['error' => $result->error], 400);
+            }
 
             return response()->json([
-                'clientSecret' => $paymentIntent->client_secret,
+                'clientSecret' => $result->clientSecret,
             ]);
-        } catch (ApiErrorException $e) {
+
+        } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
 
     /**
-     * Handle successful payment confirmation
-     *
-     * @param Request $request
-     * @param Booking $booking
-     * @return \Illuminate\Http\RedirectResponse
+     * Confirm Stripe payment
      */
-    public function confirm(Request $request, Booking $booking)
+    public function confirm(Request $request, Booking $booking): RedirectResponse
     {
-        // Check if the booking belongs to the authenticated user
-        if ($booking->student_id !== Auth::id()) {
-            return redirect()->back()->with('error', 'Unauthorized action.');
-        }
-
         try {
-            // Retrieve the payment intent
-            $paymentIntent = $this->stripe->paymentIntents->retrieve($booking->payment_intent_id);
+            $this->authorizeBookingAccess($booking);
 
-            // If payment succeeded, update booking status
-            if ($paymentIntent->status === 'succeeded') {
-                $booking->update([
-                    'payment_status' => 'paid',
-                ]);
+            $success = $this->paymentService->confirmStripePayment($booking);
 
-                // Notify the tutor about the payment
-                $booking->tutor->user->notify(new PaymentReceived($booking));
-
+            if ($success) {
                 return redirect()->route('bookings.show', $booking)
-                    ->with('success', 'Payment completed successfully.');
+                    ->with('success', __('booking.payment_completed_successfully'));
             }
 
             return redirect()->route('bookings.show', $booking)
-                ->with('error', 'Payment has not been completed. Please try again.');
-        } catch (ApiErrorException $e) {
+                ->with('error', __('booking.payment_not_completed'));
+
+        } catch (Exception $e) {
             return redirect()->route('bookings.show', $booking)
-                ->with('error', 'Error confirming payment: ' . $e->getMessage());
+                ->with('error', __('booking.error_confirming_payment', ['error' => $e->getMessage()]));
         }
     }
 
     /**
-     * Handle Stripe webhook events
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Response
+     * Handle Stripe webhook
      */
-    public function handleWebhook(Request $request)
+    public function handleWebhook(Request $request): Response
     {
-        $payload = $request->getContent();
-        $sigHeader = $request->header('Stripe-Signature');
-        $endpointSecret = config('services.stripe.webhook_secret');
-
         try {
-            $event = \Stripe\Webhook::constructEvent(
-                $payload, $sigHeader, $endpointSecret
-            );
-        } catch (\Exception $e) {
-            return response('Webhook Error: ' . $e->getMessage(), 400);
-        }
+            $this->paymentService->handleStripeWebhook($request);
 
-        // Handle specific event types
-        switch ($event->type) {
-            case 'payment_intent.succeeded':
-                $this->handleSuccessfulPayment($event->data->object);
-                break;
-            case 'payment_intent.payment_failed':
-                $this->handleFailedPayment($event->data->object);
-                break;
-        }
+            return response('Webhook received', 200);
 
-        return response('Webhook received', 200);
-    }
-
-    /**
-     * Handle successful payment webhook
-     *
-     * @param object $paymentIntent
-     * @return void
-     */
-    protected function handleSuccessfulPayment($paymentIntent)
-    {
-        $bookingId = $paymentIntent->metadata->booking_id;
-        $booking = Booking::find($bookingId);
-
-        if ($booking) {
-            $booking->update([
-                'payment_status' => 'paid',
-            ]);
-
-            // Notify the tutor about the payment
-            $booking->tutor->user->notify(new PaymentReceived($booking));
+        } catch (Exception $e) {
+            return response('Webhook Error: '.$e->getMessage(), 400);
         }
     }
 
     /**
-     * Handle failed payment webhook
-     *
-     * @param object $paymentIntent
-     * @return void
+     * Create VNPay payment
      */
-    protected function handleFailedPayment($paymentIntent)
+    public function createVnpayPayment(Request $request, Booking $booking): JsonResponse
     {
-        $bookingId = $paymentIntent->metadata->booking_id;
-        $booking = Booking::find($bookingId);
-
-        if ($booking) {
-            $booking->update([
-                'payment_status' => 'failed',
-            ]);
-        }
-    }
-
-    /**
-     * Create VNPay payment URL
-     *
-     * @param Request $request
-     * @param Booking $booking
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function createVnpayPayment(Request $request, Booking $booking)
-    {
-        // Check if the booking belongs to the authenticated user
-        if ($booking->student_id !== Auth::id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        // Check if the booking is in a valid state for payment
-        if ($booking->status !== 'accepted' || $booking->payment_status === 'paid') {
-            return response()->json(['error' => 'Invalid booking status for payment'], 400);
-        }
-
         try {
-            $paymentUrl = $this->vnpayService->createPaymentUrl($booking, $request->ip());
+            $this->authorizeBookingAccess($booking);
+            $this->validateBookingForPayment($booking);
+
+            $result = $this->paymentService->createVnpayPayment($booking, $request->ip());
+
+            if (!$result->success) {
+                return response()->json(['error' => $result->error], 400);
+            }
 
             return response()->json([
-                'payment_url' => $paymentUrl,
-                'success' => true
+                'payment_url' => $result->paymentUrl,
             ]);
-        } catch (\Exception $e) {
-            Log::error('VNPay payment creation failed: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to create payment'], 500);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
     }
 
     /**
-     * Handle VNPay return URL
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Handle VNPay return
      */
-    public function vnpayReturn(Request $request)
+    public function vnpayReturn(Request $request): RedirectResponse
     {
-        $vnpData = $request->all();
-        $result = $this->vnpayService->handlePaymentResult($vnpData);
+        try {
+            $result = $this->paymentService->handleVnpayReturn($request->all());
 
-        if ($result['success']) {
-            // Notify the tutor about the payment
-            $booking = $result['booking'];
-            $booking->tutor->user->notify(new PaymentReceived($booking));
+            if ($result['success']) {
+                return redirect()->route('bookings.show', $result['booking'])
+                    ->with('success', $result['message']);
+            }
 
-            return redirect()->route('bookings.show', $booking)
-                ->with('success', __('booking.payment_success', ['method' => 'VNPay']));
-        } else {
-            $booking = $result['booking'] ?? null;
-            $redirectRoute = $booking ? route('bookings.show', $booking) : route('bookings.index');
-
-            return redirect($redirectRoute)
+            return redirect()->route('bookings.show', $result['booking'])
                 ->with('error', $result['message']);
+
+        } catch (Exception $e) {
+            return redirect()->route('home')
+                ->with('error', __('booking.payment_processing_failed'));
         }
     }
 
     /**
-     * Handle VNPay IPN (Instant Payment Notification)
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Response
+     * Handle VNPay IPN
      */
-    public function vnpayIpn(Request $request)
+    public function vnpayIpn(Request $request): Response
     {
-        $vnpData = $request->all();
-        $result = $this->vnpayService->handlePaymentResult($vnpData);
+        try {
+            $this->paymentService->handleVnpayIpn($request->all());
 
-        if ($result['success']) {
-            return response('RspCode=00&Message=Confirm Success', 200);
-        } else {
-            return response('RspCode=99&Message=Confirm Fail', 400);
+            return response('OK', 200);
+
+        } catch (Exception $e) {
+            return response('ERROR', 400);
         }
     }
 
     /**
-     * Process payment based on selected method
-     *
-     * @param Request $request
-     * @param Booking $booking
-     * @return \Illuminate\Http\JsonResponse
+     * Process payment (unified endpoint)
      */
-    public function processPayment(Request $request, Booking $booking)
+    public function processPayment(Request $request, Booking $booking): JsonResponse|RedirectResponse
     {
         $request->validate([
             'payment_method' => 'required|in:stripe,vnpay',
         ]);
 
-        // Check authorization
-        if ($booking->student_id !== Auth::id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        // Check booking status
-        if ($booking->status !== 'accepted' || $booking->payment_status === 'paid') {
-            return response()->json(['error' => 'Invalid booking status for payment'], 400);
-        }
-
-        $paymentMethod = $request->input('payment_method');
-
         try {
-            if ($paymentMethod === 'vnpay') {
-                $paymentUrl = $this->vnpayService->createPaymentUrl($booking, $request->ip());
-                return response()->json([
-                    'redirect_url' => $paymentUrl,
-                    'payment_method' => 'vnpay'
-                ]);
-            } elseif ($paymentMethod === 'stripe') {
-                // Existing Stripe logic
-                $amount = $booking->price * 100;
-                $paymentIntent = $this->stripe->paymentIntents->create([
-                    'amount' => (int)$amount,
-                    'currency' => 'usd',
-                    'metadata' => [
-                        'booking_id' => $booking->id,
-                        'student_id' => $booking->student_id,
-                        'tutor_id' => $booking->tutor_id,
-                    ],
-                ]);
+            $this->authorizeBookingAccess($booking);
+            $this->validateBookingForPayment($booking);
 
-                $booking->update([
-                    'payment_intent_id' => $paymentIntent->id,
-                    'payment_status' => 'pending',
-                    'payment_method' => 'stripe',
-                ]);
-
-                return response()->json([
-                    'clientSecret' => $paymentIntent->client_secret,
-                    'payment_method' => 'stripe'
-                ]);
+            if ($request->payment_method === 'stripe') {
+                return $this->createIntent($request, $booking);
+            } else {
+                return $this->createVnpayPayment($request, $booking);
             }
-        } catch (\Exception $e) {
-            Log::error('Payment processing failed: ' . $e->getMessage());
-            return response()->json(['error' => 'Payment processing failed'], 500);
-        }
 
-        return response()->json(['error' => 'Invalid payment method'], 400);
+        } catch (Exception $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => $e->getMessage()], 400);
+            }
+
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     /**
-     * Get transaction history for a booking
-     *
-     * @param Booking $booking
-     * @return \Illuminate\Http\JsonResponse
+     * Get transaction history for booking
      */
-    public function getTransactionHistory(Booking $booking)
+    public function getTransactionHistory(Booking $booking): JsonResponse
     {
-        if ($booking->student_id !== Auth::id() && $booking->tutor->user_id !== Auth::id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        try {
+            $this->authorizeBookingAccess($booking);
+
+            $transactions = $this->paymentService->getBookingTransactions($booking);
+
+            return response()->json([
+                'transactions' => $transactions,
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
-
-        $transactions = $booking->transactions()
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return response()->json(['transactions' => $transactions]);
     }
 
     /**
-     * View transaction history page for a booking
-     *
-     * @param Booking $booking
-     * @return \Illuminate\View\View
+     * View transaction history page
      */
-    public function viewTransactionHistory(Booking $booking)
+    public function viewTransactionHistory(Booking $booking): View
     {
-        if ($booking->student_id !== Auth::id() && $booking->tutor->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized');
-        }
+        $this->authorizeBookingAccess($booking);
 
-        $transactions = $booking->transactions()
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $transactions = $this->paymentService->getBookingTransactions($booking);
 
         return view('bookings.transactions', compact('booking', 'transactions'));
+    }
+
+    /**
+     * Authorize booking access
+     */
+    protected function authorizeBookingAccess(Booking $booking): void
+    {
+        if ($booking->student_id !== Auth::id()) {
+            throw new Exception(__('booking.unauthorized_access'));
+        }
+    }
+
+    /**
+     * Validate booking for payment
+     */
+    protected function validateBookingForPayment(Booking $booking): void
+    {
+        if ($booking->status !== 'accepted' || $booking->payment_status === 'paid') {
+            throw new Exception(__('booking.invalid_booking_status_for_payment'));
+        }
     }
 }

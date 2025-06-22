@@ -5,10 +5,12 @@ namespace App\Services;
 use App\Models\Message;
 use App\Models\User;
 use App\Repositories\MessageRepository;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
 use Exception;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class MessageService extends BaseService
 {
@@ -16,17 +18,15 @@ class MessageService extends BaseService
 
     public function __construct()
     {
-        $this->messageRepository = new MessageRepository(new Message());
+        $this->messageRepository = new MessageRepository(new Message);
     }
 
     /**
      * Get conversations for current user
      */
-    public function getUserConversations(?int $userId = null): Collection
+    public function getUserConversations(User $user): EloquentCollection
     {
-        $userId = $userId ?? Auth::id();
-
-        return $this->messageRepository->getConversationsForUser($userId);
+        return $this->messageRepository->getConversationsForUser($user->id);
     }
 
     /**
@@ -43,34 +43,31 @@ class MessageService extends BaseService
     }
 
     /**
-     * Send a message
+     * Send message with User objects and validated data
      */
-    public function sendMessage(int $receiverId, string $content, ?int $senderId = null): Message
+    public function sendMessage(User $sender, array $data): Message
     {
-        return $this->executeTransaction(function () use ($receiverId, $content, $senderId) {
-            $senderId = $senderId ?? Auth::id();
-
-            // Validate users exist
-            $sender = User::findOrFail($senderId);
-            $receiver = User::findOrFail($receiverId);
+        return $this->executeTransaction(function () use ($sender, $data) {
+            // Validate receiver exists
+            $receiver = User::findOrFail($data['receiver_id']);
 
             // Prevent sending message to self
-            if ($senderId === $receiverId) {
+            if ($sender->id === $receiver->id) {
                 throw new Exception(__('You cannot send a message to yourself'));
             }
 
             // Create message
             $message = $this->messageRepository->create([
-                'sender_id' => $senderId,
-                'receiver_id' => $receiverId,
-                'content' => trim($content),
+                'sender_id' => $sender->id,
+                'receiver_id' => $receiver->id,
+                'content' => trim($data['message']),
                 'is_read' => false,
             ]);
 
             $this->logActivity('Message sent', [
                 'message_id' => $message->id,
-                'sender_id' => $senderId,
-                'receiver_id' => $receiverId
+                'sender_id' => $sender->id,
+                'receiver_id' => $receiver->id,
             ]);
 
             return $message;
@@ -86,7 +83,7 @@ class MessageService extends BaseService
 
         $this->logActivity('Messages marked as read', [
             'receiver_id' => $receiverId,
-            'sender_id' => $senderId
+            'sender_id' => $senderId,
         ]);
 
         return true;
@@ -95,7 +92,7 @@ class MessageService extends BaseService
     /**
      * Get unread messages for user
      */
-    public function getUnreadMessages(?int $userId = null): Collection
+    public function getUnreadMessages(?int $userId = null): EloquentCollection
     {
         $userId = $userId ?? Auth::id();
 
@@ -113,25 +110,22 @@ class MessageService extends BaseService
     }
 
     /**
-     * Delete a message
+     * Delete message by Message object and User
      */
-    public function deleteMessage(int $messageId, ?int $userId = null): bool
+    public function deleteMessage(Message $message, User $user): bool
     {
-        return $this->executeTransaction(function () use ($messageId, $userId) {
-            $userId = $userId ?? Auth::id();
-            $message = Message::findOrFail($messageId);
-
+        return $this->executeTransaction(function () use ($message, $user) {
             // Check permission - only sender can delete
-            if ($message->sender_id !== $userId) {
+            if ($message->sender_id !== $user->id) {
                 throw new Exception(__('You can only delete your own messages'));
             }
 
-            $result = $this->messageRepository->delete($message);
+            $result = $this->messageRepository->delete($message->id);
 
             if ($result) {
                 $this->logActivity('Message deleted', [
-                    'message_id' => $messageId,
-                    'sender_id' => $message->sender_id
+                    'message_id' => $message->id,
+                    'user_id' => $user->id,
                 ]);
             }
 
@@ -142,12 +136,12 @@ class MessageService extends BaseService
     /**
      * Search messages for user
      */
-    public function searchMessages(string $query, ?int $userId = null): Collection
+    public function searchMessages(string $query, ?int $userId = null): EloquentCollection
     {
         $userId = $userId ?? Auth::id();
 
         if (empty(trim($query))) {
-            return collect();
+            return new EloquentCollection;
         }
 
         return $this->messageRepository->searchMessages($userId, $query);
@@ -168,7 +162,7 @@ class MessageService extends BaseService
             'other_user' => $otherUser,
             'messages' => $messages,
             'unread_count' => $unreadCount,
-            'latest_message' => $this->messageRepository->getLatestMessageBetweenUsers($currentUserId, $otherUserId)
+            'latest_message' => $this->messageRepository->getLatestMessageBetweenUsers($currentUserId, $otherUserId),
         ];
     }
 
@@ -192,7 +186,7 @@ class MessageService extends BaseService
                 'total_received' => number_format($stats['total_received']),
                 'total_messages' => number_format($stats['total_messages']),
                 'unread_count' => number_format($stats['unread_count']),
-            ]
+            ],
         ];
     }
 
@@ -209,7 +203,7 @@ class MessageService extends BaseService
         $sender = User::find($senderId);
         $receiver = User::find($receiverId);
 
-        if (!$sender || !$receiver) {
+        if (! $sender || ! $receiver) {
             return false;
         }
 
@@ -218,20 +212,18 @@ class MessageService extends BaseService
             return false;
         }
 
-        // Additional business rules can be added here
-        // For example: check if they have had a booking together, etc.
-
         return true;
     }
 
     /**
      * Get conversation preview for dashboard
      */
-    public function getConversationPreviews(?int $userId = null, int $limit = 5): Collection
+    public function getConversationPreviews(?int $userId = null, int $limit = 5): SupportCollection
     {
         $userId = $userId ?? Auth::id();
+        $user = User::findOrFail($userId);
 
-        $conversations = $this->getUserConversations($userId);
+        $conversations = $this->getUserConversations($user);
 
         return $conversations->take($limit)->map(function ($message) use ($userId) {
             $otherUser = $message->sender_id === $userId ? $message->receiver : $message->sender;
@@ -258,13 +250,13 @@ class MessageService extends BaseService
                 ->where('is_read', false)
                 ->update([
                     'is_read' => true,
-                    'read_at' => now()
+                    'read_at' => now(),
                 ]);
 
             if ($count > 0) {
                 $this->logActivity('Bulk messages marked as read', [
                     'user_id' => $userId,
-                    'count' => $count
+                    'count' => $count,
                 ]);
             }
 
@@ -273,11 +265,54 @@ class MessageService extends BaseService
     }
 
     /**
-     * Handle errors specific to message service
+     * Get conversation between user and another user
      */
-    public function handleError(\Exception $e, string $context = ''): void
+    public function getConversation(User $user, User $otherUser): array
     {
-        $this->logError($context ?: 'Message service error occurred', $e);
-        throw $e;
+        // Mark messages as read when viewing conversation
+        $this->markMessagesAsRead($user->id, $otherUser->id);
+
+        $messages = $this->getMessagesBetweenUsers($otherUser->id, $user->id);
+
+        return [
+            'user' => $otherUser,
+            'messages' => $messages,
+            'unread_count' => $this->getUnreadCount($user->id),
+        ];
+    }
+
+    /**
+     * Mark specific message as read
+     */
+    public function markAsRead(Message $message, User $user): bool
+    {
+        // Check if user is the receiver
+        if ($message->receiver_id !== $user->id) {
+            throw new Exception(__('You can only mark your own messages as read'));
+        }
+
+        if (! $message->read_at) {
+            $message->update(['read_at' => now()]);
+
+            $this->logActivity('Message marked as read', [
+                'message_id' => $message->id,
+                'user_id' => $user->id,
+            ]);
+        }
+
+        return true;
+    }
+
+    /**
+     * Handle errors consistently
+     */
+    public function handleError(Exception $e, string $context = ''): void
+    {
+        Log::error("MessageService Error: {$context}", [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'user_id' => Auth::id(),
+        ]);
     }
 }

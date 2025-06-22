@@ -1,17 +1,18 @@
 <?php
 
-if (!function_exists('translateSubjectName')) {
+if (! function_exists('translateSubjectName')) {
     /**
      * Translate subject name based on current locale
      *
-     * @param string $subjectName
+     * @param  string  $subjectName
      * @return string
      */
-    function translateSubjectName($subjectName) {
-        $translatedName = __('subjects.names.' . $subjectName);
+    function translateSubjectName($subjectName)
+    {
+        $translatedName = __('subjects.names.'.$subjectName);
 
         // If translation not found, return original name
-        if ($translatedName === 'subjects.names.' . $subjectName) {
+        if ($translatedName === 'subjects.names.'.$subjectName) {
             return $subjectName;
         }
 
@@ -19,26 +20,27 @@ if (!function_exists('translateSubjectName')) {
     }
 }
 
-if (!function_exists('translateSubjectDescription')) {
+if (! function_exists('translateSubjectDescription')) {
     /**
      * Translate subject description based on current locale
      *
-     * @param string $subjectName
+     * @param  string  $subjectName
      * @return string
      */
-    function translateSubjectDescription($subjectName) {
-        $translatedDescription = __('subjects.descriptions.' . $subjectName);
+    function translateSubjectDescription($subjectName)
+    {
+        $translatedDescription = __('subjects.descriptions.'.$subjectName);
 
         // If translation not found, return default fallback
-        if ($translatedDescription === 'subjects.descriptions.' . $subjectName) {
-            return 'Explore ' . $subjectName . ' courses and find expert tutors.';
+        if ($translatedDescription === 'subjects.descriptions.'.$subjectName) {
+            return 'Explore '.$subjectName.' courses and find expert tutors.';
         }
 
         return $translatedDescription;
     }
 }
 
-if (!function_exists('getBookingCard')) {
+if (! function_exists('getBookingCard')) {
     /**
      * Get BookingCard component instance
      */
@@ -48,7 +50,7 @@ if (!function_exists('getBookingCard')) {
     }
 }
 
-if (!function_exists('getTutorCard')) {
+if (! function_exists('getTutorCard')) {
     /**
      * Get TutorCard component instance
      */
@@ -58,17 +60,17 @@ if (!function_exists('getTutorCard')) {
     }
 }
 
-if (!function_exists('formatCurrency')) {
+if (! function_exists('formatCurrency')) {
     /**
      * Format currency for display
      */
     function formatCurrency(float $amount, string $currency = 'USD'): string
     {
-        return number_format($amount, 2) . ' ' . $currency;
+        return number_format($amount, 2).' '.$currency;
     }
 }
 
-if (!function_exists('formatDateForDisplay')) {
+if (! function_exists('formatDateForDisplay')) {
     /**
      * Format date using user preferred format (d-m-Y)
      */
@@ -82,7 +84,7 @@ if (!function_exists('formatDateForDisplay')) {
     }
 }
 
-if (!function_exists('formatDateTimeForDisplay')) {
+if (! function_exists('formatDateTimeForDisplay')) {
     /**
      * Format datetime using user preferred format
      */
@@ -96,7 +98,7 @@ if (!function_exists('formatDateTimeForDisplay')) {
     }
 }
 
-if (!function_exists('getBookingStatusBadge')) {
+if (! function_exists('getBookingStatusBadge')) {
     /**
      * Get booking status badge configuration
      */
@@ -106,39 +108,39 @@ if (!function_exists('getBookingStatusBadge')) {
             'pending' => [
                 'color' => 'warning',
                 'icon' => 'clock',
-                'text' => __('booking.status.pending')
+                'text' => __('booking.status.pending'),
             ],
             'accepted' => [
                 'color' => 'success',
                 'icon' => 'check',
-                'text' => __('booking.status.accepted')
+                'text' => __('booking.status.accepted'),
             ],
             'rejected' => [
                 'color' => 'danger',
                 'icon' => 'times',
-                'text' => __('booking.status.rejected')
+                'text' => __('booking.status.rejected'),
             ],
             'cancelled' => [
                 'color' => 'secondary',
                 'icon' => 'ban',
-                'text' => __('booking.status.cancelled')
+                'text' => __('booking.status.cancelled'),
             ],
             'completed' => [
                 'color' => 'primary',
                 'icon' => 'check-circle',
-                'text' => __('booking.status.completed')
-            ]
+                'text' => __('booking.status.completed'),
+            ],
         ];
 
         return $statusConfig[$status] ?? [
             'color' => 'secondary',
             'icon' => 'question',
-            'text' => ucfirst($status)
+            'text' => ucfirst($status),
         ];
     }
 }
 
-if (!function_exists('calculateBookingDuration')) {
+if (! function_exists('calculateBookingDuration')) {
     /**
      * Calculate booking duration
      */
@@ -159,7 +161,7 @@ if (!function_exists('calculateBookingDuration')) {
     }
 }
 
-if (!function_exists('getTutorRatingStars')) {
+if (! function_exists('getTutorRatingStars')) {
     /**
      * Generate star rating array for tutor
      */
@@ -189,7 +191,7 @@ if (!function_exists('getTutorRatingStars')) {
     }
 }
 
-if (!function_exists('isUpcomingBooking')) {
+if (! function_exists('isUpcomingBooking')) {
     /**
      * Check if booking is upcoming
      */
@@ -199,13 +201,13 @@ if (!function_exists('isUpcomingBooking')) {
     }
 }
 
-if (!function_exists('getBookingUrgency')) {
+if (! function_exists('getBookingUrgency')) {
     /**
      * Get booking urgency level
      */
     function getBookingUrgency($startTime): string
     {
-        if (!\Carbon\Carbon::parse($startTime)->isFuture()) {
+        if (! \Carbon\Carbon::parse($startTime)->isFuture()) {
             return 'none';
         }
 
