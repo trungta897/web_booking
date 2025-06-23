@@ -30,9 +30,15 @@ class TutorService extends BaseService implements TutorServiceInterface
      */
     public function getTutorsWithFilters(array $filters = []): \Illuminate\Pagination\LengthAwarePaginator
     {
-        $cacheKey = 'tutors_'.md5(serialize($filters));
+        // Don't cache paginated results, but cache the underlying data
+        $filtersForCache = $filters;
+        unset($filtersForCache['page'], $filtersForCache['per_page']);
+        $cacheKey = 'tutors_data_'.md5(serialize($filtersForCache));
+        $page = $filters['page'] ?? 1;
+        $perPage = $filters['per_page'] ?? 12;
 
-        return Cache::remember($cacheKey, 3600, function () use ($filters) {
+        // Cache for 30 minutes (1800 seconds) - shorter cache for dynamic content
+        return Cache::remember($cacheKey.'_page_'.$page.'_'.$perPage, 1800, function () use ($filters) {
             return $this->tutorRepository->getTutorsWithFilters($filters);
         });
     }

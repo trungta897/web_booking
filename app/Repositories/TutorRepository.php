@@ -21,9 +21,15 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
      */
     public function getTutorsWithFilters(array $filters = []): LengthAwarePaginator
     {
-        $query = $this->query()->with(['user', 'subjects', 'reviews'])
+        $query = $this->query()
+            ->select(['tutors.*'])
+            ->with(['user:id,name,email,avatar', 'subjects:id,name,icon'])
             ->withCount('reviews')
-            ->withAvg('reviews', 'rating');
+            ->withAvg('reviews', 'rating')
+            ->where('is_available', true)
+            ->whereHas('user', function ($q) {
+                $q->where('account_status', 'active');
+            });
 
         // Apply filters
         $query = $this->applyFilters($query, $filters);
