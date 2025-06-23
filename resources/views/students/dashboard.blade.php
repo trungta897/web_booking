@@ -107,7 +107,12 @@
             <!-- Learning History -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6">
                 <div class="p-6">
-                    <h4 class="text-lg font-medium text-gray-900 mb-4">{{ __('common.learning_history') }}</h4>
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-medium text-gray-900">{{ __('common.learning_history') }}</h4>
+                        <a href="{{ route('bookings.index') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            {{ __('common.view_all_bookings') }}
+                        </a>
+                    </div>
 
                     @if($completedSessions->count() > 0)
                         <div class="overflow-x-auto">
@@ -155,6 +160,104 @@
                     @else
                         <p class="text-gray-500 text-center py-8">{{ __('common.no_completed_sessions_yet') }}</p>
                     @endif
+                </div>
+            </div>
+
+            <!-- All Bookings -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-medium text-gray-900">{{ __('common.all_bookings') }}</h4>
+                        <a href="{{ route('bookings.index') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            {{ __('common.view_all_bookings') }}
+                        </a>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.tutor') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.subject') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.date_time') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.status') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.price') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('common.actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @php
+                                    // Get all bookings (limited to 5 for dashboard)
+                                    $allBookings = App\Models\Booking::where('student_id', Auth::id())
+                                        ->with(['tutor.user', 'subject'])
+                                        ->orderByDesc('created_at')
+                                        ->limit(5)
+                                        ->get();
+                                @endphp
+                                @if($allBookings->count() > 0)
+                                    @foreach($allBookings as $booking)
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-8 w-8">
+                                                        <img class="h-8 w-8 rounded-full" src="{{ $booking->tutor->user->avatar ? asset('storage/' . $booking->tutor->user->avatar) : asset('images/default-avatar.png') }}" alt="{{ $booking->tutor->user->name }}">
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">
+                                                            {{ $booking->tutor->user->name }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">{{ $booking->subject->name ?? 'N/A' }}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">
+                                                    {{ Carbon\Carbon::parse($booking->start_time)->format('d/m/Y') }}
+                                                </div>
+                                                <div class="text-sm text-gray-500">
+                                                    {{ Carbon\Carbon::parse($booking->start_time)->format('H:i') }} - {{ Carbon\Carbon::parse($booking->end_time)->format('H:i') }}
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                    @if($booking->status === 'accepted') bg-green-100 text-green-800
+                                                    @elseif($booking->status === 'pending') bg-yellow-100 text-yellow-800
+                                                    @elseif($booking->status === 'rejected') bg-red-100 text-red-800
+                                                    @elseif($booking->status === 'completed') bg-blue-100 text-blue-800
+                                                    @else bg-gray-100 text-gray-800
+                                                    @endif">
+                                                    {{ ucfirst($booking->status) }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {{ number_format($booking->price) }} VNĐ
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <a href="{{ route('bookings.show', $booking) }}" class="text-indigo-600 hover:text-indigo-900">{{ __('common.view') }}</a>
+                                                @if($booking->status === 'pending')
+                                                    <form action="{{ route('bookings.destroy', $booking) }}" method="POST" class="inline-block ml-2">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('{{ __('common.confirm_cancel_booking') }}')">
+                                                            {{ __('common.cancel') }}
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                            {{ __('common.no_bookings_yet') }}
+                                        </td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 

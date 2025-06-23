@@ -52,11 +52,21 @@ abstract class BaseService implements ServiceInterface
     }
 
     /**
-     * Format currency
+     * Format currency with automatic conversion based on locale
      */
     public function formatCurrency(float $amount): string
     {
-        return number_format($amount, 2).' VND';
+        // Get current locale
+        $locale = app()->getLocale();
+
+        // If Vietnamese locale, convert USD to VND
+        if ($locale === 'vi') {
+            $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
+            return number_format($vndAmount, 0, ',', '.') . ' ₫';
+        }
+
+        // Default to USD format
+        return '$' . number_format($amount, 2);
     }
 
     /**

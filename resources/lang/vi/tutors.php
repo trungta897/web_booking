@@ -56,4 +56,7 @@ return [
     'sun' => 'CN',
     'details' => 'Chi Tiết',
     'any_rating' => 'Bất Kỳ Đánh Giá',
+    'book_now' => 'Đặt Lịch Ngay',
+    'Add to Favorites' => 'Thêm vào Yêu thích',
+    'tutor_profile' => 'Hồ Sơ Gia Sư :name',
 ];

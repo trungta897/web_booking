@@ -563,12 +563,38 @@ class TutorService extends BaseService implements TutorServiceInterface
             ->limit(5)
             ->get();
 
+        // Count statistics for dashboard
+        $totalBookings = \App\Models\Booking::where('tutor_id', $tutor->id)->count();
+        $completedBookings = \App\Models\Booking::where('tutor_id', $tutor->id)
+            ->where('status', 'completed')
+            ->count();
+        $pendingBookings = \App\Models\Booking::where('tutor_id', $tutor->id)
+            ->where('status', 'pending')
+            ->count();
+        $upcomingBookings = \App\Models\Booking::where('tutor_id', $tutor->id)
+            ->where('status', 'confirmed')
+            ->where('start_time', '>', now())
+            ->count();
+        $totalStudents = \App\Models\Booking::where('tutor_id', $tutor->id)
+            ->select('student_id')
+            ->distinct()
+            ->count();
+        $totalEarnings = \App\Models\Booking::where('tutor_id', $tutor->id)
+            ->where('status', 'completed')
+            ->sum('price');
+
         return [
             'tutor' => $tutor,
             'stats' => $stats,
             'recentBookings' => $recentBookings,
             'upcomingSessions' => $upcomingSessions,
             'recentReviews' => $recentReviews,
+            'totalBookings' => $totalBookings,
+            'completedBookings' => $completedBookings,
+            'pendingBookings' => $pendingBookings,
+            'upcomingBookings' => $upcomingBookings,
+            'totalStudents' => $totalStudents,
+            'totalEarnings' => $totalEarnings,
         ];
     }
 

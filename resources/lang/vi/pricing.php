@@ -6,7 +6,7 @@ return [
 
     'plans' => [
         'basic' => [
-            'title' => 'Cơ Bản: Lên đến $25/giờ',
+            'title' => 'Cơ Bản: Lên đến 625.000₫/giờ',
             'features' => [
                 'Dạy kèm 1:1',
                 'Các môn học cơ bản',
@@ -14,7 +14,7 @@ return [
             ],
         ],
         'standard' => [
-            'title' => 'Tiêu Chuẩn: $25-$40/giờ',
+            'title' => 'Tiêu Chuẩn: 625.000₫-1.000.000₫/giờ',
             'features' => [
                 'Dạy kèm 1:1',
                 'Tất cả môn học',
@@ -23,7 +23,7 @@ return [
             ],
         ],
         'premium' => [
-            'title' => 'Cao Cấp: $40+/giờ',
+            'title' => 'Cao Cấp: 1.000.000₫+/giờ',
             'features' => [
                 'Dạy kèm 1:1',
                 'Tất cả môn học',

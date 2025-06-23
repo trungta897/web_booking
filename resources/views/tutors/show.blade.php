@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ $tutor->user->name }}'s Profile
+                {{ __('tutors.tutor_profile', ['name' => $tutor->user->name]) }}
             </h2>
             @auth
                 @if(auth()->user()->role === 'student')
@@ -14,7 +14,7 @@
                         <svg class="h-5 w-5 mr-2" :class="{'text-red-500': isFavorite}" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
                         </svg>
-                        <span id="favoriteText">Add to Favorites</span>
+                        <span id="favoriteText">{{ __('tutors.Add to Favorites') }}</span>
                     </button>
                 @endif
             @endauth
@@ -46,11 +46,11 @@
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-2xl font-bold text-gray-900">${{ number_format($tutor->hourly_rate, 2) }}{{ __('tutors.per_hour') }}</div>
+                                    <div class="text-2xl font-bold text-gray-900">{{ formatCurrency($tutor->hourly_rate) }}<span class="text-sm font-normal">{{ __('tutors.per_hour') }}</span></div>
                                     @auth
                                         @if(auth()->user()->role === 'student')
-                                            <a href="{{ route('bookings.create', ['tutor' => $tutor->id]) }}" class="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                Book Now
+                                            <a href="{{ route('bookings.create', ['tutor' => $tutor->id]) }}" class="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                {{ __('tutors.book_now') }}
                                             </a>
                                         @endif
                                     @endauth

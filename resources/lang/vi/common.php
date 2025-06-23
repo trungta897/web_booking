@@ -143,4 +143,24 @@ return [
     'none' => 'Không có',
     'You can only delete your own messages' => 'Bạn chỉ có thể xóa tin nhắn của mình',
     'You cannot send a message to yourself' => 'Bạn không thể gửi tin nhắn cho chính mình',
+
+    // New translations for student dashboard
+    'view_all_bookings' => 'Xem tất cả đặt lịch',
+    'confirm_cancel_booking' => 'Bạn có chắc chắn muốn hủy đặt lịch này không?',
+
+    // Payment page translations
+    'Complete Payment' => 'Hoàn tất thanh toán',
+    'reviews' => 'đánh giá',
+    'Duration' => 'Thời lượng',
+    'minutes' => 'phút',
+    'Hourly Rate' => 'Giá theo giờ',
+    'hour' => 'giờ',
+    'Payment Information' => 'Thông tin thanh toán',
+    'Credit or debit card' => 'Thẻ tín dụng hoặc thẻ ghi nợ',
+    'Select payment method' => 'Chọn phương thức thanh toán',
+    'Bạn sẽ được chuyển hướng đến trang thanh toán VNPay để hoàn tất giao dịch.' => 'Bạn sẽ được chuyển hướng đến trang thanh toán VNPay để hoàn tất giao dịch.',
+    'Hỗ trợ tất cả ngân hàng tại Việt Nam' => 'Hỗ trợ tất cả ngân hàng tại Việt Nam',
+    'Thanh toán qua QR Code' => 'Thanh toán qua QR Code',
+    'Ví điện tử VNPay' => 'Ví điện tử VNPay',
+    'Bảo mật SSL 256-bit' => 'Bảo mật SSL 256-bit',
 ];

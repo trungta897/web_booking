@@ -187,7 +187,6 @@ Route::get('/test-relationships', function () {
 
 // Rate limited routes
 Route::middleware('throttle:60,1')->group(function () {
-    Route::get('/tutors', [TutorController::class, 'index'])->name('tutors.index');
     Route::get('/tutors/{tutor}', [TutorController::class, 'show'])->name('tutors.show');
     Route::post('/tutors/{tutor}/favorite', [TutorController::class, 'toggleFavorite'])->name('tutors.favorite');
     Route::get('/tutors/{tutor}/availability/{day}', [TutorController::class, 'checkAvailability'])->name('tutors.availability');

@@ -34,14 +34,15 @@ return [
         'cannot_cancel' => 'Lịch đặt này không thể hủy.',
         'invalid_payment_state' => 'Lịch đặt này không đủ điều kiện thanh toán.',
         'payment_failed' => 'Thanh toán thất bại: :message',
-        'choose_payment_method' => 'Chọn phương thức thanh toán',
-        'stripe_card' => 'Thẻ tín dụng/ghi nợ (Stripe)',
-        'vnpay_banking' => 'Internet Banking/QR Code (VNPay)',
-        'total_amount' => 'Tổng tiền',
-        'processing_payment' => 'Đang xử lý thanh toán...',
-        'payment_secure' => 'Thanh toán được bảo mật và mã hóa',
-        'payment_success' => 'Thanh toán thành công qua :method',
     ],
+
+    // Payment related translations
+    'choose_payment_method' => 'Chọn phương thức thanh toán',
+    'vnpay_banking' => 'Internet Banking/QR Code',
+    'stripe_card' => 'Thẻ tín dụng/ghi nợ',
+    'details' => 'Chi tiết đặt lịch',
+    'total_amount' => 'Tổng tiền',
+    'payment_secure' => 'Thanh toán được bảo mật và mã hóa',
 
     // Payment Controller Messages
     'payment_completed_successfully' => 'Thanh toán hoàn tất thành công',

@@ -113,7 +113,7 @@
                                     </div>
                                     <div class="flex justify-between text-sm">
                                         <span class="text-gray-500">{{ __('Hourly Rate') }}:</span>
-                                        <span class="font-medium text-gray-900">${{ number_format($booking->tutor->hourly_rate, 2) }}/{{ __('hour') }}</span>
+                                        <span class="font-medium text-gray-900">{{ formatCurrency($booking->tutor->hourly_rate) }}/{{ __('hour') }}</span>
                                     </div>
                                     <div class="flex justify-between pt-3 border-t border-gray-200">
                                         <span class="text-base font-medium text-gray-900">{{ __('booking.total_amount') }}:</span>

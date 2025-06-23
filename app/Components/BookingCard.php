@@ -29,11 +29,21 @@ class BookingCard
     public function getData(): array
     {
         return [
-            'booking' => $this->booking,
-            'formatted_data' => $this->getFormattedData(),
-            'status_info' => $this->getStatusInfo(),
-            'actions' => $this->getAvailableActions(),
-            'options' => $this->options,
+            'id' => $this->booking->id,
+            'student_name' => $this->booking->student->name,
+            'tutor_name' => $this->booking->tutor->user->name,
+            'subject_name' => $this->booking->subject->name,
+            'start_time' => $this->booking->start_time->format('d-m-Y H:i'),
+            'end_time' => $this->booking->end_time->format('d-m-Y H:i'),
+            'status' => $this->booking->status,
+            'status_badge' => getBookingStatusBadge($this->booking->status),
+            'duration' => calculateBookingDuration($this->booking->start_time, $this->booking->end_time),
+            'price' => formatCurrency($this->booking->price),
+            'is_upcoming' => isUpcomingBooking($this->booking->start_time),
+            'urgency' => getBookingUrgency($this->booking->start_time),
+            'can_be_cancelled' => $this->booking->canBeCancelled(),
+            'show_url' => route('bookings.show', $this->booking),
+            ...$this->options,
         ];
     }
 
@@ -46,7 +56,7 @@ class BookingCard
             'start_time' => Carbon::parse($this->booking->start_time)->format($this->options['date_format']),
             'end_time' => Carbon::parse($this->booking->end_time)->format($this->options['date_format']),
             'duration' => $this->calculateDuration(),
-            'price' => number_format($this->booking->price, 2).' USD',
+            'price' => formatCurrency($this->booking->price),
             'status_text' => ucfirst($this->booking->status),
             'payment_status_text' => ucfirst($this->booking->payment_status ?? 'unpaid'),
         ];

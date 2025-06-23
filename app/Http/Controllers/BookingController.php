@@ -9,7 +9,9 @@ use App\Services\BookingService;
 use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class BookingController extends Controller
@@ -78,16 +80,47 @@ class BookingController extends Controller
     /**
      * Update booking status
      */
-    public function update(BookingRequest $request, Booking $booking): RedirectResponse
+    public function update(Request $request, Booking $booking): RedirectResponse
     {
         $this->authorize('update', $booking);
 
         try {
-            $this->bookingService->updateBookingStatus($booking, $request->validated());
+            // Validate input
+            $validated = $request->validate([
+                'status' => 'required|in:accepted,rejected',
+                'rejection_reason' => 'nullable|string|max:100',
+                'rejection_description' => 'nullable|string|max:500',
+            ]);
 
-            return back()->with('success', __('booking.success.status_updated'));
+            // Kiểm tra xem người dùng có phải là tutor không
+            if (Auth::user()->role !== 'tutor') {
+                return back()->withErrors(['error' => 'Only tutors can update booking status']);
+            }
+
+            // Kiểm tra xem người dùng có phải là tutor của booking này không
+            if (Auth::user()->tutor->id !== $booking->tutor_id) {
+                return back()->withErrors(['error' => 'You can only update your own bookings']);
+            }
+
+            // Cập nhật booking
+            $booking->update($validated);
+
+            // Thông báo thành công
+            $message = $validated['status'] === 'accepted'
+                ? 'Booking has been accepted successfully'
+                : 'Booking has been rejected successfully';
+
+            return back()->with('success', $message);
 
         } catch (Exception $e) {
+            // Log lỗi để debug
+            Log::error('Booking update error: ' . $e->getMessage(), [
+                'booking_id' => $booking->id,
+                'user_id' => Auth::id(),
+                'data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }

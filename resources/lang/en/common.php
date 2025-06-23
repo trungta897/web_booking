@@ -143,4 +143,8 @@ return [
     'none' => 'None',
     'You can only delete your own messages' => 'You can only delete your own messages',
     'You cannot send a message to yourself' => 'You cannot send a message to yourself',
+
+    // New translations for student dashboard
+    'view_all_bookings' => 'View All Bookings',
+    'confirm_cancel_booking' => 'Are you sure you want to cancel this booking?',
 ];

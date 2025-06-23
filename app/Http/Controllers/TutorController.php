@@ -52,9 +52,15 @@ class TutorController extends Controller
             'day_of_week', 'experience', 'sort',
         ]);
 
-        $data = $this->tutorService->getTutorsWithFilters($filters);
+        $tutors = $this->tutorService->getTutorsWithFilters($filters);
 
-        return view('tutors.index', $data);
+        // Get all subjects for the filter dropdown
+        $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
+
+        return view('tutors.index', [
+            'tutors' => $tutors,
+            'subjects' => $subjects
+        ]);
     }
 
     /**
@@ -64,7 +70,9 @@ class TutorController extends Controller
     {
         $tutorData = $this->tutorService->getTutorDetails($tutor->id);
 
-        return view('tutors.show', $tutorData);
+        return view('tutors.show', [
+            'tutor' => $tutorData
+        ]);
     }
 
     /**

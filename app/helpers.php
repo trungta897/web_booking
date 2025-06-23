@@ -62,11 +62,25 @@ if (! function_exists('getTutorCard')) {
 
 if (! function_exists('formatCurrency')) {
     /**
-     * Format currency for display
+     * Format currency for display with automatic conversion based on locale
      */
     function formatCurrency(float $amount, string $currency = 'USD'): string
     {
-        return number_format($amount, 2).' '.$currency;
+        // Get current locale
+        $locale = app()->getLocale();
+
+        // If Vietnamese locale and currency is USD, convert to VND
+        if ($locale === 'vi' && $currency === 'USD') {
+            $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
+            return number_format($vndAmount, 0, ',', '.') . ' ₫';
+        }
+
+        // For other cases, format normally
+        if ($currency === 'VND') {
+            return number_format($amount, 0, ',', '.') . ' ₫';
+        }
+
+        return '$' . number_format($amount, 2);
     }
 }
 

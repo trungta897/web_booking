@@ -28,10 +28,17 @@
                                 <label for="price_range" class="block text-xs font-medium text-gray-700">{{ __('tutors.price_range') }}</label>
                                 <select name="price_range" id="price_range" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     <option value="">{{ __('tutors.any_price') }}</option>
-                                    <option value="0-25" {{ request('price_range') == '0-25' ? 'selected' : '' }}>$0 - $25/hr</option>
-                                    <option value="26-50" {{ request('price_range') == '26-50' ? 'selected' : '' }}>$26 - $50/hr</option>
-                                    <option value="51-100" {{ request('price_range') == '51-100' ? 'selected' : '' }}>$51 - $100/hr</option>
-                                    <option value="101+" {{ request('price_range') == '101+' ? 'selected' : '' }}>$101+/hr</option>
+                                    @if(app()->getLocale() === 'vi')
+                                        <option value="0-25" {{ request('price_range') == '0-25' ? 'selected' : '' }}>0 - 625.000₫/giờ</option>
+                                        <option value="26-50" {{ request('price_range') == '26-50' ? 'selected' : '' }}>650.000 - 1.250.000₫/giờ</option>
+                                        <option value="51-100" {{ request('price_range') == '51-100' ? 'selected' : '' }}>1.275.000 - 2.500.000₫/giờ</option>
+                                        <option value="101+" {{ request('price_range') == '101+' ? 'selected' : '' }}>2.525.000₫+/giờ</option>
+                                    @else
+                                        <option value="0-25" {{ request('price_range') == '0-25' ? 'selected' : '' }}>$0 - $25/hr</option>
+                                        <option value="26-50" {{ request('price_range') == '26-50' ? 'selected' : '' }}>$26 - $50/hr</option>
+                                        <option value="51-100" {{ request('price_range') == '51-100' ? 'selected' : '' }}>$51 - $100/hr</option>
+                                        <option value="101+" {{ request('price_range') == '101+' ? 'selected' : '' }}>$101+/hr</option>
+                                    @endif
                                 </select>
                             </div>
                             <div>
@@ -148,7 +155,7 @@
 
                             <div class="mt-auto pt-4 border-t border-gray-100">
                                 <div class="flex items-center justify-between">
-                                    <div class="text-lg font-bold text-brand-primary">${{ number_format($tutor->hourly_rate, 2) }}<span class="text-sm font-normal text-secondary-500">{{ __('tutors.per_hour') }}</span></div>
+                                    <div class="text-lg font-bold text-brand-primary">{{ formatCurrency($tutor->hourly_rate) }}<span class="text-sm font-normal text-secondary-500">{{ __('tutors.per_hour') }}</span></div>
                                     <a href="{{ route('tutors.show', $tutor) }}" class="btn-primary text-sm py-2 px-3">
                                         {{ __('tutors.view_profile') }}
                                     </a>

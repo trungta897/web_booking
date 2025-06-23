@@ -329,10 +329,17 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('welcome.search.price_range') }}</label>
                                 <select name="price_range" class="modern-input w-full">
                                     <option value="">{{ __('welcome.search.any_price') }}</option>
-                                    <option value="0-25">$0 - $25/hr</option>
-                                    <option value="26-50">$26 - $50/hr</option>
-                                    <option value="51-100">$51 - $100/hr</option>
-                                    <option value="101+">$101+/hr</option>
+                                    @if(app()->getLocale() === 'vi')
+                                        <option value="0-25">0 - 625.000₫/giờ</option>
+                                        <option value="26-50">650.000 - 1.250.000₫/giờ</option>
+                                        <option value="51-100">1.275.000 - 2.500.000₫/giờ</option>
+                                        <option value="101+">2.525.000₫+/giờ</option>
+                                    @else
+                                        <option value="0-25">$0 - $25/hr</option>
+                                        <option value="26-50">$26 - $50/hr</option>
+                                        <option value="51-100">$51 - $100/hr</option>
+                                        <option value="101+">$101+/hr</option>
+                                    @endif
                                 </select>
                             </div>
                             <div class="flex items-end">
@@ -486,7 +493,7 @@
                                 </div>
                                 <p class="text-sm text-gray-600 mb-4">{{ Str::limit($tutor->bio, 100) }}</p>
                                 <div class="flex items-center justify-between mt-auto">
-                                    <div class="text-lg font-medium text-gray-900">${{ number_format($tutor->hourly_rate, 2) }}/hr</div>
+                                    <div class="text-lg font-medium text-gray-900">{{ formatCurrency($tutor->hourly_rate) }}/hr</div>
                                     <a href="{{ route('tutors.show', $tutor) }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                         {{ __('welcome.featured_tutors.view_profile') }}
                                     </a>
