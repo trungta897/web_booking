@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -111,12 +112,12 @@ class Booking extends Model
 
     public function canBeCancelled()
     {
-        return $this->isPending() || ($this->isAccepted() && $this->start_time->isFuture());
+        return $this->isPending() || ($this->isAccepted() && $this->start_time > now());
     }
 
     public function canBeReviewed()
     {
-        return $this->isAccepted() && $this->end_time->isPast() && ! $this->review;
+        return $this->isAccepted() && $this->end_time < now() && ! $this->review;
     }
 
     public function student()
@@ -136,7 +137,7 @@ class Booking extends Model
 
     public function getDurationAttribute()
     {
-        return $this->start_time->diffInMinutes($this->end_time);
+        return Carbon::parse($this->start_time)->diffInMinutes(Carbon::parse($this->end_time));
     }
 
     public function getTotalPriceAttribute()
@@ -183,10 +184,10 @@ class Booking extends Model
     public function getDisplayAmountAttribute()
     {
         if ($this->currency === 'VND') {
-            return number_format($this->price, 0, ',', '.').' ₫';
+            return number_format((float)$this->price, 0, ',', '.').' ₫';
         }
 
-        return '$'.number_format($this->price, 2);
+        return '$'.number_format((float)$this->price, 2);
     }
 
     public function getPaymentMethodDisplayAttribute()
@@ -199,5 +200,10 @@ class Booking extends Model
         ];
 
         return $methods[$this->payment_method] ?? $this->payment_method;
+    }
+
+    public function setPriceAttribute($value)
+    {
+        $this->attributes['price'] = round($value, 2);
     }
 }

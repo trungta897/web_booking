@@ -101,15 +101,17 @@ class BookingService extends BaseService
             $price = $hours * $tutor->hourly_rate;
 
             // Create booking
-            $booking = new Booking;
-            $booking->student_id = $student->id;
-            $booking->tutor_id = $tutor->id;
-            $booking->subject_id = $data['subject_id'];
-            $booking->start_time = $data['start_time'];
-            $booking->end_time = $data['end_time'];
-            $booking->notes = $data['notes'] ?? null;
-            $booking->price = $price;
-            $booking->status = Booking::STATUS_PENDING;
+            $booking = new Booking();
+            $booking->fill([
+                'student_id' => $student->id,
+                'tutor_id' => $tutor->id,
+                'subject_id' => $data['subject_id'],
+                'start_time' => $data['start_time'],
+                'end_time' => $data['end_time'],
+                'notes' => $data['notes'] ?? null,
+                'price' => $price,
+                'status' => Booking::STATUS_PENDING
+            ]);
             $booking->save();
 
             // Send notification to tutor

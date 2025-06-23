@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -91,10 +92,13 @@ class Tutor extends Model
 
         $found = false;
         foreach ($availabilities as $a) {
-            \Illuminate\Support\Facades\Log::info("Checking against availability: {$a->start_time} - {$a->end_time}");
+            $startTimeStr = $a->start_time->format('H:i:s');
+            $endTimeStr = $a->end_time->format('H:i:s');
+            \Illuminate\Support\Facades\Log::info("Checking against availability: {$startTimeStr} - {$endTimeStr}");
+
             // So sánh chỉ phần giờ phút giây
-            $availStart = Carbon::createFromFormat('H:i:s', $a->start_time)->setDate($startDateTime->year, $startDateTime->month, $startDateTime->day);
-            $availEnd = Carbon::createFromFormat('H:i:s', $a->end_time)->setDate($startDateTime->year, $startDateTime->month, $startDateTime->day);
+            $availStart = Carbon::createFromFormat('H:i:s', $startTimeStr)->setDate($startDateTime->year, $startDateTime->month, $startDateTime->day);
+            $availEnd = Carbon::createFromFormat('H:i:s', $endTimeStr)->setDate($startDateTime->year, $startDateTime->month, $startDateTime->day);
             if ($startDateTime->greaterThanOrEqualTo($availStart) && $endDateTime->lessThanOrEqualTo($availEnd)) {
                 $found = true;
                 break;
@@ -107,7 +111,7 @@ class Tutor extends Model
 
         // Check overlapping bookings như cũ
         $overlappingBookingsExist = $this->bookings()
-            ->whereIn('status', ['accepted', 'pending'])
+            ->whereIn('status', [Booking::STATUS_ACCEPTED, Booking::STATUS_PENDING])
             ->where(function ($query) use ($startDateTime, $endDateTime) {
                 $query->where(function ($q) use ($startDateTime, $endDateTime) {
                     $q->where('start_time', '<', $endDateTime)
@@ -161,5 +165,16 @@ class Tutor extends Model
         }
 
         return true;
+    }
+
+    /**
+     * Set the hourly rate attribute.
+     *
+     * @param  mixed  $value
+     * @return void
+     */
+    public function setHourlyRateAttribute($value)
+    {
+        $this->attributes['hourly_rate'] = round($value, 2);
     }
 }
