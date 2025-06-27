@@ -113,7 +113,7 @@
                                     </div>
                                     <div class="flex justify-between text-sm">
                                         <span class="text-gray-500">{{ __('Hourly Rate') }}:</span>
-                                        <span class="font-medium text-gray-900">{{ formatCurrency($booking->tutor->hourly_rate) }}/{{ __('hour') }}</span>
+                                        <span class="font-medium text-gray-900">{{ formatHourlyRate($booking->tutor->hourly_rate) }}</span>
                                     </div>
                                     <div class="flex justify-between pt-3 border-t border-gray-200">
                                         <span class="text-base font-medium text-gray-900">{{ __('booking.total_amount') }}:</span>
@@ -166,18 +166,30 @@
                                 </div>
                             </div>
 
-                            <!-- Payment Button -->
-                            <button type="button" id="payment-button"
-                                    class="w-full mt-6 inline-flex justify-center items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest hover:from-blue-700 hover:to-purple-700 active:from-blue-800 active:to-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-200 transform hover:scale-105"
-                                    disabled>
-                                <span id="button-text">{{ __('Select payment method') }}</span>
-                                <span id="spinner" class="hidden ml-2">
-                                    <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <!-- Payment Buttons -->
+                            <div class="mt-6 space-y-3">
+                                <!-- Payment Button -->
+                                <button type="button" id="payment-button"
+                                        class="w-full inline-flex justify-center items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest hover:from-blue-700 hover:to-purple-700 active:from-blue-800 active:to-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-200 transform hover:scale-105"
+                                        disabled>
+                                    <span id="button-text">{{ __('Select payment method') }}</span>
+                                    <span id="spinner" class="hidden ml-2">
+                                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </span>
+                                </button>
+
+                                <!-- Cancel Button -->
+                                <button type="button" id="cancel-payment-button"
+                                        class="w-full inline-flex justify-center items-center px-6 py-3 bg-gray-500 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest hover:bg-gray-600 active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                </span>
-                            </button>
+                                    {{ __('booking.cancel_payment') }}
+                                </button>
+                            </div>
 
                             <p class="mt-4 text-xs text-gray-500 text-center">
                                 <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -193,195 +205,243 @@
     </div>
 
     @push('scripts')
-    <script src="https://js.stripe.com/v3/"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            let selectedPaymentMethod = null;
-            let stripe = null;
-            let card = null;
+        let selectedPaymentMethod = null;
 
-            // Payment method selection
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Payment page loaded');
+
+            // Elements
             const paymentMethodCards = document.querySelectorAll('.payment-method-card');
-            const paymentForms = document.querySelectorAll('.payment-form');
             const paymentButton = document.getElementById('payment-button');
+            const cancelButton = document.getElementById('cancel-payment-button');
             const buttonText = document.getElementById('button-text');
-            const spinner = document.getElementById('spinner');
+            const vnpayForm = document.getElementById('vnpay-form');
+            const stripeForm = document.getElementById('stripe-form');
             const paymentError = document.getElementById('payment-error');
 
-            // Handle payment method selection
+            console.log('Found elements:', {
+                cards: paymentMethodCards.length,
+                button: !!paymentButton,
+                vnpayForm: !!vnpayForm,
+                stripeForm: !!stripeForm
+            });
+
+            // Debug booking info
+            console.log('📋 Booking Info:', {
+                bookingId: {{ $booking->id }},
+                studentId: {{ $booking->student_id }},
+                tutorId: {{ $booking->tutor_id }},
+                status: '{{ $booking->status }}',
+                paymentStatus: '{{ $booking->payment_status }}'
+            });
+
+            // Payment method selection
             paymentMethodCards.forEach(card => {
                 card.addEventListener('click', function() {
+                    console.log('Payment method card clicked:', this.dataset.method);
+
+                    // Remove previous selections
+                    paymentMethodCards.forEach(c => {
+                        c.classList.remove('border-blue-500', 'border-purple-500', 'bg-blue-50', 'bg-purple-50');
+                        c.classList.add('border-gray-200');
+                        const radio = c.querySelector('input[type="radio"]');
+                        if (radio) radio.checked = false;
+                    });
+
+                    // Hide all forms
+                    document.querySelectorAll('.payment-form').forEach(form => {
+                        form.classList.add('hidden');
+                    });
+
+                    // Select current method
                     const method = this.dataset.method;
-                    selectPaymentMethod(method);
+                    selectedPaymentMethod = method;
+
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = true;
+
+                    if (method === 'vnpay') {
+                        this.classList.remove('border-gray-200');
+                        this.classList.add('border-blue-500', 'bg-blue-50');
+                        vnpayForm.classList.remove('hidden');
+                        buttonText.textContent = 'Thanh toán với VNPay';
+                    } else if (method === 'stripe') {
+                        this.classList.remove('border-gray-200');
+                        this.classList.add('border-purple-500', 'bg-purple-50');
+                        stripeForm.classList.remove('hidden');
+                        buttonText.textContent = 'Thanh toán với Stripe';
+                    }
+
+                    // Enable payment button
+                    paymentButton.disabled = false;
+                    paymentButton.classList.remove('opacity-50');
+
+                    console.log('Payment method selected:', method);
                 });
             });
 
-            function selectPaymentMethod(method) {
-                selectedPaymentMethod = method;
+            // Payment button click
+            paymentButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Payment button clicked, method:', selectedPaymentMethod);
 
-                // Update UI
-                paymentMethodCards.forEach(card => {
-                    card.classList.remove('border-blue-500', 'border-purple-500', 'bg-blue-50', 'bg-purple-50');
-                    card.classList.add('border-gray-200');
-                    card.querySelector('input[type="radio"]').checked = false;
-                });
-
-                const selectedCard = document.querySelector(`[data-method="${method}"]`);
-                selectedCard.classList.remove('border-gray-200');
-                selectedCard.classList.add(method === 'vnpay' ? 'border-blue-500' : 'border-purple-500');
-                selectedCard.classList.add(method === 'vnpay' ? 'bg-blue-50' : 'bg-purple-50');
-                selectedCard.querySelector('input[type="radio"]').checked = true;
-
-                // Show/hide payment forms
-                paymentForms.forEach(form => form.classList.add('hidden'));
-                document.getElementById(`${method}-form`).classList.remove('hidden');
-
-                // Update button
-                paymentButton.disabled = false;
-                updateButtonText();
-
-                // Initialize Stripe if needed
-                if (method === 'stripe' && !stripe) {
-                    initializeStripe();
+                if (!selectedPaymentMethod) {
+                    showError('Vui lòng chọn phương thức thanh toán');
+                    return;
                 }
-            }
 
-            function updateButtonText() {
+                // Show loading
+                paymentButton.disabled = true;
+                buttonText.textContent = 'Đang xử lý...';
+                document.getElementById('spinner').classList.remove('hidden');
+
                 if (selectedPaymentMethod === 'vnpay') {
-                    buttonText.textContent = '{{ __("Thanh toán với VNPay") }} {{ $booking->display_amount }}';
+                    processVNPayPayment();
                 } else if (selectedPaymentMethod === 'stripe') {
-                    buttonText.textContent = '{{ __("Pay with Stripe") }} ${{ number_format($booking->price, 2) }}';
-                }
-            }
-
-            function initializeStripe() {
-                stripe = Stripe('{{ config('services.stripe.key') }}');
-                const elements = stripe.elements();
-
-                card = elements.create('card', {
-                    hidePostalCode: true,
-                    style: {
-                        base: {
-                            fontSize: '16px',
-                            color: '#1f2937',
-                            '::placeholder': {
-                                color: '#6b7280',
-                            },
-                        },
-                        invalid: {
-                            color: '#ef4444',
-                            iconColor: '#ef4444',
-                        },
-                    },
-                });
-
-                card.mount('#card-element');
-
-                card.addEventListener('change', function(event) {
-                    const displayError = document.getElementById('card-errors');
-                    if (event.error) {
-                        displayError.textContent = event.error.message;
-                    } else {
-                        displayError.textContent = '';
-                    }
-                });
-            }
-
-            // Handle payment button click
-            paymentButton.addEventListener('click', async function() {
-                if (!selectedPaymentMethod) return;
-
-                setLoading(true);
-                hideError();
-
-                try {
-                    if (selectedPaymentMethod === 'vnpay') {
-                        await processVnpayPayment();
-                    } else if (selectedPaymentMethod === 'stripe') {
-                        await processStripePayment();
-                    }
-                } catch (error) {
-                    showError(error.message);
-                    setLoading(false);
+                    processStripePayment();
                 }
             });
 
-            async function processVnpayPayment() {
-                const response = await fetch('{{ route('payments.process', $booking) }}', {
+            // Cancel payment button click
+            cancelButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Cancel payment button clicked');
+
+                // Show confirmation dialog
+                if (confirm('Bạn có chắc chắn muốn hủy thanh toán? Bạn có thể quay lại thanh toán sau.')) {
+                    console.log('User confirmed cancellation, redirecting to dashboard');
+
+                    // Redirect to student dashboard
+                    @auth
+                        @if(auth()->user()->role === 'student')
+                            window.location.href = '{{ route("student.dashboard") }}';
+                        @else
+                            window.location.href = '{{ route("bookings.show", $booking) }}';
+                        @endif
+                    @else
+                        window.location.href = '{{ route("bookings.index") }}';
+                    @endauth
+                } else {
+                    console.log('User cancelled the cancellation');
+                }
+            });
+
+                                                                                                function processVNPayPayment() {
+                console.log('Processing VNPay payment...');
+                console.log('🔍 Request URL:', `/web_booking/public/bookings/{{ $booking->id }}/payment/process`);
+                console.log('🆔 Booking ID:', {{ $booking->id }});
+
+                fetch(`/web_booking/public/bookings/{{ $booking->id }}/payment/process`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({
                         payment_method: 'vnpay'
                     })
+                })
+                .then(response => {
+                    console.log('VNPay response status:', response.status);
+
+                    if (!response.ok) {
+                                                // Handle different error status codes
+                        if (response.status === 403) {
+                            throw new Error('Bạn không có quyền thanh toán cho booking này.');
+                        } else if (response.status === 422) {
+                            throw new Error('Booking này không thể thanh toán (đã thanh toán hoặc chưa được chấp nhận).');
+                        } else if (response.status === 404) {
+                            throw new Error('Booking không tồn tại hoặc đã bị xóa. Vui lòng kiểm tra lại.');
+                        }
+
+                        // If response is not ok, try to get error message
+                        return response.json().then(data => {
+                            throw new Error(data.error || `Lỗi server: ${response.status}`);
+                        }).catch(() => {
+                            if (response.status === 500) {
+                                throw new Error('Lỗi server nội bộ. Vui lòng thử lại sau.');
+                            } else {
+                                throw new Error(`Lỗi kết nối server: ${response.status}`);
+                            }
+                        });
+                    }
+
+                    return response.json();
+                })
+                                .then(data => {
+                    console.log('VNPay response data:', data);
+
+                    if (data.payment_url) {
+                        console.log('Redirecting to VNPay:', data.payment_url);
+                        window.location.href = data.payment_url;
+                    } else {
+                        throw new Error(data.error || 'Có lỗi xảy ra khi tạo link thanh toán VNPay');
+                    }
+                })
+                .catch(error => {
+                    console.error('VNPay payment error:', error);
+
+                    // Handle different error types
+                    let errorMessage = 'Có lỗi xảy ra khi kết nối đến VNPay';
+
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        errorMessage = 'Không thể kết nối đến server. Vui lòng thử lại.';
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+
+                    showError(errorMessage);
+                    resetPaymentButton();
                 });
-
-                const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-
-                // Redirect to VNPay
-                window.location.href = data.redirect_url;
             }
 
-            async function processStripePayment() {
-                const response = await fetch('{{ route('payments.process', $booking) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    },
-                    body: JSON.stringify({
-                        payment_method: 'stripe'
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-
-                const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
-                    payment_method: {
-                        card: card,
-                        billing_details: {
-                            name: '{{ auth()->user()->name }}',
-                            email: '{{ auth()->user()->email }}',
-                        },
-                    },
-                });
-
-                if (error) {
-                    throw new Error(error.message);
-                } else if (paymentIntent.status === 'succeeded') {
-                    window.location.href = '{{ route('payments.confirm', $booking) }}';
-                }
-            }
-
-            function setLoading(loading) {
-                paymentButton.disabled = loading;
-                if (loading) {
-                    spinner.classList.remove('hidden');
-                    buttonText.textContent = '{{ __("booking.processing_payment") }}';
-                } else {
-                    spinner.classList.add('hidden');
-                    updateButtonText();
-                }
+            function processStripePayment() {
+                console.log('Processing Stripe payment...');
+                // TODO: Implement Stripe payment processing
+                showError('Stripe payment chưa được triển khai');
+                resetPaymentButton();
             }
 
             function showError(message) {
+                console.log('Showing error:', message);
                 paymentError.textContent = message;
                 paymentError.classList.remove('hidden');
-                paymentError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Hide error after 5 seconds
+                setTimeout(() => {
+                    paymentError.classList.add('hidden');
+                }, 5000);
             }
 
-            function hideError() {
-                paymentError.classList.add('hidden');
+            function resetPaymentButton() {
+                paymentButton.disabled = selectedPaymentMethod ? false : true;
+                paymentButton.classList.toggle('opacity-50', !selectedPaymentMethod);
+
+                if (selectedPaymentMethod === 'vnpay') {
+                    buttonText.textContent = 'Thanh toán với VNPay';
+                } else if (selectedPaymentMethod === 'stripe') {
+                    buttonText.textContent = 'Thanh toán với Stripe';
+                } else {
+                    buttonText.textContent = 'Chọn phương thức thanh toán';
+                }
+                document.getElementById('spinner').classList.add('hidden');
+            }
+
+            // Test button click without payment method (for debugging)
+            if (paymentButton) {
+                paymentButton.addEventListener('click', function(e) {
+                    console.log('🔥 Payment button clicked - any method!');
+                }, true); // Use capture phase
+            }
+
+            // Auto-select VNPay for Vietnamese users
+            const vnpayCard = document.querySelector('[data-method="vnpay"]');
+            if (vnpayCard) {
+                console.log('Auto-selecting VNPay...');
+                setTimeout(() => vnpayCard.click(), 100); // Small delay to ensure DOM is ready
+            } else {
+                console.error('❌ VNPay card not found for auto-selection');
             }
         });
     </script>

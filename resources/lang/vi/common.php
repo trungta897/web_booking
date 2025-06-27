@@ -19,6 +19,7 @@ return [
     'messages' => 'Tin nhắn',
     'notifications' => 'Thông báo',
     'favorites' => 'Yêu thích',
+    'my_bookings' => 'Booking của tôi',
     'date' => 'Ngày',
     'time' => 'Giờ',
     'save' => 'Lưu',
@@ -163,4 +164,18 @@ return [
     'Thanh toán qua QR Code' => 'Thanh toán qua QR Code',
     'Ví điện tử VNPay' => 'Ví điện tử VNPay',
     'Bảo mật SSL 256-bit' => 'Bảo mật SSL 256-bit',
+    'Thanh toán với VNPay' => 'Thanh toán với VNPay',
+    'Pay with Stripe' => 'Thanh toán với Stripe',
+
+    // VNPay result page translations
+    'payment_processed_successfully' => 'Giao dịch của bạn đã được xử lý thành công',
+    'email_confirmation_sent' => 'Thông tin chi tiết đã được gửi đến email của bạn',
+    'transaction_not_completed' => 'Giao dịch chưa được hoàn tất',
+    'can_retry_payment' => 'Bạn có thể thử thanh toán lại bất cứ lúc nào',
+    'transaction_failed' => 'Giao dịch không thể hoàn thành',
+    'check_info_and_retry' => 'Vui lòng kiểm tra lại thông tin và thử lại',
+    'helpful_information' => 'Thông tin hữu ích',
+    'email_confirmation_coming' => 'Bạn sẽ nhận được email xác nhận trong vài phút tới',
+    'schedule_updated' => 'Thông tin lịch học đã được cập nhật trong tài khoản của bạn',
+    'contact_tutor_via_message' => 'Bạn có thể liên hệ với gia sư qua hệ thống tin nhắn',
 ];

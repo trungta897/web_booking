@@ -34,6 +34,21 @@ return [
         'cannot_cancel' => 'Lịch đặt này không thể hủy.',
         'invalid_payment_state' => 'Lịch đặt này không đủ điều kiện thanh toán.',
         'payment_failed' => 'Thanh toán thất bại: :message',
+        'booking_not_found' => 'Booking không tồn tại hoặc đã bị xóa. Vui lòng kiểm tra lại.',
+        'unauthorized_access' => 'Bạn không có quyền truy cập vào booking này.',
+        'only_student_can_pay' => 'Chỉ sinh viên đặt lịch mới có thể thực hiện thanh toán.',
+        'payment_validation_failed' => 'Booking này không thể thanh toán (có thể đã được thanh toán hoặc chưa được chấp nhận).',
+        'booking_cancelled_payment' => 'Booking này đã bị hủy và không thể thanh toán.',
+        'booking_not_accepted_payment' => 'Booking này chưa được gia sư chấp nhận và không thể thanh toán.',
+        'booking_not_paid_refund' => 'Booking này chưa được thanh toán và không thể hoàn tiền.',
+        'only_tutor_can_refund' => 'Chỉ gia sư của booking này mới có thể thực hiện hoàn tiền.',
+    ],
+    'info' => [
+        'already_paid' => 'Booking này đã được thanh toán.',
+    'payment_completed' => 'Thanh toán hoàn tất',
+    'payment_completed_successfully' => 'Thanh toán đã hoàn tất thành công',
+    'payment_amount_was' => 'Số tiền đã thanh toán',
+    'view_transaction_history' => 'Xem lịch sử giao dịch',
     ],
 
     // Payment related translations
@@ -43,14 +58,14 @@ return [
     'details' => 'Chi tiết đặt lịch',
     'total_amount' => 'Tổng tiền',
     'payment_secure' => 'Thanh toán được bảo mật và mã hóa',
+    'processing_payment' => 'Đang xử lý thanh toán...',
+    'cancel_payment' => 'Hủy thanh toán',
 
     // Payment Controller Messages
     'payment_completed_successfully' => 'Thanh toán hoàn tất thành công',
     'payment_not_completed' => 'Thanh toán chưa hoàn tất. Vui lòng thử lại',
     'error_confirming_payment' => 'Lỗi xác nhận thanh toán: :error',
     'payment_processing_failed' => 'Xử lý thanh toán thất bại',
-    'unauthorized_access' => 'Truy cập không được phép',
-    'invalid_booking_status_for_payment' => 'Trạng thái đặt lịch không hợp lệ để thanh toán',
     'status' => [
         'pending' => 'Chờ duyệt',
         'accepted' => 'Đã chấp nhận',

@@ -19,6 +19,7 @@ return [
     'messages' => 'Messages',
     'notifications' => 'Notifications',
     'favorites' => 'Favorites',
+    'my_bookings' => 'My Bookings',
     'date' => 'Date',
     'time' => 'Time',
     'save' => 'Save',
@@ -147,4 +148,29 @@ return [
     // New translations for student dashboard
     'view_all_bookings' => 'View All Bookings',
     'confirm_cancel_booking' => 'Are you sure you want to cancel this booking?',
+
+    // Payment page translations
+    'Complete Payment' => 'Complete Payment',
+    'reviews' => 'reviews',
+    'Duration' => 'Duration',
+    'minutes' => 'minutes',
+    'Hourly Rate' => 'Hourly Rate',
+    'hour' => 'hour',
+    'Payment Information' => 'Payment Information',
+    'Credit or debit card' => 'Credit or debit card',
+    'Select payment method' => 'Select payment method',
+    'Thanh toán với VNPay' => 'Pay with VNPay',
+    'Pay with Stripe' => 'Pay with Stripe',
+
+    // VNPay result page translations
+    'payment_processed_successfully' => 'Your transaction has been processed successfully',
+    'email_confirmation_sent' => 'Details have been sent to your email',
+    'transaction_not_completed' => 'Transaction not completed',
+    'can_retry_payment' => 'You can retry payment anytime',
+    'transaction_failed' => 'Transaction could not be completed',
+    'check_info_and_retry' => 'Please check your information and try again',
+    'helpful_information' => 'Helpful Information',
+    'email_confirmation_coming' => 'You will receive email confirmation in a few minutes',
+    'schedule_updated' => 'Study schedule has been updated in your account',
+    'contact_tutor_via_message' => 'You can contact your tutor via message system',
 ];

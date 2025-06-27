@@ -99,6 +99,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bookings/{booking}/transactions/view', [PaymentController::class, 'viewTransactionHistory'])->name('payments.transactions.view');
     Route::post('/webhook/stripe', [PaymentController::class, 'handleWebhook'])->name('payments.webhook');
 
+    // Refund routes
+    Route::post('/bookings/{booking}/refund', [PaymentController::class, 'processRefund'])->name('payments.refund');
+    Route::get('/bookings/{booking}/refund/confirm', [PaymentController::class, 'confirmRefund'])->name('payments.refund.confirm');
+
     // Tutor availability routes
     Route::get('/tutors/{tutor}/availability/{day}', [TutorController::class, 'checkAvailability'])->name('tutors.availability');
     Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':tutor')->group(function () {
@@ -185,11 +189,101 @@ Route::get('/test-relationships', function () {
     ]);
 })->name('test.relationships');
 
+// Test auth route
+Route::middleware(['auth'])->get('/test-auth', function () {
+    return response()->json([
+        'authenticated' => true,
+        'user_id' => \Illuminate\Support\Facades\Auth::id(),
+        'user_email' => \Illuminate\Support\Facades\Auth::user()->email ?? 'no email',
+    ]);
+})->name('test.auth');
+
+// Test booking access
+Route::middleware(['auth'])->get('/test-booking/{booking}', function (\App\Models\Booking $booking) {
+    return response()->json([
+        'booking_id' => $booking->id,
+        'student_id' => $booking->student_id,
+        'current_user_id' => \Illuminate\Support\Facades\Auth::id(),
+        'is_owner' => $booking->student_id === \Illuminate\Support\Facades\Auth::id(),
+        'status' => $booking->status,
+        'payment_status' => $booking->payment_status,
+        'can_pay' => $booking->status === 'accepted' && $booking->payment_status !== 'paid',
+        'price' => $booking->price,
+        'tutor_user_id' => $booking->tutor->user_id ?? null,
+        'is_tutor' => ($booking->tutor && $booking->tutor->user_id === \Illuminate\Support\Facades\Auth::id()),
+    ]);
+})->name('test.booking');
+
+// Debug payment route
+Route::middleware(['auth'])->post('/debug-payment/{booking}', function (\App\Models\Booking $booking, \Illuminate\Http\Request $request) {
+    try {
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        return response()->json([
+            'booking_exists' => true,
+            'booking_id' => $booking->id,
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'is_student' => $booking->student_id === $user->id,
+            'is_tutor' => $booking->tutor && $booking->tutor->user_id === $user->id,
+            'booking_status' => $booking->status,
+            'payment_status' => $booking->payment_status,
+            'booking_price' => $booking->price,
+            'request_data' => $request->all(),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+})->name('debug.payment');
+
+// Test VNPay success route
+Route::middleware(['auth'])->get('/test-vnpay-success/{booking}', function (\App\Models\Booking $booking) {
+    $fakeVnpayData = [
+        'vnp_Amount' => ($booking->price * 100),
+        'vnp_BankCode' => 'NCB',
+        'vnp_CardType' => 'ATM',
+        'vnp_OrderInfo' => 'Thanh toan hoc phi - ' . $booking->subject->name,
+        'vnp_PayDate' => now()->format('YmdHis'),
+        'vnp_ResponseCode' => '00', // Success code
+        'vnp_TmnCode' => 'TEST123',
+        'vnp_TransactionNo' => '14562789',
+        'vnp_TxnRef' => $booking->vnpay_txn_ref ?: 'BOOKING_' . $booking->id . '_' . time(),
+    ];
+
+    // Simulate successful payment
+    $booking->update([
+        'payment_status' => 'paid',
+        'payment_method' => 'vnpay',
+    ]);
+
+    return redirect()->route('bookings.show', $booking)
+        ->with('success', 'Thanh toán thành công! (Test mode)');
+})->name('test.vnpay.success');
+
 // Rate limited routes
 Route::middleware('throttle:60,1')->group(function () {
     Route::get('/tutors/{tutor}', [TutorController::class, 'show'])->name('tutors.show');
     Route::post('/tutors/{tutor}/favorite', [TutorController::class, 'toggleFavorite'])->name('tutors.favorite');
     Route::get('/tutors/{tutor}/availability/{day}', [TutorController::class, 'checkAvailability'])->name('tutors.availability');
+});
+
+// VNPay Demo & Test routes
+Route::middleware(['auth'])->group(function () {
+    // VNPay Demo for users (general access)
+    Route::get('/vnpay-demo', [PaymentController::class, 'showVnpayDemo'])->name('vnpay.demo.view');
+    Route::post('/vnpay-demo', [PaymentController::class, 'createDemoVnpay'])->name('vnpay.demo.create');
+
+    // VNPay Test for admin only
+    Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':admin')->group(function () {
+        Route::get('/test-vnpay', [PaymentController::class, 'showVnpayTest'])->name('test.vnpay.view');
+        Route::post('/test-vnpay', [PaymentController::class, 'createTestVnpay'])->name('test.vnpay');
+    });
+
+    // VNPay Result page
+    Route::get('/vnpay-result', [PaymentController::class, 'showVnpayResult'])->name('vnpay.result');
 });
 
 require __DIR__.'/auth.php';

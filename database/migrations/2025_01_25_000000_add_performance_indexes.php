@@ -7,33 +7,76 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
+     * Check if an index exists on a table
+     */
+    private function hasIndex(string $table, string $index): bool
+    {
+        try {
+            $exists = Schema::getConnection()->select("SHOW INDEX FROM `{$table}` WHERE Key_name = ?", [$index]);
+            return !empty($exists);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
      * Run the migrations.
      */
     public function up(): void
     {
         // Indexes for users table
-        Schema::table('users', function (Blueprint $table) {
-            $table->index(['role', 'account_status']);
-            $table->index('account_status');
-            $table->index('email_verified_at');
-        });
+        if (Schema::hasTable('users')) {
+            Schema::table('users', function (Blueprint $table) {
+                if (!$this->hasIndex('users', 'users_role_account_status_index')) {
+                    $table->index(['role', 'account_status']);
+                }
+                if (!$this->hasIndex('users', 'users_account_status_index')) {
+                    $table->index('account_status');
+                }
+                if (!$this->hasIndex('users', 'users_email_verified_at_index')) {
+                    $table->index('email_verified_at');
+                }
+            });
+        }
 
         // Indexes for tutors table
-        Schema::table('tutors', function (Blueprint $table) {
-            $table->index(['is_available', 'hourly_rate']);
-            $table->index('experience_years');
-            $table->index('user_id');
-        });
+        if (Schema::hasTable('tutors')) {
+            Schema::table('tutors', function (Blueprint $table) {
+                if (!$this->hasIndex('tutors', 'tutors_is_available_hourly_rate_index')) {
+                    $table->index(['is_available', 'hourly_rate']);
+                }
+                if (!$this->hasIndex('tutors', 'tutors_experience_years_index')) {
+                    $table->index('experience_years');
+                }
+                if (!$this->hasIndex('tutors', 'tutors_user_id_index')) {
+                    $table->index('user_id');
+                }
+            });
+        }
 
         // Indexes for bookings table
-        Schema::table('bookings', function (Blueprint $table) {
-            $table->index(['status', 'payment_status']);
-            $table->index(['tutor_id', 'status']);
-            $table->index(['student_id', 'status']);
-            $table->index(['start_time', 'end_time']);
-            $table->index('start_time');
-            $table->index('created_at');
-        });
+        if (Schema::hasTable('bookings')) {
+            Schema::table('bookings', function (Blueprint $table) {
+                if (!$this->hasIndex('bookings', 'bookings_status_payment_status_index')) {
+                    $table->index(['status', 'payment_status']);
+                }
+                if (!$this->hasIndex('bookings', 'bookings_tutor_id_status_index')) {
+                    $table->index(['tutor_id', 'status']);
+                }
+                if (!$this->hasIndex('bookings', 'bookings_student_id_status_index')) {
+                    $table->index(['student_id', 'status']);
+                }
+                if (!$this->hasIndex('bookings', 'bookings_start_time_end_time_index')) {
+                    $table->index(['start_time', 'end_time']);
+                }
+                if (!$this->hasIndex('bookings', 'bookings_start_time_index')) {
+                    $table->index('start_time');
+                }
+                if (!$this->hasIndex('bookings', 'bookings_created_at_index')) {
+                    $table->index('created_at');
+                }
+            });
+        }
 
         // Indexes for reviews table
         Schema::table('reviews', function (Blueprint $table) {

@@ -293,8 +293,8 @@ class BookingService extends BaseService
         return [
             'total_earnings' => $totalEarnings,
             'monthly_earnings' => $monthlyEarnings,
-            'formatted_total' => number_format($totalEarnings, 0, ',', '.').' VNĐ',
-            'formatted_monthly' => number_format($monthlyEarnings, 0, ',', '.').' VNĐ',
+            'formatted_total' => formatCurrency($totalEarnings),
+            'formatted_monthly' => formatCurrency($monthlyEarnings),
         ];
     }
 

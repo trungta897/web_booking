@@ -183,22 +183,7 @@ class Booking extends Model
 
     public function getDisplayAmountAttribute()
     {
-        // Get current locale
-        $locale = app()->getLocale();
-
-        // If Vietnamese locale and price is in USD, convert to VND
-        if ($locale === 'vi' && ($this->currency === 'USD' || !$this->currency)) {
-            $vndAmount = (float)$this->price * 25000; // 1 USD = 25,000 VND
-            return number_format($vndAmount, 0, ',', '.') . ' ₫';
-        }
-
-        // If already in VND
-        if ($this->currency === 'VND') {
-            return number_format((float)$this->price, 0, ',', '.') . ' ₫';
-        }
-
-        // Default to USD format
-        return '$' . number_format((float)$this->price, 2);
+        return formatBookingAmount($this);
     }
 
     public function getPaymentMethodDisplayAttribute()

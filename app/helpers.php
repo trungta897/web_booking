@@ -66,8 +66,11 @@ if (! function_exists('formatCurrency')) {
      */
     function formatCurrency(float $amount, string $currency = 'USD'): string
     {
-        // Get current locale
-        $locale = app()->getLocale();
+        // Get current locale with multiple fallbacks
+        $locale = session('locale') ?: app()->getLocale();
+        if (!$locale || !in_array($locale, ['en', 'vi'])) {
+            $locale = config('app.locale', 'vi');
+        }
 
         // If Vietnamese locale and currency is USD, convert to VND
         if ($locale === 'vi' && $currency === 'USD') {
@@ -81,6 +84,90 @@ if (! function_exists('formatCurrency')) {
         }
 
         return '$' . number_format($amount, 2);
+    }
+}
+
+if (! function_exists('formatBookingAmount')) {
+    /**
+     * Format booking amount using the booking's stored currency field
+     */
+    function formatBookingAmount(\App\Models\Booking $booking): string
+    {
+        $currency = $booking->currency ?? 'VND';
+        $amount = $booking->price;
+
+        // Get current locale
+        $locale = session('locale') ?: app()->getLocale();
+        if (!$locale || !in_array($locale, ['en', 'vi'])) {
+            $locale = config('app.locale', 'vi');
+        }
+
+        // Smart detection: If currency is VND but amount is small (< 1000),
+        // it's likely USD amount saved with wrong currency
+        if ($currency === 'VND' && $amount < 1000) {
+            // This is likely USD amount with wrong currency label
+            if ($locale === 'vi') {
+                // Vietnamese: Convert USD to VND for display
+                $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
+                return number_format($vndAmount, 0, ',', '.') . ' ₫';
+            } else {
+                // English: Display as USD
+                return '$' . number_format($amount, 2);
+            }
+        }
+
+        // Case 1: Currency is VND (real VND amounts)
+        if ($currency === 'VND') {
+            if ($locale === 'vi') {
+                // Vietnamese: Display VND as is
+                return number_format($amount, 0, ',', '.') . ' ₫';
+            } else {
+                // English: Convert VND to USD for display
+                $usdAmount = $amount / 25000; // 1 USD = 25,000 VND
+                return '$' . number_format($usdAmount, 2);
+            }
+        }
+
+        // Case 2: Currency is USD (legacy)
+        if ($currency === 'USD') {
+            if ($locale === 'vi') {
+                // Vietnamese: Convert USD to VND for display
+                $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
+                return number_format($vndAmount, 0, ',', '.') . ' ₫';
+            } else {
+                // English: Display USD as is
+                return '$' . number_format($amount, 2);
+            }
+        }
+
+        // Default fallback
+        return number_format($amount, 2) . ' ' . $currency;
+    }
+}
+
+if (! function_exists('formatHourlyRate')) {
+    /**
+     * Format hourly rate with proper currency and unit based on locale
+     */
+        function formatHourlyRate(float $amount, string $currency = 'USD'): string
+    {
+        // Get current locale with multiple fallbacks
+        $locale = session('locale') ?: app()->getLocale();
+        if (!$locale || !in_array($locale, ['en', 'vi'])) {
+            $locale = config('app.locale', 'vi');
+        }
+
+        if ($locale === 'vi') {
+            // Vietnamese: convert USD to VND and show as "₫/giờ"
+            if ($currency === 'USD') {
+                $vndAmount = $amount * 25000;
+                return number_format($vndAmount, 0, ',', '.') . ' ₫/giờ';
+            }
+            return number_format($amount, 0, ',', '.') . ' ₫/giờ';
+        } else {
+            // English: show as "$/hr"
+            return '$' . number_format($amount, 2) . '/hr';
+        }
     }
 }
 

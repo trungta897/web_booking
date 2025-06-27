@@ -135,8 +135,15 @@ class BookingController extends Controller
         try {
             $this->bookingService->cancelBooking($booking, Auth::user());
 
-            return redirect()->route('bookings.index')
-                ->with('success', __('booking.success.booking_cancelled'));
+            // Redirect based on user role
+            $user = Auth::user();
+            if ($user->role === 'student') {
+                return redirect()->route('student.dashboard')
+                    ->with('success', __('booking.success.booking_cancelled'));
+            } else {
+                return redirect()->route('tutor.dashboard')
+                    ->with('success', __('booking.success.booking_cancelled'));
+            }
 
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
@@ -166,9 +173,19 @@ class BookingController extends Controller
     {
         $this->authorize('view', $booking);
 
+        if ($booking->status === 'cancelled') {
+            return redirect()->route('bookings.show', $booking)
+                ->with('error', __('booking.error.booking_cancelled_payment'));
+        }
+
         if ($booking->payment_status === 'paid') {
             return redirect()->route('bookings.show', $booking)
-                ->with('info', __('booking.info.already_paid'));
+                ->with('info', __('booking.already_paid'));
+        }
+
+        if ($booking->status !== 'accepted') {
+            return redirect()->route('bookings.show', $booking)
+                ->with('error', __('booking.error.booking_not_accepted_payment'));
         }
 
         return view('bookings.payment', compact('booking'));

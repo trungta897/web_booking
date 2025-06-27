@@ -51,12 +51,15 @@ class VnpayService
             'status' => Transaction::STATUS_PENDING,
         ]);
 
+        // Calculate VND amount for VNPay
+        $vndAmount = $this->calculateVndAmount($booking);
+
         // Tham số VNPay
         $vnpData = [
             'vnp_Version' => '2.1.0',
             'vnp_Command' => 'pay',
             'vnp_TmnCode' => $this->vnpTmnCode,
-            'vnp_Amount' => $booking->price * 100, // VNPay tính bằng VND * 100
+            'vnp_Amount' => $vndAmount * 100, // VNPay tính bằng VND * 100
             'vnp_CurrCode' => 'VND',
             'vnp_TxnRef' => $txnRef,
             'vnp_OrderInfo' => 'Thanh toan hoc phi - '.$booking->subject->name.' - '.$booking->tutor->user->name,
@@ -281,5 +284,34 @@ class VnpayService
         ]);
 
         return $transaction;
+    }
+
+    /**
+     * Calculate VND amount from booking price
+     */
+    private function calculateVndAmount(Booking $booking): float
+    {
+        $currency = $booking->currency ?? 'VND';
+        $amount = $booking->price;
+
+        // Smart detection: If currency is VND but amount is small (< 1000),
+        // it's likely USD amount saved with wrong currency
+        if ($currency === 'VND' && $amount < 1000) {
+            // This is likely USD amount with wrong currency label
+            return $amount * 25000; // Convert USD to VND
+        }
+
+        // Case 1: Currency is VND (real VND amounts)
+        if ($currency === 'VND') {
+            return $amount; // Already VND
+        }
+
+        // Case 2: Currency is USD (legacy)
+        if ($currency === 'USD') {
+            return $amount * 25000; // Convert USD to VND
+        }
+
+        // Default: assume VND
+        return $amount;
     }
 }

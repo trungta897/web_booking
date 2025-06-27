@@ -21,7 +21,10 @@ class PaymentService extends BaseService implements PaymentServiceInterface
 
     public function __construct(VnpayService $vnpayService)
     {
-        $this->stripe = new StripeClient(config('services.stripe.secret'));
+        $stripeSecret = config('services.stripe.secret');
+        if ($stripeSecret) {
+            $this->stripe = new StripeClient($stripeSecret);
+        }
         $this->vnpayService = $vnpayService;
     }
 
@@ -31,6 +34,10 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     public function createStripePaymentIntent(Booking $booking): PaymentResult
     {
         try {
+            if (!$this->stripe) {
+                return new PaymentResult(false, error: 'Stripe not configured');
+            }
+
             $amount = $booking->price * 100; // Convert to cents
 
             $paymentIntent = $this->stripe->paymentIntents->create([
@@ -102,6 +109,10 @@ class PaymentService extends BaseService implements PaymentServiceInterface
      */
     public function handleStripeWebhook(Request $request): void
     {
+        if (!$this->stripe) {
+            throw new Exception('Stripe not configured');
+        }
+
         $payload = $request->getContent();
         $signature = $request->header('Stripe-Signature');
 
@@ -226,12 +237,12 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Create VNPay payment URL
+     * Create VNPay payment
      */
-    public function createVnpayPayment(Booking $booking, string $returnUrl): PaymentResult
+    public function createVnpayPayment(Booking $booking, string $ipAddr = null): PaymentResult
     {
         try {
-            $paymentUrl = $this->vnpayService->createPaymentUrl($booking, $returnUrl);
+            $paymentUrl = $this->vnpayService->createPaymentUrl($booking, $ipAddr);
 
             $this->logActivity('VNPay payment URL created', [
                 'booking_id' => $booking->id,
@@ -439,6 +450,10 @@ class PaymentService extends BaseService implements PaymentServiceInterface
      */
     protected function processStripeRefund(Transaction $transaction, ?string $reason = null): array
     {
+        if (!$this->stripe) {
+            throw new Exception('Stripe not configured');
+        }
+
         try {
             $refund = $this->stripe->refunds->create([
                 'payment_intent' => $transaction->transaction_id,

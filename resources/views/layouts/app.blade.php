@@ -90,5 +90,8 @@
             <!-- Language Notification -->
             <x-language-notification />
         </div>
+
+        <!-- Scripts from individual views -->
+        @stack('scripts')
     </body>
 </html>

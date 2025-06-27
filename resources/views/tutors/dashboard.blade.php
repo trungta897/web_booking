@@ -24,7 +24,7 @@
                         </div>
                         <div class="bg-purple-50 p-4 rounded-lg">
                             <h4 class="font-medium text-purple-700">{{ __('common.total_earnings') }}</h4>
-                            <p class="text-2xl font-bold text-purple-600">{{ number_format($totalEarnings) }} VNĐ</p>
+                            <p class="text-2xl font-bold text-purple-600">{{ formatCurrency($totalEarnings) }}</p>
                         </div>
                         <div class="bg-yellow-50 p-4 rounded-lg">
                             <h4 class="font-medium text-yellow-700">{{ __('common.completed_sessions') }}</h4>
@@ -80,7 +80,7 @@
                                                 <p class="text-sm text-gray-500">
                                                     {{ Carbon\Carbon::parse($booking->start_time)->format('d/m/Y H:i') }}
                                                 </p>
-                                                <p class="text-sm font-medium text-gray-700">{{ number_format($booking->total_amount) }} VNĐ</p>
+                                                <p class="text-sm font-medium text-gray-700">{{ $booking->display_amount }}</p>
                                             </div>
                                             <div class="text-right">
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
@@ -147,7 +147,7 @@
                                                 {{ Carbon\Carbon::parse($booking->start_time)->format('d/m/Y H:i') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {{ number_format($booking->total_amount) }} VNĐ
+                                                {{ $booking->display_amount }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium

@@ -7,6 +7,23 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Session Messages -->
+            @if (session('success'))
+                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{{ session('success') }}</span>
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{{ session('error') }}</span>
+                </div>
+            @endif
+            @if (session('info'))
+                <div class="mb-4 bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{{ session('info') }}</span>
+                </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     <div class="mb-6">
@@ -125,27 +142,82 @@
                             </div>
                         @endif
 
-                        @if($booking->status === 'accepted' && $booking->payment_status !== 'paid' && auth()->user()->id === $booking->student_id)
+                        @if($booking->status === 'accepted' && auth()->user()->id === $booking->student_id)
                             <div class="md:col-span-2">
-                                <h4 class="text-sm font-medium text-gray-500">{{ __('Payment Required') }}</h4>
-                                <div class="mt-2">
-                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                        <div class="flex items-center">
-                                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                            </svg>
-                                            <span class="text-sm text-blue-800">{{ __('This booking requires payment to confirm.') }}</span>
-                                        </div>
-                                        <div class="mt-3">
-                                            <a href="{{ route('bookings.payment', $booking) }}"
-                                               class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:from-blue-700 hover:to-purple-700 transition-all duration-200">
-                                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
-                                                    <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                                @if($booking->payment_status === 'paid')
+                                    <!-- Already paid - show success message -->
+                                    <h4 class="text-sm font-medium text-green-600">{{ __('booking.payment_completed') }}</h4>
+                                    <div class="mt-2">
+                                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                                 </svg>
-                                                {{ __('Complete Payment') }} {{ $booking->display_amount }}
-                                            </a>
+                                                <span class="text-sm text-green-800 font-medium">{{ __('booking.payment_completed_successfully') }}</span>
+                                            </div>
+                                            <p class="text-sm text-green-700 mt-2">
+                                                {{ __('booking.payment_amount_was') }}: <span class="font-semibold">{{ $booking->display_amount }}</span>
+                                            </p>
+                                            <div class="mt-3">
+                                                <a href="{{ route('bookings.transactions', $booking) }}"
+                                                   class="inline-flex items-center px-3 py-2 bg-green-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 transition-all duration-200">
+                                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    {{ __('booking.view_transaction_history') }}
+                                                </a>
+                                            </div>
                                         </div>
+                                    </div>
+                                @else
+                                    <!-- Needs payment - show payment button -->
+                                    <h4 class="text-sm font-medium text-gray-500">{{ __('Payment Required') }}</h4>
+                                    <div class="mt-2">
+                                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span class="text-sm text-blue-800">{{ __('This booking requires payment to confirm.') }}</span>
+                                            </div>
+                                            <div class="mt-3">
+                                                <a href="{{ route('bookings.payment', $booking) }}"
+                                                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:from-blue-700 hover:to-purple-700 transition-all duration-200">
+                                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                                                        <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    {{ __('Complete Payment') }} {{ $booking->display_amount }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+
+                        <!-- Refund section for tutors -->
+                        @if($booking->status === 'accepted' && $booking->payment_status === 'paid' && auth()->user()->role === 'tutor' && auth()->user()->tutor && $booking->tutor_id === auth()->user()->tutor->id)
+                            <div class="md:col-span-2">
+                                <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-orange-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span class="text-sm text-orange-800 font-medium">Quản lý hoàn tiền</span>
+                                    </div>
+                                    <p class="mt-2 text-sm text-orange-700">
+                                        Nếu bạn không thể dạy buổi học này, bạn có thể hoàn tiền cho học viên.
+                                    </p>
+                                    <div class="mt-3">
+                                        <button type="button" onclick="openRefundModal()"
+                                                class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 transition-all duration-200">
+                                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                                                <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                                            </svg>
+                                            Hoàn tiền cho học viên
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -378,6 +450,95 @@
                 if (event.key === 'Escape') {
                     closeRejectModal();
                     closeCancelModal();
+                }
+            });
+        </script>
+        @endpush
+    @endif
+
+    <!-- Refund Modal for Tutors -->
+    @if($booking->status === 'accepted' && $booking->payment_status === 'paid' && auth()->user()->role === 'tutor' && auth()->user()->tutor && $booking->tutor_id === auth()->user()->tutor->id)
+        <div id="refundModal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeRefundModal()"></div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <form action="{{ route('payments.refund', $booking) }}" method="POST">
+                        @csrf
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start">
+                                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 sm:mx-0 sm:h-10 sm:w-10">
+                                    <svg class="h-6 h-6 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                                        <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                        {{ __('Hoàn tiền cho học viên') }}
+                                    </h3>
+                                    <div class="mt-4 space-y-4">
+                                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                                            <p class="text-sm text-orange-800">
+                                                <strong>Số tiền hoàn:</strong> {{ $booking->display_amount }}
+                                            </p>
+                                            <p class="text-sm text-orange-700 mt-1">
+                                                Học viên sẽ nhận được tiền hoàn trong vòng 3-5 ngày làm việc.
+                                            </p>
+                                        </div>
+
+                                        <div>
+                                            <label for="refund_reason" class="block text-sm font-medium text-gray-700">
+                                                {{ __('Lý do hoàn tiền') }} <span class="text-red-500">*</span>
+                                            </label>
+                                            <select id="refund_reason" name="refund_reason" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                                                <option value="">{{ __('Chọn lý do') }}</option>
+                                                <option value="tutor_sick">Gia sư bị ốm</option>
+                                                <option value="tutor_emergency">Gia sư có việc khẩn cấp</option>
+                                                <option value="schedule_conflict">Xung đột lịch học</option>
+                                                <option value="technical_issues">Sự cố kỹ thuật</option>
+                                                <option value="student_request">Yêu cầu từ học viên</option>
+                                                <option value="other">Lý do khác</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label for="refund_description" class="block text-sm font-medium text-gray-700">
+                                                {{ __('Mô tả chi tiết') }} ({{ __('Tùy chọn') }})
+                                            </label>
+                                            <textarea id="refund_description" name="refund_description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" placeholder="Mô tả thêm về lý do hoàn tiền..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                {{ __('Xác nhận hoàn tiền') }}
+                            </button>
+                            <button type="button" onclick="closeRefundModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                {{ __('Hủy bỏ') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        @push('scripts')
+        <script>
+            function openRefundModal() {
+                document.getElementById('refundModal').classList.remove('hidden');
+            }
+
+            function closeRefundModal() {
+                document.getElementById('refundModal').classList.add('hidden');
+            }
+
+            // Close modal when pressing escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeRefundModal();
                 }
             });
         </script>

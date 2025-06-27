@@ -90,7 +90,7 @@
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                ${{ number_format($bookingItem->price, 2) }}
+                                                {{ $bookingItem->display_amount }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('bookings.show', $bookingItem) }}" class="text-indigo-600 hover:text-indigo-900">

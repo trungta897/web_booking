@@ -24,7 +24,7 @@
                         </div>
                         <div class="bg-purple-50 p-4 rounded-lg">
                             <h4 class="font-medium text-purple-700">{{ __('common.total_spent') }}</h4>
-                            <p class="text-2xl font-bold text-purple-600">{{ number_format($totalSpent) }} VNĐ</p>
+                            <p class="text-2xl font-bold text-purple-600">{{ formatCurrency($totalSpent) }}</p>
                         </div>
                         <div class="bg-yellow-50 p-4 rounded-lg">
                             <h4 class="font-medium text-yellow-700">{{ __('common.completed_sessions') }}</h4>
@@ -51,7 +51,7 @@
                                                     {{ Carbon\Carbon::parse($session->start_time)->format('d/m/Y H:i') }} -
                                                     {{ Carbon\Carbon::parse($session->end_time)->format('H:i') }}
                                                 </p>
-                                                <p class="text-sm font-medium text-gray-700">{{ number_format($session->price) }} VNĐ</p>
+                                                <p class="text-sm font-medium text-gray-700">{{ $session->display_amount }}</p>
                                             </div>
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                                 {{ $session->status }}
@@ -140,7 +140,7 @@
                                                 {{ Carbon\Carbon::parse($session->start_time)->format('d/m/Y H:i') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {{ number_format($session->price) }} VNĐ
+                                                {{ $session->display_amount }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -232,11 +232,11 @@
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ number_format($booking->price) }} VNĐ
+                                                {{ $booking->display_amount }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('bookings.show', $booking) }}" class="text-indigo-600 hover:text-indigo-900">{{ __('common.view') }}</a>
-                                                @if($booking->status === 'pending')
+                                                @if($booking->canBeCancelled())
                                                     <form action="{{ route('bookings.destroy', $booking) }}" method="POST" class="inline-block ml-2">
                                                         @csrf
                                                         @method('DELETE')
