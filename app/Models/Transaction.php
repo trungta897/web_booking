@@ -19,6 +19,7 @@ class Transaction extends Model
         'currency',
         'status',
         'gateway_response',
+        'gateway_transaction_id',
         'metadata',
         'processed_at',
     ];

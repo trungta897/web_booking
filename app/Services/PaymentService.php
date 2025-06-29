@@ -89,8 +89,9 @@ class PaymentService extends BaseService implements PaymentServiceInterface
                 'payment_at' => now(),
             ]);
 
-            // Create transaction record
-            $this->createTransactionRecord($booking, 'stripe', 'paid');
+            // Create transaction record - This should be handled by a dedicated Stripe transaction handler if needed
+            // For now, we assume the webhook is the source of truth and creates the transaction.
+            // $this->createTransactionRecord($booking, 'stripe', 'paid');
 
             // Send notifications
             $this->sendPaymentNotifications($booking);
@@ -151,40 +152,23 @@ class PaymentService extends BaseService implements PaymentServiceInterface
      */
     public function handleVnpayIpn(array $ipnData): void
     {
-        if (! $this->vnpayService->validateIPN($ipnData)) {
-            throw new Exception('Invalid VNPay IPN');
-        }
+        $result = $this->vnpayService->handlePaymentResult($ipnData);
 
-        $bookingId = $ipnData['vnp_TxnRef'] ?? null;
-        $booking = Booking::find($bookingId);
-
-        if (! $booking) {
-            throw new Exception('Booking not found');
-        }
-
-        if ($ipnData['vnp_ResponseCode'] === '00') {
-            // Payment successful
-            if ($booking->payment_status !== 'paid') {
-                $booking->update([
-                    'payment_status' => 'paid',
-                    'payment_method' => 'vnpay',
-                    'payment_at' => now(),
-                    'vnpay_transaction_id' => $ipnData['vnp_TransactionNo'] ?? null,
-                ]);
-
-                $this->createTransactionRecord($booking, 'vnpay', 'paid');
-                $this->sendPaymentNotifications($booking);
-            }
+        if ($result['success']) {
+            $this->sendPaymentNotifications($result['booking']);
+            $this->logActivity('VNPay IPN processed successfully', [
+                'booking_id' => $result['booking']->id,
+                'vnpay_transaction_no' => $ipnData['vnp_TransactionNo'] ?? null,
+            ]);
         } else {
-            // Payment failed
-            $booking->update(['payment_status' => 'failed']);
-            $this->createTransactionRecord($booking, 'vnpay', 'failed');
+            $this->logActivity('VNPay IPN processing failed', [
+                'vnp_TxnRef' => $ipnData['vnp_TxnRef'] ?? 'N/A',
+                'error' => $result['message'],
+            ]);
+            // Throw an exception to signal failure to the VNPay server if needed.
+            // This ensures VNPay might retry sending the IPN.
+            throw new Exception($result['message']);
         }
-
-        $this->logActivity('VNPay IPN processed', [
-            'booking_id' => $booking->id,
-            'response_code' => $ipnData['vnp_ResponseCode'],
-        ]);
     }
 
     /**
@@ -200,6 +184,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     /**
      * Create transaction record
      */
+    /*
     protected function createTransactionRecord(Booking $booking, string $method, string $status): void
     {
         Transaction::create([
@@ -214,6 +199,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
             'processed_at' => $status === 'paid' ? now() : null,
         ]);
     }
+    */
 
     /**
      * Send payment notifications
@@ -257,37 +243,10 @@ class PaymentService extends BaseService implements PaymentServiceInterface
 
     /**
      * Handle VNPay return
-     *
-     * @param array $params
-     * @return array{success: bool, booking?: Booking, message?: string, error?: string}
      */
     public function handleVnpayReturn(array $params): array
     {
-        try {
-            $result = $this->vnpayService->handlePaymentResult($params);
-
-            if ($result['success']) {
-                $booking = $result['booking'];
-
-                $this->logActivity('VNPay payment confirmed', [
-                    'booking_id' => $booking->id,
-                    'txn_ref' => $params['vnp_TxnRef'] ?? null,
-                ]);
-
-                return $result;
-            }
-
-            return $result;
-        } catch (Exception $e) {
-            $this->logError('VNPay return handling failed', $e, [
-                'params' => $params,
-            ]);
-
-            return [
-                'success' => false,
-                'error' => $e->getMessage(),
-            ];
-        }
+        return $this->vnpayService->handlePaymentResult($params);
     }
 
     /**

@@ -49,6 +49,10 @@ return [
     'payment_completed_successfully' => 'Thanh toán đã hoàn tất thành công',
     'payment_amount_was' => 'Số tiền đã thanh toán',
     'view_transaction_history' => 'Xem lịch sử giao dịch',
+    'payment_details' => 'Chi tiết thanh toán',
+    'transaction_id' => 'Mã giao dịch',
+    'amount' => 'Số tiền',
+    'paid_at' => 'Thời gian thanh toán',
     ],
 
     // Payment related translations
@@ -74,4 +78,16 @@ return [
         'completed' => 'Hoàn thành',
         'paid' => 'Đã thanh toán',
     ],
+    'transaction_type' => [
+        'payment' => 'Thanh toán',
+        'refund' => 'Hoàn tiền',
+        'partial_refund' => 'Hoàn tiền một phần',
+    ],
+    'payment_methods' => [
+        'vnpay' => 'VNPay',
+        'stripe' => 'Stripe',
+        'cash' => 'Tiền mặt',
+        'bank_transfer' => 'Chuyển khoản ngân hàng',
+    ],
+    'payment_not_ready' => 'Booking Chưa Sẵn Sàng Thanh Toán',
 ];

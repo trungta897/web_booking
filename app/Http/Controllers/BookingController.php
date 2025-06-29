@@ -175,17 +175,17 @@ class BookingController extends Controller
 
         if ($booking->status === 'cancelled') {
             return redirect()->route('bookings.show', $booking)
-                ->with('error', __('booking.error.booking_cancelled_payment'));
+                ->with('error', __('booking.errors.booking_cancelled_payment'));
         }
 
-        if ($booking->payment_status === 'paid') {
+        if ($booking->payment_status === 'paid' || $booking->completedTransactions()->exists()) {
             return redirect()->route('bookings.show', $booking)
-                ->with('info', __('booking.already_paid'));
+                ->with('info', __('booking.info.already_paid'));
         }
 
         if ($booking->status !== 'accepted') {
             return redirect()->route('bookings.show', $booking)
-                ->with('error', __('booking.error.booking_not_accepted_payment'));
+                ->with('error', __('booking.errors.booking_not_accepted_payment'));
         }
 
         return view('bookings.payment', compact('booking'));

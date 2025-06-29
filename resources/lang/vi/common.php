@@ -178,4 +178,9 @@ return [
     'email_confirmation_coming' => 'Bạn sẽ nhận được email xác nhận trong vài phút tới',
     'schedule_updated' => 'Thông tin lịch học đã được cập nhật trong tài khoản của bạn',
     'contact_tutor_via_message' => 'Bạn có thể liên hệ với gia sư qua hệ thống tin nhắn',
+
+    // Transaction History page translations
+    'Transaction History' => 'Lịch Sử Giao Dịch',
+    'No transactions yet' => 'Chưa có giao dịch nào',
+    'No payment transactions have been made for this booking.' => 'Chưa có giao dịch thanh toán nào được thực hiện cho booking này.',
 ];

@@ -164,9 +164,14 @@ class VnpayService
                 // Thanh toán thành công
                 $booking->update([
                     'payment_status' => 'paid',
+                    'payment_method' => 'vnpay',
+                    'payment_at' => Carbon::now(),
                     'payment_metadata' => array_merge($booking->payment_metadata ?? [], [
                         'vnpay_transaction_no' => $transactionNo,
                         'vnpay_response_time' => Carbon::now(),
+                        'vnpay_amount' => $amount,
+                        'vnpay_bank_code' => $vnpData['vnp_BankCode'] ?? null,
+                        'vnpay_card_type' => $vnpData['vnp_CardType'] ?? null,
                     ]),
                 ]);
 
@@ -175,8 +180,12 @@ class VnpayService
                         'status' => Transaction::STATUS_COMPLETED,
                         'gateway_response' => $vnpData,
                         'processed_at' => Carbon::now(),
+                        'gateway_transaction_id' => $transactionNo,
                         'metadata' => [
                             'vnpay_transaction_no' => $transactionNo,
+                            'vnpay_bank_code' => $vnpData['vnp_BankCode'] ?? null,
+                            'vnpay_card_type' => $vnpData['vnp_CardType'] ?? null,
+                            'vnpay_pay_date' => $vnpData['vnp_PayDate'] ?? null,
                         ],
                     ]);
                 }
@@ -185,6 +194,7 @@ class VnpayService
                     'booking_id' => $booking->id,
                     'txn_ref' => $txnRef,
                     'amount' => $amount,
+                    'transaction_no' => $transactionNo,
                 ]);
 
                 return [
@@ -200,6 +210,11 @@ class VnpayService
                     $transaction->update([
                         'status' => Transaction::STATUS_FAILED,
                         'gateway_response' => $vnpData,
+                        'processed_at' => Carbon::now(),
+                        'metadata' => [
+                            'vnpay_response_code' => $responseCode,
+                            'vnpay_response_message' => $this->getResponseMessage($responseCode),
+                        ],
                     ]);
                 }
 
@@ -207,6 +222,7 @@ class VnpayService
                     'booking_id' => $booking->id,
                     'response_code' => $responseCode,
                     'txn_ref' => $txnRef,
+                    'response_message' => $this->getResponseMessage($responseCode),
                 ]);
 
                 return [

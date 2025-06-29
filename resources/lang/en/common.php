@@ -173,4 +173,9 @@ return [
     'email_confirmation_coming' => 'You will receive email confirmation in a few minutes',
     'schedule_updated' => 'Study schedule has been updated in your account',
     'contact_tutor_via_message' => 'You can contact your tutor via message system',
+
+    // Transaction History page translations
+    'Transaction History' => 'Transaction History',
+    'No transactions yet' => 'No transactions yet',
+    'No payment transactions have been made for this booking.' => 'No payment transactions have been made for this booking.',
 ];

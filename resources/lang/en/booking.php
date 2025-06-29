@@ -49,6 +49,10 @@ return [
     'payment_completed_successfully' => 'Payment completed successfully',
     'payment_amount_was' => 'Payment amount',
     'view_transaction_history' => 'View Transaction History',
+    'payment_details' => 'Payment Details',
+    'transaction_id' => 'Transaction ID',
+    'amount' => 'Amount',
+    'paid_at' => 'Paid At',
     ],
 
     // Payment related translations
@@ -75,4 +79,16 @@ return [
         'completed' => 'Completed',
         'paid' => 'Paid',
     ],
+    'transaction_type' => [
+        'payment' => 'Payment',
+        'refund' => 'Refund',
+        'partial_refund' => 'Partial Refund',
+    ],
+    'payment_methods' => [
+        'vnpay' => 'VNPay',
+        'stripe' => 'Stripe',
+        'cash' => 'Cash',
+        'bank_transfer' => 'Bank Transfer',
+    ],
+    'payment_not_ready' => 'Booking Not Ready for Payment',
 ];

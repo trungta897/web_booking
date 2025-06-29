@@ -151,7 +151,7 @@ class BookingCard
                 break;
 
             case 'accepted':
-                if ($this->booking->payment_status !== 'paid') {
+                if ($this->booking->payment_status !== 'paid' && !$this->booking->completedTransactions()->exists()) {
                     if ($user->role === 'student' && $this->booking->student_id === $user->id) {
                         $actions[] = [
                             'type' => 'pay',

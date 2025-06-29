@@ -526,11 +526,27 @@ class PaymentController extends Controller
         }
 
         if ($booking->payment_status === 'paid') {
-            throw new Exception(__('booking.already_paid'), 422);
+            throw new Exception(__('booking.info.already_paid'), 422);
+        }
+
+        // Kiểm tra xem có transaction đã hoàn thành không
+        if ($booking->completedTransactions()->exists()) {
+            throw new Exception(__('booking.info.already_paid'), 422);
         }
 
         if ($booking->status !== 'accepted') {
             throw new Exception(__('booking.errors.booking_not_accepted_payment'), 422);
+        }
+
+        // Kiểm tra xem có giao dịch pending nào không
+        $pendingTransaction = $booking->transactions()
+            ->where('status', 'pending')
+            ->where('type', 'payment')
+            ->where('created_at', '>', now()->subMinutes(30)) // Chỉ kiểm tra 30 phút gần đây
+            ->first();
+
+        if ($pendingTransaction) {
+            throw new Exception('Có một giao dịch đang được xử lý. Vui lòng đợi hoặc thử lại sau.', 422);
         }
     }
 
