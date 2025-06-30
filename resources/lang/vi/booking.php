@@ -91,4 +91,15 @@ return [
         'bank_transfer' => 'Chuyển khoản ngân hàng',
     ],
     'payment_not_ready' => 'Booking Chưa Sẵn Sàng Thanh Toán',
+
+    // Payment status and processing
+    'payment_status' => 'Trạng thái thanh toán',
+    'payment_processing' => 'Thanh toán đang được xử lý',
+    'payment_processing_message' => 'Booking này đang trong quá trình thanh toán. Vui lòng liên hệ admin nếu có vấn đề.',
+    'transaction_code' => 'Mã giao dịch',
+
+    // Refund management
+    'refund_management' => 'Quản lý hoàn tiền',
+    'refund_description' => 'Nếu bạn không thể dạy buổi học này, bạn có thể hoàn tiền cho học viên.',
+    'refund_to_student' => 'Hoàn tiền cho học viên',
 ];

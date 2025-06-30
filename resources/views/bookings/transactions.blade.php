@@ -60,15 +60,48 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm font-medium text-gray-900">
-                                                    @if($transaction->currency === 'VND')
-                                                        {{ number_format($transaction->amount, 0, ',', '.') }} ₫
-                                                    @else
-                                                        @if(app()->getLocale() === 'vi')
-                                                            {{ number_format($transaction->amount * 25000, 0, ',', '.') }} ₫
-                                                        @else
-                                                            ${{ number_format($transaction->amount, 2) }}
-                                                        @endif
-                                                    @endif
+                                                    @php
+                                                        $currency = $transaction->currency ?? 'VND';
+                                                        $amount = $transaction->amount;
+                                                        $locale = session('locale') ?: app()->getLocale();
+                                                        if (!$locale || !in_array($locale, ['en', 'vi'])) {
+                                                            $locale = config('app.locale', 'vi');
+                                                        }
+
+                                                        // Smart detection: If currency is VND but amount is small (< 1000),
+                                                        // it's likely USD amount saved with wrong currency
+                                                        if ($currency === 'VND' && $amount < 1000) {
+                                                            // This is likely USD amount with wrong currency label
+                                                            if ($locale === 'vi') {
+                                                                // Vietnamese: Convert USD to VND for display
+                                                                $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
+                                                                $displayAmount = number_format($vndAmount, 0, ',', '.') . ' ₫';
+                                                            } else {
+                                                                // English: Display as USD
+                                                                $displayAmount = '$' . number_format($amount, 2);
+                                                            }
+                                                        } elseif ($currency === 'VND') {
+                                                            if ($locale === 'vi') {
+                                                                // Vietnamese: Display VND as is
+                                                                $displayAmount = number_format($amount, 0, ',', '.') . ' ₫';
+                                                            } else {
+                                                                // English: Convert VND to USD for display
+                                                                $usdAmount = $amount / 25000; // 1 USD = 25,000 VND
+                                                                $displayAmount = '$' . number_format($usdAmount, 2);
+                                                            }
+                                                        } else {
+                                                            // Currency is USD or other
+                                                            if ($locale === 'vi') {
+                                                                // Vietnamese: Convert to VND
+                                                                $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
+                                                                $displayAmount = number_format($vndAmount, 0, ',', '.') . ' ₫';
+                                                            } else {
+                                                                // English: Display as original currency
+                                                                $displayAmount = '$' . number_format($amount, 2);
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    {{ $displayAmount }}
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">

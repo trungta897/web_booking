@@ -187,4 +187,16 @@ return [
     'Payment Required' => 'Yêu cầu thanh toán',
     'This booking requires payment to confirm.' => 'Buổi học này cần thanh toán để xác nhận.',
     'View Transaction History' => 'Xem lịch sử giao dịch',
+    'Booking Details' => 'Chi Tiết Đặt Lịch',
+    'Session Information' => 'Thông Tin Buổi Học',
+    'notes' => 'Ghi chú',
+    'meeting_link' => 'Liên kết họp',
+
+    // Status translations
+    'accepted' => 'Đã chấp nhận',
+    'rejected' => 'Đã từ chối',
+    'cancelled' => 'Đã hủy',
+
+    // Booking ID translation
+    'booking_id' => 'Đặt lịch',
 ];

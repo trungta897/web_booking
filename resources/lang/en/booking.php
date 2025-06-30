@@ -92,4 +92,15 @@ return [
         'bank_transfer' => 'Bank Transfer',
     ],
     'payment_not_ready' => 'Booking Not Ready for Payment',
+
+    // Payment status and processing
+    'payment_status' => 'Payment Status',
+    'payment_processing' => 'Payment is being processed',
+    'payment_processing_message' => 'This booking is currently being processed for payment. Please contact admin if you have any issues.',
+    'transaction_code' => 'Transaction Code',
+
+    // Refund management
+    'refund_management' => 'Refund Management',
+    'refund_description' => 'If you cannot teach this session, you can refund the student.',
+    'refund_to_student' => 'Refund to Student',
 ];

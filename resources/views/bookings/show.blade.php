@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Booking Details') }}
+            {{ __('common.Booking Details') }}
         </h2>
     </x-slot>
 
@@ -29,8 +29,8 @@
                     <div class="mb-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="text-lg font-medium text-gray-900">Session Information</h3>
-                                <p class="mt-1 text-sm text-gray-600">Booking #{{ $booking->id }}</p>
+                                <h3 class="text-lg font-medium text-gray-900">{{ __('common.Session Information') }}</h3>
+                                <p class="mt-1 text-sm text-gray-600">{{ __('common.booking_id') }} #{{ $booking->id }}</p>
                             </div>
                             <span class="px-3 py-1 text-sm font-semibold rounded-full
                                 @if($booking->status === 'accepted') bg-green-100 text-green-800
@@ -38,25 +38,43 @@
                                 @elseif($booking->status === 'rejected') bg-red-100 text-red-800
                                 @else bg-gray-100 text-gray-800
                                 @endif">
-                                {{ ucfirst($booking->status) }}
+                                @switch($booking->status)
+                                    @case('accepted')
+                                        {{ __('common.accepted') }}
+                                        @break
+                                    @case('pending')
+                                        {{ __('common.pending') }}
+                                        @break
+                                    @case('rejected')
+                                        {{ __('common.rejected') }}
+                                        @break
+                                    @case('cancelled')
+                                        {{ __('common.cancelled') }}
+                                        @break
+                                    @case('completed')
+                                        {{ __('common.completed') }}
+                                        @break
+                                    @default
+                                        {{ ucfirst($booking->status) }}
+                                @endswitch
                             </span>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500">Tutor</h4>
+                            <h4 class="text-sm font-medium text-gray-500">{{ __('common.tutor') }}</h4>
                             <div class="mt-2 flex items-center">
                                 <img class="h-10 w-10 rounded-full" src="{{ $booking->tutor->user->profile_photo_url }}" alt="{{ $booking->tutor->user->name }}">
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-gray-900">{{ $booking->tutor->user->name }}</p>
-                                    <p class="text-sm text-gray-500">{{ $booking->subject->name }}</p>
+                                    <p class="text-sm text-gray-500">{{ translateSubjectName($booking->subject->name) }}</p>
                                 </div>
                             </div>
                         </div>
 
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500">Student</h4>
+                            <h4 class="text-sm font-medium text-gray-500">{{ __('common.student') }}</h4>
                             <div class="mt-2 flex items-center justify-between">
                                 <div class="flex items-center">
                                     <img class="h-10 w-10 rounded-full" src="{{ $booking->student->profile_photo_url }}" alt="{{ $booking->student->name }}">
@@ -73,7 +91,7 @@
                         </div>
 
                         <div>
-                            <h4 class="text-sm font-medium text-gray-500">Date & Time</h4>
+                            <h4 class="text-sm font-medium text-gray-500">{{ __('common.date_time') }}</h4>
                             <p class="mt-2 text-sm text-gray-900">
                                 {{ $booking->start_time->format('F d, Y') }}
                             </p>
@@ -89,7 +107,7 @@
 
                         @if($booking->notes)
                             <div class="md:col-span-2">
-                                <h4 class="text-sm font-medium text-gray-500">Notes</h4>
+                                <h4 class="text-sm font-medium text-gray-500">{{ __('common.notes') }}</h4>
                                 <p class="mt-2 text-sm text-gray-900">{{ $booking->notes }}</p>
                             </div>
                         @endif
@@ -116,7 +134,7 @@
 
                         @if($booking->meeting_link)
                             <div class="md:col-span-2">
-                                <h4 class="text-sm font-medium text-gray-500">Meeting Link</h4>
+                                <h4 class="text-sm font-medium text-gray-500">{{ __('common.meeting_link') }}</h4>
                                 <a href="{{ $booking->meeting_link }}" target="_blank" class="mt-2 text-sm text-indigo-600 hover:text-indigo-900">
                                     {{ $booking->meeting_link }}
                                 </a>
@@ -161,31 +179,7 @@
                                     }
                                 @endphp
 
-                                {{-- Debug information (remove in production) --}}
-                                @if(config('app.debug'))
-                                    <div class="mb-4 p-3 bg-gray-100 rounded text-xs">
-                                        <strong>🔍 Debug Payment Status (Booking #{{ $booking->id }}):</strong><br>
-                                        💳 Payment Status: <span class="font-mono {{ $paymentStatusIsPaid ? 'text-green-600' : 'text-red-600' }}">{{ $booking->payment_status ?? 'null' }}</span><br>
-                                        ⏳ Payment Status Is Pending: <span class="{{ $paymentStatusIsPending ? 'text-yellow-600' : 'text-gray-600' }}">{{ $paymentStatusIsPending ? 'TRUE' : 'FALSE' }}</span><br>
-                                        ✅ Payment Status Is Paid: <span class="{{ $paymentStatusIsPaid ? 'text-green-600' : 'text-red-600' }}">{{ $paymentStatusIsPaid ? 'TRUE' : 'FALSE' }}</span><br>
-                                        🔗 VNPay TxnRef: <span class="font-mono text-xs">{{ $booking->vnpay_txn_ref ?? 'null' }}</span><br>
-                                        📊 Total Transactions: {{ $allTransactionsCount }}<br>
-                                        ✅ Completed Transactions: {{ $completedTransactionsCount }}<br>
-                                        🔄 Has Completed Transactions: <span class="{{ $hasCompletedTransactions ? 'text-green-600' : 'text-red-600' }}">{{ $hasCompletedTransactions ? 'TRUE' : 'FALSE' }}</span><br>
-                                        💰 Has Successful Payment Transactions: <span class="{{ $hasSuccessfulPaymentTransactions ? 'text-green-600' : 'text-red-600' }}">{{ $hasSuccessfulPaymentTransactions ? 'TRUE' : 'FALSE' }}</span><br>
-                                        🎯 <strong>FINAL: Is Already Paid:</strong> <span class="font-bold {{ $isAlreadyPaid ? 'text-green-600' : 'text-red-600' }}">{{ $isAlreadyPaid ? 'TRUE ✅' : 'FALSE ❌' }}</span><br>
-                                        🚀 <strong>Can Make Payment:</strong> <span class="font-bold {{ $canMakePayment ? 'text-blue-600' : 'text-gray-600' }}">{{ $canMakePayment ? 'TRUE 🚀' : 'FALSE 🚫' }}</span><br>
-                                        📋 Booking Status: <span class="font-mono">{{ $booking->status }}</span><br>
-                                        👤 Current User ID: {{ auth()->user()->id }}<br>
-                                        🎓 Student ID: {{ $booking->student_id }}
-                                        @if($allTransactionsCount > 0)
-                                            <br><strong>Transactions:</strong><br>
-                                            @foreach($booking->transactions as $transaction)
-                                                - ID: {{ $transaction->id }}, Type: {{ $transaction->type }}, Status: {{ $transaction->status }}, Method: {{ $transaction->payment_method }}<br>
-                                            @endforeach
-                                        @endif
-                                    </div>
-                                @endif
+
                                 @if($isAlreadyPaid)
                                     <!-- Case 1: Already Paid - Hide payment button completely -->
                                     <h4 class="text-sm font-medium text-gray-500">{{ __('common.Payment History') }}</h4>
@@ -195,10 +189,10 @@
                                                 <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                                 </svg>
-                                                <span class="text-sm text-green-800 font-medium">{{ __('booking.payment_completed_successfully') }}</span>
+                                                <span class="text-sm text-green-800 font-medium">{{ __('booking.info.payment_completed_successfully') }}</span>
                                             </div>
                                             <p class="text-sm text-green-700 mt-2">
-                                                {{ __('booking.payment_amount_was') }}: <span class="font-semibold">{{ $booking->display_amount }}</span>
+                                                {{ __('booking.info.payment_amount_was') }}: <span class="font-semibold">{{ $booking->display_amount }}</span>
                                             </p>
 
                                             @php
@@ -209,11 +203,11 @@
                                                 <div class="mt-3 pt-3 border-t border-green-200">
                                                     <div class="grid grid-cols-2 gap-2 text-xs">
                                                         <div>
-                                                            <span class="text-green-600">{{ __('booking.payment_method') }}:</span>
+                                                            <span class="text-green-600">{{ __('booking.info.payment_method') }}:</span>
                                                             <span class="font-medium text-green-800">{{ $completedTransaction->payment_method_name }}</span>
                                                         </div>
                                                         <div>
-                                                            <span class="text-green-600">{{ __('booking.paid_at') }}:</span>
+                                                            <span class="text-green-600">{{ __('booking.info.paid_at') }}:</span>
                                                             <span class="font-medium text-green-800">{{ $completedTransaction->processed_at ? $completedTransaction->processed_at->format('d/m/Y H:i') : $completedTransaction->created_at->format('d/m/Y H:i') }}</span>
                                                         </div>
                                                     </div>
@@ -224,7 +218,7 @@
                                                 <a href="{{ route('bookings.transactions', $booking) }}"
                                                    class="inline-flex items-center px-3 py-2 bg-green-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 transition-all duration-200">
                                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                                    {{ __('booking.view_transaction_history') }}
+                                                    {{ __('booking.info.view_transaction_history') }}
                                                 </a>
                                             </div>
                                         </div>
@@ -254,21 +248,21 @@
                                     </div>
                                 @elseif($paymentStatusIsPending && !$canMakePayment)
                                     <!-- Case 3: Payment In Progress - Show status message -->
-                                    <h4 class="text-sm font-medium text-gray-500">Trạng thái thanh toán</h4>
+                                    <h4 class="text-sm font-medium text-gray-500">{{ __('booking.payment_status') }}</h4>
                                     <div class="mt-2">
                                         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                                             <div class="flex items-center">
                                                 <svg class="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                                                 </svg>
-                                                <span class="text-sm text-yellow-800 font-medium">Thanh toán đang được xử lý</span>
+                                                <span class="text-sm text-yellow-800 font-medium">{{ __('booking.payment_processing') }}</span>
                                             </div>
                                             <p class="text-sm text-yellow-700 mt-2">
-                                                Booking này đang trong quá trình thanh toán. Vui lòng liên hệ admin nếu có vấn đề.
+                                                {{ __('booking.payment_processing_message') }}
                                             </p>
                                             @if($booking->vnpay_txn_ref)
                                                 <p class="text-xs text-yellow-600 mt-2 font-mono">
-                                                    Mã giao dịch: {{ $booking->vnpay_txn_ref }}
+                                                    {{ __('booking.transaction_code') }}: {{ $booking->vnpay_txn_ref }}
                                                 </p>
                                             @endif
                                         </div>
@@ -299,10 +293,10 @@
                                         <svg class="w-5 h-5 text-orange-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.667-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                                         </svg>
-                                        <span class="text-sm text-orange-800 font-medium">Quản lý hoàn tiền</span>
+                                        <span class="text-sm text-orange-800 font-medium">{{ __('booking.refund_management') }}</span>
                                     </div>
                                     <p class="mt-2 text-sm text-orange-700">
-                                        Nếu bạn không thể dạy buổi học này, bạn có thể hoàn tiền cho học viên.
+                                        {{ __('booking.refund_description') }}
                                     </p>
                                     <div class="mt-3">
                                         <button type="button" onclick="openRefundModal()"
@@ -311,7 +305,7 @@
                                                 <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
                                                 <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
                                             </svg>
-                                            Hoàn tiền cho học viên
+                                            {{ __('booking.refund_to_student') }}
                                         </button>
                                     </div>
                                 </div>

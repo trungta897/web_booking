@@ -39,7 +39,50 @@
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-600">{{ __('booking.amount') }}:</span>
-                                            <span class="font-medium">{{ number_format($completedTransaction->amount, 0) }} {{ $completedTransaction->currency }}</span>
+                                            <span class="font-medium">
+                                                @php
+                                                    $currency = $completedTransaction->currency ?? 'VND';
+                                                    $amount = $completedTransaction->amount;
+                                                    $locale = session('locale') ?: app()->getLocale();
+                                                    if (!$locale || !in_array($locale, ['en', 'vi'])) {
+                                                        $locale = config('app.locale', 'vi');
+                                                    }
+
+                                                    // Smart detection: If currency is VND but amount is small (< 1000),
+                                                    // it's likely USD amount saved with wrong currency
+                                                    if ($currency === 'VND' && $amount < 1000) {
+                                                        // This is likely USD amount with wrong currency label
+                                                        if ($locale === 'vi') {
+                                                            // Vietnamese: Convert USD to VND for display
+                                                            $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
+                                                            $displayAmount = number_format($vndAmount, 0, ',', '.') . ' ₫';
+                                                        } else {
+                                                            // English: Display as USD
+                                                            $displayAmount = '$' . number_format($amount, 2);
+                                                        }
+                                                    } elseif ($currency === 'VND') {
+                                                        if ($locale === 'vi') {
+                                                            // Vietnamese: Display VND as is
+                                                            $displayAmount = number_format($amount, 0, ',', '.') . ' ₫';
+                                                        } else {
+                                                            // English: Convert VND to USD for display
+                                                            $usdAmount = $amount / 25000; // 1 USD = 25,000 VND
+                                                            $displayAmount = '$' . number_format($usdAmount, 2);
+                                                        }
+                                                    } else {
+                                                        // Currency is USD or other
+                                                        if ($locale === 'vi') {
+                                                            // Vietnamese: Convert to VND
+                                                            $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
+                                                            $displayAmount = number_format($vndAmount, 0, ',', '.') . ' ₫';
+                                                        } else {
+                                                            // English: Display as original currency
+                                                            $displayAmount = '$' . number_format($amount, 2);
+                                                        }
+                                                    }
+                                                @endphp
+                                                {{ $displayAmount }}
+                                            </span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-600">{{ __('booking.paid_at') }}:</span>

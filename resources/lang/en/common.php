@@ -182,4 +182,16 @@ return [
     'Payment Required' => 'Payment Required',
     'This booking requires payment to confirm.' => 'This booking requires payment to confirm.',
     'View Transaction History' => 'View Transaction History',
+    'Booking Details' => 'Booking Details',
+    'Session Information' => 'Session Information',
+    'notes' => 'Notes',
+    'meeting_link' => 'Meeting Link',
+
+    // Status translations
+    'accepted' => 'Accepted',
+    'rejected' => 'Rejected',
+    'cancelled' => 'Cancelled',
+
+    // Booking ID translation
+    'booking_id' => 'Booking',
 ];
