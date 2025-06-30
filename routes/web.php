@@ -97,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payments/vnpay/ipn', [PaymentController::class, 'vnpayIpn'])->name('payments.vnpay.ipn');
     Route::get('/bookings/{booking}/transactions', [PaymentController::class, 'getTransactionHistory'])->name('payments.transactions');
     Route::get('/bookings/{booking}/transactions/view', [PaymentController::class, 'viewTransactionHistory'])->name('payments.transactions.view');
+    Route::get('/bookings/{booking}/transaction-history', [PaymentController::class, 'viewTransactionHistory'])->name('bookings.transactions');
     Route::post('/webhook/stripe', [PaymentController::class, 'handleWebhook'])->name('payments.webhook');
 
     // Refund routes

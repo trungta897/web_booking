@@ -110,6 +110,23 @@ class Booking extends Model
         return $this->payment_status === self::PAYMENT_STATUS_PAID;
     }
 
+    /**
+     * Check if booking is fully paid (comprehensive check)
+     */
+    public function isFullyPaid()
+    {
+        // Check payment_status field
+        if ($this->payment_status === self::PAYMENT_STATUS_PAID) {
+            return true;
+        }
+
+        // Check if there are completed payment transactions
+        return $this->transactions()
+            ->where('type', 'payment')
+            ->where('status', 'completed')
+            ->exists();
+    }
+
     public function canBeCancelled()
     {
         return $this->isPending() || ($this->isAccepted() && $this->start_time > now());

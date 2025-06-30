@@ -53,6 +53,7 @@ return [
     'transaction_id' => 'Transaction ID',
     'amount' => 'Amount',
     'paid_at' => 'Paid At',
+    'payment_method' => 'Payment Method',
     ],
 
     // Payment related translations

@@ -178,4 +178,8 @@ return [
     'Transaction History' => 'Transaction History',
     'No transactions yet' => 'No transactions yet',
     'No payment transactions have been made for this booking.' => 'No payment transactions have been made for this booking.',
+    'Payment History' => 'Payment History',
+    'Payment Required' => 'Payment Required',
+    'This booking requires payment to confirm.' => 'This booking requires payment to confirm.',
+    'View Transaction History' => 'View Transaction History',
 ];

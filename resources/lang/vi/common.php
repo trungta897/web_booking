@@ -182,5 +182,9 @@ return [
     // Transaction History page translations
     'Transaction History' => 'Lịch Sử Giao Dịch',
     'No transactions yet' => 'Chưa có giao dịch nào',
-    'No payment transactions have been made for this booking.' => 'Chưa có giao dịch thanh toán nào được thực hiện cho booking này.',
+    'No payment transactions have been made for this booking.' => 'Chưa có giao dịch thanh toán nào cho buổi học này.',
+    'Payment History' => 'Lịch sử thanh toán',
+    'Payment Required' => 'Yêu cầu thanh toán',
+    'This booking requires payment to confirm.' => 'Buổi học này cần thanh toán để xác nhận.',
+    'View Transaction History' => 'Xem lịch sử giao dịch',
 ];
