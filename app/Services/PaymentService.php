@@ -446,9 +446,13 @@ class PaymentService extends BaseService implements PaymentServiceInterface
         // VNPay refund implementation would go here
         // This is a placeholder as VNPay refund requires specific API integration
 
+        $message = app()->getLocale() === 'vi'
+            ? 'Hoàn tiền VNPay cần được xử lý thủ công qua cổng thanh toán VNPay. Vui lòng liên hệ admin để được hỗ trợ.'
+            : 'VNPay refunds must be processed manually through VNPay portal. Please contact admin for assistance.';
+
         return [
             'success' => false,
-            'message' => 'VNPay refunds must be processed manually through VNPay portal',
+            'message' => $message,
         ];
     }
 }

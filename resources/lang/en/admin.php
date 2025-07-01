@@ -12,6 +12,7 @@ return [
     'bookings' => 'Bookings',
     'subjects' => 'Subjects',
     'reports' => 'Reports',
+    'refunds' => 'Refunds',
     'reviews' => 'Reviews',
     'profile' => 'Profile',
 

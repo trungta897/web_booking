@@ -50,6 +50,9 @@
                     <a href="{{ route('admin.bookings') }}" class="nav-link {{ request()->routeIs('admin.bookings') ? 'active' : '' }}">
                         <i class="fas fa-calendar-check"></i> {{ __('admin.bookings') }}
                     </a>
+                    <a href="{{ route('admin.refunds') }}" class="nav-link {{ request()->routeIs('admin.refunds*') ? 'active' : '' }}">
+                        <i class="fas fa-undo-alt"></i> {{ __('admin.refunds') }}
+                    </a>
                     <a href="{{ route('admin.subjects') }}" class="nav-link {{ request()->routeIs('admin.subjects*') ? 'active' : '' }}">
                         <i class="fas fa-book"></i> {{ __('admin.subjects') }}
                     </a>
@@ -232,7 +235,7 @@
                     </div>
 
                     <main class="px-6 pb-6">
-                        {{ $slot }}
+                        @yield('content')
                     </main>
                 </div>
             </div>

@@ -177,6 +177,12 @@ Route::middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class.':ad
     // Admin Profile
     Route::get('/profile', [AdminProfileController::class, 'show'])->name('profile.show');
     Route::patch('/profile/suspend', [AdminProfileController::class, 'suspend'])->name('profile.suspend');
+
+    // Refund management routes
+    Route::get('/refunds', [App\Http\Controllers\AdminRefundController::class, 'index'])->name('refunds');
+    Route::get('/refunds/{refund}/details', [App\Http\Controllers\AdminRefundController::class, 'details'])->name('refunds.details');
+    Route::post('/refunds/{booking}/start-processing', [App\Http\Controllers\AdminRefundController::class, 'startProcessing'])->name('refunds.start-processing');
+    Route::post('/refunds/{booking}/complete', [App\Http\Controllers\AdminRefundController::class, 'complete'])->name('refunds.complete');
 });
 
 // Test route for Tutor and Subject relationships

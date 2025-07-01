@@ -12,6 +12,7 @@ return [
     'bookings' => 'Đặt lịch',
     'subjects' => 'Môn học',
     'reports' => 'Báo cáo',
+    'refunds' => 'Hoàn tiền',
     'reviews' => 'Đánh giá',
     'profile' => 'Hồ sơ',
 
