@@ -293,4 +293,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/vnpay-result', [PaymentController::class, 'showVnpayResult'])->name('vnpay.result');
 });
 
+
+
 require __DIR__.'/auth.php';

@@ -1,11 +1,15 @@
-<x-admin-layout>
-    <x-slot name="header">
+@extends('layouts.admin')
+
+@section('content')
+    <!-- Header -->
+    <div class="admin-page-header bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 px-6 py-4">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Tutor Details: ') }} {{ $user->name }}
         </h2>
-    </x-slot>
+    </div>
 
-    <div class="py-12">
+    <!-- Main Content -->
+    <div class="px-6 py-4">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <!-- Tutor Information Card -->
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
@@ -153,4 +157,4 @@
             </div>
         </div>
     </div>
-</x-admin-layout>
+@endsection

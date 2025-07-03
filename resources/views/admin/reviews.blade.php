@@ -1,9 +1,14 @@
-<x-admin-layout>
-    <x-slot name="header">
-        <h2>Reviews</h2>
-    </x-slot>
+@extends('layouts.admin')
 
-    <div class="admin-card">
+@section('content')
+    <!-- Header -->
+    <div class="admin-page-header bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 px-6 py-4">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Reviews</h2>
+    </div>
+
+    <!-- Main Content -->
+    <div class="px-6 py-4">
+        <div class="admin-card">
         <div class="admin-card-header">
             <h3>All Reviews</h3>
             <div class="flex items-center space-x-4">
@@ -66,4 +71,4 @@
             </div>
         </div>
     </div>
-</x-admin-layout>
+@endsection

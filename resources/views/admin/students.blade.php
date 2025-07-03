@@ -1,11 +1,15 @@
-<x-admin-layout>
-    <x-slot name="header">
+@extends('layouts.admin')
+
+@section('content')
+    <!-- Header -->
+    <div class="admin-page-header bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 px-6 py-4">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('admin.manage_students') }}
         </h2>
-    </x-slot>
+    </div>
 
-    <div class="py-12">
+    <!-- Main Content -->
+    <div class="px-6 py-4">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
@@ -91,4 +95,4 @@
             </div>
         </div>
     </div>
-</x-admin-layout>
+@endsection
