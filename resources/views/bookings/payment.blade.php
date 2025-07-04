@@ -335,8 +335,6 @@
         let selectedPaymentMethod = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Payment page loaded');
-
             // Elements
             const paymentMethodCards = document.querySelectorAll('.payment-method-card');
             const paymentButton = document.getElementById('payment-button');
@@ -346,26 +344,9 @@
             const stripeForm = document.getElementById('stripe-form');
             const paymentError = document.getElementById('payment-error');
 
-            console.log('Found elements:', {
-                cards: paymentMethodCards.length,
-                button: !!paymentButton,
-                vnpayForm: !!vnpayForm,
-                stripeForm: !!stripeForm
-            });
-
-            // Debug booking info
-            console.log('📋 Booking Info:', {
-                bookingId: {{ $booking->id }},
-                studentId: {{ $booking->student_id }},
-                tutorId: {{ $booking->tutor_id }},
-                status: '{{ $booking->status }}',
-                paymentStatus: '{{ $booking->payment_status }}'
-            });
-
             // Payment method selection
             paymentMethodCards.forEach(card => {
                 card.addEventListener('click', function() {
-                    console.log('Payment method card clicked:', this.dataset.method);
 
                     // Remove previous selections
                     paymentMethodCards.forEach(c => {
@@ -402,15 +383,12 @@
                     // Enable payment button
                     paymentButton.disabled = false;
                     paymentButton.classList.remove('opacity-50');
-
-                    console.log('Payment method selected:', method);
                 });
             });
 
             // Payment button click
             paymentButton.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('Payment button clicked, method:', selectedPaymentMethod);
 
                 if (!selectedPaymentMethod) {
                     showError('Vui lòng chọn phương thức thanh toán');
@@ -432,11 +410,9 @@
             // Cancel payment button click
             cancelButton.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('Cancel payment button clicked');
 
                 // Show confirmation dialog
                 if (confirm('Bạn có chắc chắn muốn hủy thanh toán? Bạn có thể quay lại thanh toán sau.')) {
-                    console.log('User confirmed cancellation, redirecting to dashboard');
 
                     // Redirect to student dashboard
                     @auth
@@ -448,15 +424,10 @@
                     @else
                         window.location.href = '{{ route("bookings.index") }}';
                     @endauth
-                } else {
-                    console.log('User cancelled the cancellation');
                 }
             });
 
                                                                                                 function processVNPayPayment() {
-                console.log('Processing VNPay payment...');
-                console.log('🔍 Request URL:', `/web_booking/public/bookings/{{ $booking->id }}/payment/process`);
-                console.log('🆔 Booking ID:', {{ $booking->id }});
 
                 fetch(`/web_booking/public/bookings/{{ $booking->id }}/payment/process`, {
                     method: 'POST',
@@ -469,7 +440,6 @@
                     })
                 })
                 .then(response => {
-                    console.log('VNPay response status:', response.status);
 
                     if (!response.ok) {
                                                 // Handle different error status codes
@@ -496,10 +466,7 @@
                     return response.json();
                 })
                                 .then(data => {
-                    console.log('VNPay response data:', data);
-
                     if (data.payment_url) {
-                        console.log('Redirecting to VNPay:', data.payment_url);
                         window.location.href = data.payment_url;
                     } else {
                         throw new Error(data.error || 'Có lỗi xảy ra khi tạo link thanh toán VNPay');
@@ -523,14 +490,12 @@
             }
 
             function processStripePayment() {
-                console.log('Processing Stripe payment...');
                 // TODO: Implement Stripe payment processing
                 showError('Stripe payment chưa được triển khai');
                 resetPaymentButton();
             }
 
             function showError(message) {
-                console.log('Showing error:', message);
                 paymentError.textContent = message;
                 paymentError.classList.remove('hidden');
 
@@ -554,20 +519,10 @@
                 document.getElementById('spinner').classList.add('hidden');
             }
 
-            // Test button click without payment method (for debugging)
-            if (paymentButton) {
-                paymentButton.addEventListener('click', function(e) {
-                    console.log('🔥 Payment button clicked - any method!');
-                }, true); // Use capture phase
-            }
-
             // Auto-select VNPay for Vietnamese users
             const vnpayCard = document.querySelector('[data-method="vnpay"]');
             if (vnpayCard) {
-                console.log('Auto-selecting VNPay...');
                 setTimeout(() => vnpayCard.click(), 100); // Small delay to ensure DOM is ready
-            } else {
-                console.error('❌ VNPay card not found for auto-selection');
             }
         });
     </script>

@@ -8,7 +8,7 @@
 
     <!-- Main Content -->
     <div class="px-6 py-4">
-        <div class="admin-card">
+    <div class="admin-card">
         <div class="admin-card-header">
             <h3>All Reviews</h3>
             <div class="flex items-center space-x-4">
