@@ -176,4 +176,80 @@ return [
     'select_report_type' => 'Select Report Type',
     'user_activity' => 'User Activity',
     'generate_report' => 'Generate Report',
+
+    // Refunds Management
+    'refunds_management' => 'VNPay Refund Management',
+    'refunds_subtitle' => 'Track and process refund requests',
+    'refund_guide' => 'Guide',
+    'refresh' => 'Refresh',
+    'filters' => 'Filters',
+    'status_filter' => 'Status',
+    'payment_method_filter' => 'Method',
+    'from_date' => 'From date',
+    'to_date' => 'To date',
+    'filter_button' => 'Filter',
+    'clear_filters' => 'Clear filters',
+    'export' => 'Export',
+    'print' => 'Print',
+
+    // Refund Statistics
+    'pending_refunds' => 'Pending',
+    'processing_refunds' => 'Processing',
+    'completed_refunds' => 'Completed (This month)',
+    'total_refund_amount' => 'Total refunded (This month)',
+    'avg_processing_time' => 'Average processing time',
+    'hours' => 'hours',
+    'no_data_available' => 'No data available',
+    'by_payment_method' => 'By payment method',
+    'by_refund_type' => 'By refund type',
+    'full_refund' => 'Full refund',
+    'partial_refund' => 'Partial refund',
+    'refund_trends' => 'Refund trends (Last 7 days)',
+    'top_refund_reasons' => 'Top refund reasons',
+
+    // Refund List
+    'refund_requests_list' => 'Refund requests list',
+    'no_refunds_found' => 'No refund requests found',
+    'no_refunds_message' => 'No refund requests have been created in the system yet.',
+    'booking_id_column' => 'Booking ID',
+    'student_column' => 'Student',
+    'amount_column' => 'Amount',
+    'reason_column' => 'Reason',
+    'status_column' => 'Status',
+    'request_date_column' => 'Request date',
+    'actions_column' => 'Actions',
+    'view_details_action' => 'View details',
+
+    // Refund Workflow
+    'refund_workflow_title' => 'Refund workflow (7 steps)',
+    'workflow_note' => 'Important note: VNPay does not support automatic refund API. All refunds must be processed manually through VNPay Merchant Portal.',
+    'workflow_important' => 'Important: Must complete step 7 to update status and send notification to student.',
+    'workflow_steps' => [
+        'step1' => 'Start processing',
+        'step1_desc' => 'Click "Process" button for the refund request to process',
+        'step2' => 'Access VNPay Portal',
+        'step2_desc' => 'Login to VNPay Merchant Portal',
+        'step3' => 'Find refund menu',
+        'step3_desc' => 'Go to "Transaction Management" → "Refund"',
+        'step4' => 'Find transaction',
+        'step4_desc' => 'Find transaction by VNPay Transaction ID',
+        'step5' => 'Process refund',
+        'step5_desc' => 'Process refund on VNPay portal',
+        'step6' => 'Get transaction code',
+        'step6_desc' => 'Copy refund transaction code from VNPay',
+        'step7' => 'Complete',
+        'step7_desc' => 'Click "Complete" and enter transaction code'
+    ],
+
+    // Status badges
+    'status_pending' => 'Pending',
+    'status_processing' => 'Processing',
+    'status_completed' => 'Completed',
+    'status_failed' => 'Failed',
+
+    // Payment methods
+    'vnpay' => 'VNPay',
+    'stripe' => 'Stripe',
+    'all_methods' => 'All methods',
+    'all_statuses' => 'All statuses',
 ];

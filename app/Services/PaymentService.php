@@ -171,15 +171,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
         }
     }
 
-    /**
-     * Get booking transactions
-     */
-    public function getBookingTransactions(Booking $booking): Collection
-    {
-        return $booking->transactions()
-            ->orderBy('created_at', 'desc')
-            ->get();
-    }
+
 
     /**
      * Create transaction record
@@ -319,6 +311,32 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
+     * Get booking transactions summary
+     *
+     * @param Booking $booking
+     * @return array{transactions: Collection, total_paid: float, total_refunded: float, payment_status: string, formatted: array{total_paid: string, total_refunded: string}}
+     */
+    public function getBookingTransactions(Booking $booking): array
+    {
+        $transactions = $this->getTransactionHistory($booking);
+
+        return [
+            'transactions' => $transactions,
+            'total_paid' => $transactions->where('type', Transaction::TYPE_PAYMENT)
+                ->where('status', Transaction::STATUS_COMPLETED)
+                ->sum('amount'),
+            'total_refunded' => $transactions->whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
+                ->where('status', Transaction::STATUS_COMPLETED)
+                ->sum('amount'),
+            'payment_status' => $booking->payment_status,
+            'formatted' => [
+                'total_paid' => $this->formatCurrency($transactions->where('type', Transaction::TYPE_PAYMENT)->sum('amount')),
+                'total_refunded' => $this->formatCurrency(abs($transactions->whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])->sum('amount'))),
+            ],
+        ];
+    }
+
+    /**
      * Refund payment
      *
      * @param Booking $booking
@@ -333,36 +351,59 @@ class PaymentService extends BaseService implements PaymentServiceInterface
                 throw new Exception('Booking is not paid, cannot refund');
             }
 
-            return $this->executeTransaction(function () use ($booking, $reason) {
+            // Validate refund amount
+            $totalPaid = $this->getTotalPaidAmount($booking);
+            $totalRefunded = $this->getTotalRefundedAmount($booking);
+            $availableForRefund = $totalPaid - abs($totalRefunded);
+
+            if ($amount > $availableForRefund) {
+                throw new Exception("Refund amount ({$amount}) exceeds available amount ({$availableForRefund})");
+            }
+
+            return $this->executeTransaction(function () use ($booking, $amount, $reason) {
                 // Process refund based on payment method
                 $transaction = Transaction::where('booking_id', $booking->id)
                     ->where('status', Transaction::STATUS_COMPLETED)
+                    ->where('type', Transaction::TYPE_PAYMENT)
                     ->first();
 
                 if (! $transaction) {
-                    throw new Exception('No completed transaction found');
+                    throw new Exception('No completed payment transaction found');
                 }
 
-                $refundResult = $this->processRefund($transaction, $reason);
+                $refundResult = $this->processRefund($transaction, $reason, $amount);
 
                 if ($refundResult['success']) {
-                    $booking->update(['payment_status' => 'refunded']);
+                    // Determine refund type
+                    $isPartialRefund = $amount < $booking->price;
+                    $refundType = $isPartialRefund ? Transaction::TYPE_PARTIAL_REFUND : Transaction::TYPE_REFUND;
+
+                    // Update booking payment status
+                    $newPaymentStatus = $isPartialRefund ? 'partial_refunded' : 'refunded';
+                    $booking->update(['payment_status' => $newPaymentStatus]);
 
                     // Create refund transaction record
                     Transaction::create([
                         'booking_id' => $booking->id,
                         'user_id' => $booking->student_id,
-                        'amount' => -$booking->price, // Negative amount for refund
+                        'amount' => -$amount, // Negative amount for refund
                         'currency' => $transaction->currency ?? 'VND',
                         'payment_method' => $transaction->payment_method,
-                        'type' => Transaction::TYPE_REFUND,
-                        'status' => Transaction::STATUS_REFUNDED,
+                        'type' => $refundType,
+                        'status' => Transaction::STATUS_COMPLETED,
                         'transaction_id' => $refundResult['refund_id'] ?? null,
+                        'processed_at' => now(),
+                        'metadata' => [
+                            'refund_reason' => $reason,
+                            'original_transaction_id' => $transaction->id,
+                            'refund_type' => $isPartialRefund ? 'partial' : 'full',
+                        ]
                     ]);
 
                     $this->logActivity('Payment refunded', [
                         'booking_id' => $booking->id,
-                        'amount' => $booking->price,
+                        'amount' => $amount,
+                        'type' => $refundType,
                         'reason' => $reason,
                     ]);
                 }
@@ -372,6 +413,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
         } catch (Exception $e) {
             $this->logError('Refund processing failed', $e, [
                 'booking_id' => $booking->id,
+                'amount' => $amount,
             ]);
 
             return [
@@ -386,15 +428,18 @@ class PaymentService extends BaseService implements PaymentServiceInterface
      *
      * @param Transaction $transaction
      * @param string|null $reason
+     * @param float|null $amount
      * @return array{success: bool, refund_id?: string, message?: string}
      */
-    protected function processRefund(Transaction $transaction, ?string $reason = null): array
+    protected function processRefund(Transaction $transaction, ?string $reason = null, ?float $amount = null): array
     {
+        $refundAmount = $amount ?? $transaction->amount;
+
         switch ($transaction->payment_method) {
             case 'stripe':
-                return $this->processStripeRefund($transaction, $reason);
+                return $this->processStripeRefund($transaction, $reason, $refundAmount);
             case 'vnpay':
-                return $this->processVnpayRefund($transaction, $reason);
+                return $this->processVnpayRefund($transaction, $reason, $refundAmount);
             default:
                 throw new Exception('Unsupported payment method for refund');
         }
@@ -405,22 +450,26 @@ class PaymentService extends BaseService implements PaymentServiceInterface
      *
      * @param Transaction $transaction
      * @param string|null $reason
+     * @param float $amount
      * @return array{success: bool, refund_id?: string, message?: string}
      */
-    protected function processStripeRefund(Transaction $transaction, ?string $reason = null): array
+    protected function processStripeRefund(Transaction $transaction, ?string $reason = null, ?float $amount = null): array
     {
         if (!$this->stripe) {
             throw new Exception('Stripe not configured');
         }
 
+        $refundAmount = $amount ?? $transaction->amount;
+
         try {
             $refund = $this->stripe->refunds->create([
                 'payment_intent' => $transaction->transaction_id,
-                'amount' => $transaction->amount * 100, // Convert to cents
+                'amount' => $refundAmount * 100, // Convert to cents
                 'reason' => 'requested_by_customer',
                 'metadata' => [
                     'booking_id' => $transaction->booking_id,
                     'reason' => $reason,
+                    'refund_amount' => $refundAmount,
                 ],
             ]);
 
@@ -439,9 +488,10 @@ class PaymentService extends BaseService implements PaymentServiceInterface
      *
      * @param Transaction $transaction
      * @param string|null $reason
+     * @param float|null $amount
      * @return array{success: bool, message: string}
      */
-    protected function processVnpayRefund(Transaction $transaction, ?string $reason = null): array
+    protected function processVnpayRefund(Transaction $transaction, ?string $reason = null, ?float $amount = null): array
     {
         // VNPay refund implementation would go here
         // This is a placeholder as VNPay refund requires specific API integration
@@ -454,5 +504,27 @@ class PaymentService extends BaseService implements PaymentServiceInterface
             'success' => false,
             'message' => $message,
         ];
+    }
+
+    /**
+     * Get total paid amount for booking
+     */
+    private function getTotalPaidAmount(Booking $booking): float
+    {
+        return Transaction::where('booking_id', $booking->id)
+            ->where('type', Transaction::TYPE_PAYMENT)
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->sum('amount');
+    }
+
+    /**
+     * Get total refunded amount for booking
+     */
+    private function getTotalRefundedAmount(Booking $booking): float
+    {
+        return Transaction::where('booking_id', $booking->id)
+            ->whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->sum('amount'); // This will be negative, so we need abs() when displaying
     }
 }

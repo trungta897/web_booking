@@ -58,6 +58,10 @@ class Booking extends Model
 
     const PAYMENT_STATUS_FAILED = 'failed';
 
+    const PAYMENT_STATUS_REFUNDED = 'refunded';
+
+    const PAYMENT_STATUS_PARTIAL_REFUNDED = 'partial_refunded';
+
     // Add scopes for common queries
     public function scopePending($query)
     {

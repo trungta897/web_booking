@@ -14,7 +14,7 @@ class AdminRefundController extends Controller
     public function index(Request $request)
     {
         $query = Transaction::where('payment_method', 'vnpay')
-            ->where('type', 'refund')
+            ->whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
             ->with(['booking.student', 'booking.tutor.user']);
 
         // Apply filters
@@ -30,31 +30,133 @@ class AdminRefundController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
+        if ($request->filled('payment_method')) {
+            $query->where('payment_method', $request->payment_method);
+        }
+
         $refunds = $query->orderBy('created_at', 'desc')->paginate(20);
 
-        // Calculate stats
-        $stats = [
-            'pending' => Transaction::where('payment_method', 'vnpay')
-                ->where('type', 'refund')
-                ->where('status', 'pending')
-                ->count(),
-            'processing' => Transaction::where('payment_method', 'vnpay')
-                ->where('type', 'refund')
-                ->where('status', 'processing')
-                ->count(),
-            'completed' => Transaction::where('payment_method', 'vnpay')
-                ->where('type', 'refund')
-                ->where('status', 'completed')
-                ->whereMonth('created_at', now()->month)
-                ->count(),
-            'total_amount' => Transaction::where('payment_method', 'vnpay')
-                ->where('type', 'refund')
-                ->where('status', 'completed')
-                ->whereMonth('created_at', now()->month)
-                ->sum('amount')
-        ];
+        // Enhanced statistics
+        $stats = $this->getRefundStatistics($request);
 
         return view('admin.refunds', compact('refunds', 'stats'));
+    }
+
+    /**
+     * Get comprehensive refund statistics
+     */
+    private function getRefundStatistics(Request $request): array
+    {
+        $baseQuery = Transaction::whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND]);
+
+        // Apply same filters as main query
+        if ($request->filled('date_from')) {
+            $baseQuery->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $baseQuery->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        return [
+            // Status counts
+            'pending' => (clone $baseQuery)->where('status', 'pending')->count(),
+            'processing' => (clone $baseQuery)->where('status', 'processing')->count(),
+            'completed' => (clone $baseQuery)->where('status', 'completed')->count(),
+            'failed' => (clone $baseQuery)->where('status', 'failed')->count(),
+
+            // Amount statistics (this month)
+            'total_amount_month' => (clone $baseQuery)
+                ->where('status', 'completed')
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->sum('amount'),
+
+            'total_amount_all_time' => (clone $baseQuery)
+                ->where('status', 'completed')
+                ->sum('amount'),
+
+            // Payment method breakdown
+            'by_payment_method' => (clone $baseQuery)
+                ->where('status', 'completed')
+                ->selectRaw('payment_method, COUNT(*) as count, SUM(amount) as total_amount')
+                ->groupBy('payment_method')
+                ->get(),
+
+            // Average processing time
+            'avg_processing_time' => $this->getAverageProcessingTime(),
+
+            // Refund type breakdown
+            'by_type' => (clone $baseQuery)
+                ->where('status', 'completed')
+                ->selectRaw('type, COUNT(*) as count, SUM(amount) as total_amount')
+                ->groupBy('type')
+                ->get(),
+
+            // Recent trends (last 7 days)
+            'daily_trends' => $this->getDailyRefundTrends(),
+
+            // Top reasons (if we track this in metadata)
+            'top_reasons' => $this->getTopRefundReasons(),
+        ];
+    }
+
+    /**
+     * Get average refund processing time
+     */
+    private function getAverageProcessingTime(): ?float
+    {
+        $completedRefunds = Transaction::whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
+            ->where('status', 'completed')
+            ->whereNotNull('processed_at')
+            ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, processed_at)) as avg_hours')
+            ->value('avg_hours');
+
+        return $completedRefunds ? round($completedRefunds, 1) : null;
+    }
+
+    /**
+     * Get daily refund trends for the last 7 days
+     */
+    private function getDailyRefundTrends(): array
+    {
+        $trends = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $trends[] = [
+                'date' => $date->format('d/m'),
+                'count' => Transaction::whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
+                    ->whereDate('created_at', $date)
+                    ->count(),
+                'amount' => abs(Transaction::whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
+                    ->whereDate('created_at', $date)
+                    ->where('status', 'completed')
+                    ->sum('amount'))
+            ];
+        }
+
+        // Always return data for chart display - even if all counts are 0
+        return $trends;
+    }
+
+    /**
+     * Get top refund reasons from metadata
+     */
+    private function getTopRefundReasons(): array
+    {
+        $refunds = Transaction::whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
+            ->where('status', 'completed')
+            ->whereNotNull('metadata')
+            ->get();
+
+        $reasons = [];
+        foreach ($refunds as $refund) {
+            $reason = $refund->metadata['refund_reason'] ?? 'Unknown';
+            $reasons[$reason] = ($reasons[$reason] ?? 0) + 1;
+        }
+
+        arsort($reasons);
+        return array_slice($reasons, 0, 5, true);
     }
 
     public function startProcessing(Request $request, $bookingId)

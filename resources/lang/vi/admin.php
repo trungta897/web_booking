@@ -176,4 +176,80 @@ return [
     'select_report_type' => 'Chọn Loại Báo Cáo',
     'user_activity' => 'Hoạt Động Người Dùng',
     'generate_report' => 'Tạo Báo Cáo',
+
+    // Refunds Management
+    'refunds_management' => 'Quản lý hoàn tiền VNPay',
+    'refunds_subtitle' => 'Theo dõi và xử lý các yêu cầu hoàn tiền',
+    'refund_guide' => 'Hướng dẫn',
+    'refresh' => 'Làm mới',
+    'filters' => 'Bộ lọc',
+    'status_filter' => 'Trạng thái',
+    'payment_method_filter' => 'Phương thức',
+    'from_date' => 'Từ ngày',
+    'to_date' => 'Đến ngày',
+    'filter_button' => 'Lọc',
+    'clear_filters' => 'Xóa bộ lọc',
+    'export' => 'Xuất dữ liệu',
+    'print' => 'In',
+
+    // Refund Statistics
+    'pending_refunds' => 'Chờ xử lý',
+    'processing_refunds' => 'Đang xử lý',
+    'completed_refunds' => 'Hoàn thành (Tháng này)',
+    'total_refund_amount' => 'Tổng tiền hoàn (Tháng này)',
+    'avg_processing_time' => 'Thời gian xử lý trung bình',
+    'hours' => 'giờ',
+    'no_data_available' => 'Chưa có dữ liệu',
+    'by_payment_method' => 'Theo phương thức thanh toán',
+    'by_refund_type' => 'Theo loại hoàn tiền',
+    'full_refund' => 'Hoàn tiền toàn bộ',
+    'partial_refund' => 'Hoàn tiền một phần',
+    'refund_trends' => 'Xu hướng hoàn tiền (7 ngày gần đây)',
+    'top_refund_reasons' => 'Lý do hoàn tiền phổ biến',
+
+    // Refund List
+    'refund_requests_list' => 'Danh sách yêu cầu hoàn tiền',
+    'no_refunds_found' => 'Không có yêu cầu hoàn tiền nào',
+    'no_refunds_message' => 'Chưa có yêu cầu hoàn tiền nào được tạo trong hệ thống.',
+    'booking_id_column' => 'Mã booking',
+    'student_column' => 'Học viên',
+    'amount_column' => 'Số tiền',
+    'reason_column' => 'Lý do',
+    'status_column' => 'Trạng thái',
+    'request_date_column' => 'Ngày yêu cầu',
+    'actions_column' => 'Thao tác',
+    'view_details_action' => 'Xem chi tiết',
+
+    // Refund Workflow
+    'refund_workflow_title' => 'Quy trình hoàn tiền (7 bước)',
+    'workflow_note' => 'Lưu ý quan trọng: VNPay không hỗ trợ API hoàn tiền tự động. Tất cả hoàn tiền phải được xử lý thủ công qua VNPay Merchant Portal.',
+    'workflow_important' => 'Quan trọng: Phải hoàn tất bước 7 để cập nhật trạng thái và gửi thông báo cho học viên.',
+    'workflow_steps' => [
+        'step1' => 'Bắt đầu xử lý',
+        'step1_desc' => 'Click nút "Xử lý" cho yêu cầu hoàn tiền cần xử lý',
+        'step2' => 'Truy cập VNPay Portal',
+        'step2_desc' => 'Đăng nhập vào VNPay Merchant Portal',
+        'step3' => 'Tìm menu hoàn tiền',
+        'step3_desc' => 'Vào mục "Quản lý giao dịch" → "Hoàn tiền"',
+        'step4' => 'Tìm giao dịch',
+        'step4_desc' => 'Tìm giao dịch theo mã VNPay Transaction',
+        'step5' => 'Thực hiện hoàn tiền',
+        'step5_desc' => 'Thực hiện hoàn tiền trên VNPay portal',
+        'step6' => 'Lấy mã giao dịch',
+        'step6_desc' => 'Copy mã giao dịch hoàn tiền từ VNPay',
+        'step7' => 'Hoàn thành',
+        'step7_desc' => 'Click "Hoàn thành" và nhập mã giao dịch'
+    ],
+
+    // Status badges
+    'status_pending' => 'Chờ xử lý',
+    'status_processing' => 'Đang xử lý',
+    'status_completed' => 'Hoàn thành',
+    'status_failed' => 'Thất bại',
+
+    // Payment methods
+    'vnpay' => 'VNPay',
+    'stripe' => 'Stripe',
+    'all_methods' => 'Tất cả phương thức',
+    'all_statuses' => 'Tất cả trạng thái',
 ];

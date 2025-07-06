@@ -1,757 +1,597 @@
 @extends('layouts.admin')
 
-@section('title', 'Quản lý hoàn tiền VNPay')
+@section('title', __('admin.refunds_management'))
 
 @section('content')
-<div class="container-fluid">
-    <!-- Header Section -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-1 text-gray-800 fw-bold">
-                <i class="fas fa-undo-alt text-primary me-2"></i>
-                Quản lý hoàn tiền VNPay
-            </h1>
-            <p class="text-muted mb-0">Quản lý và xử lý các yêu cầu hoàn tiền từ VNPay</p>
-        </div>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="refreshPage()">
-                <i class="fas fa-sync-alt"></i> Làm mới
-            </button>
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#refundGuideModal">
-                <i class="fas fa-question-circle"></i> Hướng dẫn
-            </button>
-        </div>
-    </div>
-
-    <!-- Enhanced Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Chờ xử lý
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Enhanced Header with Actions -->
+        <div class="mb-8">
+            <div class="md:flex md:items-center md:justify-between">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-undo-alt text-white"></i>
                             </div>
-                            <div class="h4 mb-0 font-weight-bold text-gray-800">{{ $stats['pending'] }}</div>
-                            <div class="text-xs text-muted">Yêu cầu mới</div>
                         </div>
-                        <div class="col-auto">
-                            <div class="icon-circle bg-warning">
-                                <i class="fas fa-clock text-white"></i>
+                        <div class="ml-4">
+                            <h1 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl">
+                                {{ __('admin.refunds_management') }}
+                            </h1>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                {{ __('admin.refunds_subtitle') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                                <div class="mt-4 flex md:mt-0 md:ml-4">
+                    <button type="button"
+                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                            onclick="refreshData()">
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        {{ __('admin.refresh') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Pending Refunds -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-yellow-600 dark:text-yellow-400"></i>
                             </div>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                {{ __('admin.pending_refunds') }}
+                            </p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                                {{ $stats['pending'] }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Processing Refunds -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-cog text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                {{ __('admin.processing_refunds') }}
+                            </p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                                {{ $stats['processing'] }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Refunds -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check text-green-600 dark:text-green-400"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                {{ __('admin.completed_refunds') }}
+                            </p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                                {{ $stats['completed'] }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Amount -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-dollar-sign text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                {{ __('admin.total_refund_amount') }}
+                            </p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                                {{ number_format(abs($stats['total_amount_month']), 0, ',', '.') }}₫
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Đang xử lý
-                            </div>
-                            <div class="h4 mb-0 font-weight-bold text-gray-800">{{ $stats['processing'] }}</div>
-                            <div class="text-xs text-muted">Đang thực hiện</div>
+        <!-- Additional Metrics Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Processing Time Card -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-stopwatch mr-2 text-blue-600 dark:text-blue-400"></i>
+                        {{ __('admin.avg_processing_time') }}
+                    </h3>
+                </div>
+                <div class="p-6 text-center">
+                    @if($stats['avg_processing_time'])
+                        <div class="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                            {{ $stats['avg_processing_time'] }}
                         </div>
-                        <div class="col-auto">
-                            <div class="icon-circle bg-info">
-                                <i class="fas fa-cog text-white"></i>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('admin.hours') }}</div>
+                    @else
+                        <div class="text-gray-500 dark:text-gray-400">{{ __('admin.no_data_available') }}</div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Payment Method Breakdown -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-credit-card mr-2 text-green-600 dark:text-green-400"></i>
+                        {{ __('admin.by_payment_method') }}
+                    </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    @forelse($stats['by_payment_method'] as $method)
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {{ ucfirst($method->payment_method) }}
+                            </span>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-gray-900 dark:text-white">{{ $method->count }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ number_format(abs($method->total_amount), 0, ',', '.') }}₫
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @empty
+                        <div class="text-center text-gray-500 dark:text-gray-400">{{ __('admin.no_data_available') }}</div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Refund Type Breakdown -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                        <i class="fas fa-chart-pie mr-2 text-purple-600 dark:text-purple-400"></i>
+                        {{ __('admin.by_refund_type') }}
+                    </h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    @forelse($stats['by_type'] as $type)
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                @if($type->type === 'refund')
+                                    {{ __('admin.full_refund') }}
+                                @else
+                                    {{ __('admin.partial_refund') }}
+                                @endif
+                            </span>
+                            <div class="text-right">
+                                <div class="text-lg font-bold text-gray-900 dark:text-white">{{ $type->count }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ number_format(abs($type->total_amount), 0, ',', '.') }}₫
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center text-gray-500 dark:text-gray-400">{{ __('admin.no_data_available') }}</div>
+                    @endforelse
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Hoàn thành
-                            </div>
-                            <div class="h4 mb-0 font-weight-bold text-gray-800">{{ $stats['completed'] }}</div>
-                            <div class="text-xs text-muted">Tháng này</div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="icon-circle bg-success">
-                                <i class="fas fa-check text-white"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Trends Chart -->
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-200 dark:border-gray-700 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i>
+                    {{ __('admin.refund_trends') }}
+                </h3>
+            </div>
+            <div class="p-6">
+                <canvas id="refundTrendsChart" width="100%" height="60"></canvas>
             </div>
         </div>
 
-        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Tổng tiền hoàn
-                            </div>
-                            <div class="h4 mb-0 font-weight-bold text-gray-800">{{ number_format($stats['total_amount'], 0, ',', '.') }}₫</div>
-                            <div class="text-xs text-muted">Tháng này</div>
+        <!-- Top Refund Reasons -->
+        @if(count($stats['top_reasons']) > 0)
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-200 dark:border-gray-700 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-list-alt mr-2 text-orange-600 dark:text-orange-400"></i>
+                    {{ __('admin.top_refund_reasons') }}
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach($stats['top_reasons'] as $reason)
+                        <div class="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $reason->reason }}</span>
+                            <span class="text-lg font-bold text-gray-900 dark:text-white">{{ $reason->count }}</span>
                         </div>
-                        <div class="col-auto">
-                            <div class="icon-circle bg-primary">
-                                <i class="fas fa-dollar-sign text-white"></i>
-                            </div>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
-    </div>
+        @endif
 
-    <!-- Enhanced Filters -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-light border-0">
-            <div class="d-flex align-items-center">
-                <i class="fas fa-filter text-primary me-2"></i>
-                <h6 class="m-0 font-weight-bold text-primary">Bộ lọc tìm kiếm</h6>
+        <!-- Filters Section -->
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-200 dark:border-gray-700 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                    <i class="fas fa-filter mr-2 text-gray-600 dark:text-gray-400"></i>
+                    {{ __('admin.filters') }}
+                </h3>
             </div>
-        </div>
-        <div class="card-body">
-            <form method="GET" action="{{ route('admin.refunds') }}" id="filterForm">
-                <div class="row g-3">
-                    <div class="col-lg-3 col-md-6">
-                        <label for="status" class="form-label fw-semibold">Trạng thái</label>
-                        <select name="status" id="status" class="form-select">
-                            <option value="">Tất cả trạng thái</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
-                                <i class="fas fa-clock"></i> Chờ xử lý
+            <div class="p-6">
+                <form method="GET" action="{{ route('admin.refunds') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <!-- Status Filter -->
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ __('admin.status_filter') }}
+                        </label>
+                        <select name="status" id="status"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <option value="">{{ __('admin.all_statuses') }}</option>
+                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>
+                                {{ __('admin.status_pending') }}
                             </option>
-                            <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>
-                                <i class="fas fa-cog"></i> Đang xử lý
+                            <option value="processing" {{ request('status') === 'processing' ? 'selected' : '' }}>
+                                {{ __('admin.status_processing') }}
                             </option>
-                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
-                                <i class="fas fa-check"></i> Hoàn thành
+                            <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>
+                                {{ __('admin.status_completed') }}
+                            </option>
+                            <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>
+                                {{ __('admin.status_failed') }}
                             </option>
                         </select>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label for="date_from" class="form-label fw-semibold">Từ ngày</label>
-                        <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request('date_from') }}">
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label for="date_to" class="form-label fw-semibold">Đến ngày</label>
-                        <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request('date_to') }}">
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label">&nbsp;</label>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary flex-fill">
-                                <i class="fas fa-search"></i> Lọc
-                            </button>
-                            <a href="{{ route('admin.refunds') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-times"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Enhanced Refunds Table -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-light border-0">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-list text-primary me-2"></i>
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        Danh sách yêu cầu hoàn tiền
-                        <span class="badge bg-secondary ms-2">{{ $refunds->total() }}</span>
-                    </h6>
-                </div>
-                @if($refunds->count() > 0)
-                    <small class="text-muted">
-                        Hiển thị {{ $refunds->firstItem() }}-{{ $refunds->lastItem() }} trong {{ $refunds->total() }} kết quả
-                    </small>
-                @endif
+                    <!-- Payment Method Filter -->
+                    <div>
+                        <label for="method" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ __('admin.payment_method_filter') }}
+                        </label>
+                        <select name="method" id="method"
+                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            <option value="">{{ __('admin.all_methods') }}</option>
+                            <option value="vnpay" {{ request('method') === 'vnpay' ? 'selected' : '' }}>
+                                {{ __('admin.vnpay') }}
+                            </option>
+                            <option value="stripe" {{ request('method') === 'stripe' ? 'selected' : '' }}>
+                                {{ __('admin.stripe') }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- From Date -->
+                    <div>
+                        <label for="from_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ __('admin.from_date') }}
+                        </label>
+                        <input type="date" name="from_date" id="from_date" value="{{ request('from_date') }}"
+                               class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+
+                    <!-- To Date -->
+                    <div>
+                        <label for="to_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ __('admin.to_date') }}
+                        </label>
+                        <input type="date" name="to_date" id="to_date" value="{{ request('to_date') }}"
+                               class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-end space-x-2">
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                            <i class="fas fa-filter mr-2"></i>
+                            {{ __('admin.filter_button') }}
+                        </button>
+                        <a href="{{ route('admin.refunds') }}"
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                            <i class="fas fa-times mr-2"></i>
+                            {{ __('admin.clear_filters') }}
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
-        <div class="card-body p-0">
-            @if($refunds->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="refundsTable">
-                        <thead class="table-light">
+
+        <!-- Refund Requests List -->
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                        {{ __('admin.refund_requests_list') }}
+                    </h3>
+                    <div class="flex space-x-2">
+                        <button type="button"
+                                class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                                onclick="exportData()">
+                            <i class="fas fa-download mr-1"></i>
+                            {{ __('admin.export') }}
+                        </button>
+                        <button type="button"
+                                class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                                onclick="printData()">
+                            <i class="fas fa-print mr-1"></i>
+                            {{ __('admin.print') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                @if(count($refunds) > 0)
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th class="fw-semibold">Mã</th>
-                                <th class="fw-semibold">Booking</th>
-                                <th class="fw-semibold">Học viên</th>
-                                <th class="fw-semibold">Số tiền</th>
-                                <th class="fw-semibold">Trạng thái</th>
-                                <th class="fw-semibold">Ngày tạo</th>
-                                <th class="fw-semibold">Ngày xử lý</th>
-                                <th class="fw-semibold text-center">Hành động</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    {{ __('admin.booking_id_column') }}
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    {{ __('admin.student_column') }}
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    {{ __('admin.amount_column') }}
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    {{ __('admin.reason_column') }}
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    {{ __('admin.status_column') }}
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    {{ __('admin.request_date_column') }}
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    {{ __('admin.actions_column') }}
+                                </th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             @foreach($refunds as $refund)
-                            <tr>
-                                <td class="fw-semibold text-primary">#{{ $refund->id }}</td>
-                                <td>
-                                    <a href="{{ route('admin.bookings.show', $refund->booking) }}"
-                                       class="text-decoration-none text-info fw-semibold">
-                                        #{{ $refund->booking_id }}
-                                    </a>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar-sm me-2">
-                                            <div class="avatar-title bg-soft-primary text-primary rounded-circle">
-                                                {{ substr($refund->booking->student->name, 0, 1) }}
-                                            </div>
-                                        </div>
-                                    <div>
-                                            <div class="fw-semibold">{{ $refund->booking->student->name }}</div>
-                                        <small class="text-muted">{{ $refund->booking->student->email }}</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="fw-bold text-success">{{ number_format($refund->amount, 0, ',', '.') }}₫</span>
-                                </td>
-                                <td>
-                                    @php
-                                        $statusConfig = [
-                                            'pending' => ['class' => 'bg-warning', 'icon' => 'clock', 'text' => 'Chờ xử lý'],
-                                            'processing' => ['class' => 'bg-info', 'icon' => 'cog', 'text' => 'Đang xử lý'],
-                                            'completed' => ['class' => 'bg-success', 'icon' => 'check', 'text' => 'Hoàn thành'],
-                                            'failed' => ['class' => 'bg-danger', 'icon' => 'times', 'text' => 'Thất bại']
-                                        ];
-                                        $config = $statusConfig[$refund->status] ?? ['class' => 'bg-secondary', 'icon' => 'question', 'text' => $refund->status];
-                                    @endphp
-                                    <span class="badge {{ $config['class'] }} d-inline-flex align-items-center">
-                                        <i class="fas fa-{{ $config['icon'] }} me-1"></i>
-                                        {{ $config['text'] }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold">{{ $refund->created_at->format('d/m/Y') }}</div>
-                                    <small class="text-muted">{{ $refund->created_at->format('H:i') }}</small>
-                                </td>
-                                <td>
-                                    @if($refund->processed_at)
-                                        <div class="fw-semibold">{{ $refund->processed_at->format('d/m/Y') }}</div>
-                                        <small class="text-muted">{{ $refund->processed_at->format('H:i') }}</small>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div class="d-flex justify-content-center gap-1">
-                                        <button type="button" class="btn btn-sm btn-outline-primary"
-                                                onclick="showRefundDetails({{ $refund->id }})"
-                                                data-bs-toggle="tooltip" title="Xem chi tiết">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-
-                                        @if($refund->status === 'pending')
-                                            <button type="button" class="btn btn-sm btn-outline-warning"
-                                                    onclick="startProcessing({{ $refund->booking_id }})"
-                                                    data-bs-toggle="tooltip" title="Bắt đầu xử lý">
-                                                <i class="fas fa-play"></i>
-                                            </button>
-                                        @endif
-
-                                        @if($refund->status === 'processing')
-                                            <button type="button" class="btn btn-sm btn-outline-success"
-                                                    onclick="completeRefund({{ $refund->booking_id }})"
-                                                    data-bs-toggle="tooltip" title="Hoàn thành">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                        #{{ $refund->booking->id }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                        {{ $refund->booking->student->name }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                        <span class="font-semibold">{{ number_format(abs($refund->amount), 0, ',', '.') }}₫</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-white max-w-xs truncate">
+                                        {{ $refund->metadata['reason'] ?? 'N/A' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @php
+                                            $statusClasses = [
+                                                'pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+                                                'processing' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+                                                'completed' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+                                                'failed' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                            ];
+                                        @endphp
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $statusClasses[$refund->status] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300' }}">
+                                            {{ __('admin.status_' . $refund->status) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $refund->created_at->format('d/m/Y H:i') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <a href="{{ route('admin.bookings.show', $refund->booking) }}"
+                                           class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200">
+                                            {{ __('admin.view_details_action') }}
+                                        </a>
+                                    </td>
+                                </tr>
                             @endforeach
                         </tbody>
                     </table>
-                </div>
 
-                <!-- Enhanced Pagination -->
-                <div class="d-flex justify-content-between align-items-center p-3 border-top">
-                    <div class="text-muted">
-                        Hiển thị {{ $refunds->firstItem() }}-{{ $refunds->lastItem() }} trong {{ $refunds->total() }} kết quả
+                    <!-- Pagination -->
+                    @if($refunds->hasPages())
+                        <div class="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
+                            {{ $refunds->appends(request()->query())->links() }}
+                        </div>
+                    @endif
+                @else
+                    <div class="text-center py-12">
+                        <div class="w-24 h-24 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                            <i class="fas fa-inbox text-gray-400 dark:text-gray-500 text-3xl"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                            {{ __('admin.no_refunds_found') }}
+                        </h3>
+                        <p class="text-gray-500 dark:text-gray-400">
+                            {{ __('admin.no_refunds_message') }}
+                        </p>
                     </div>
-                {{ $refunds->appends(request()->query())->links() }}
-                </div>
-            @else
-                <div class="text-center py-5">
-                    <div class="mb-3">
-                        <i class="fas fa-inbox fa-3x text-muted opacity-50"></i>
-                    </div>
-                    <h5 class="text-muted">Không có yêu cầu hoàn tiền nào</h5>
-                    <p class="text-muted mb-0">Chưa có yêu cầu hoàn tiền nào được tạo trong hệ thống.</p>
-                </div>
-            @endif
-        </div>
-    </div>
-</div>
-
-<!-- Enhanced Refund Guide Modal -->
-<div class="modal fade" id="refundGuideModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-book-open me-2"></i>
-                    Hướng dẫn hoàn tiền VNPay
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                @endif
             </div>
-            <div class="modal-body">
-                <div class="alert alert-info border-0 bg-light-info">
-                    <div class="d-flex">
-                        <i class="fas fa-info-circle text-info me-3 mt-1"></i>
-                        <div>
-                            <strong>Lưu ý quan trọng:</strong> VNPay không hỗ trợ API hoàn tiền tự động.
-                            Tất cả hoàn tiền phải được xử lý thủ công qua VNPay Merchant Portal.
-                        </div>
-                    </div>
-                </div>
-
-                <h6 class="fw-bold mb-3">
-                    <i class="fas fa-list-ol text-primary me-2"></i>
-                    Quy trình hoàn tiền (7 bước):
-                </h6>
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-marker bg-warning"></div>
-                        <div class="timeline-content">
-                            <h6 class="fw-semibold">Bước 1: Bắt đầu xử lý</h6>
-                            <p class="text-muted mb-0">Click nút "Xử lý" cho yêu cầu hoàn tiền cần xử lý</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker bg-info"></div>
-                        <div class="timeline-content">
-                            <h6 class="fw-semibold">Bước 2: Truy cập VNPay Portal</h6>
-                            <p class="text-muted mb-0">Đăng nhập vào VNPay Merchant Portal</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker bg-primary"></div>
-                        <div class="timeline-content">
-                            <h6 class="fw-semibold">Bước 3: Tìm menu hoàn tiền</h6>
-                            <p class="text-muted mb-0">Vào mục "Quản lý giao dịch" → "Hoàn tiền"</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker bg-success"></div>
-                        <div class="timeline-content">
-                            <h6 class="fw-semibold">Bước 4: Tìm giao dịch</h6>
-                            <p class="text-muted mb-0">Tìm giao dịch theo mã VNPay Transaction</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker bg-warning"></div>
-                        <div class="timeline-content">
-                            <h6 class="fw-semibold">Bước 5: Thực hiện hoàn tiền</h6>
-                            <p class="text-muted mb-0">Thực hiện hoàn tiền trên VNPay portal</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker bg-info"></div>
-                        <div class="timeline-content">
-                            <h6 class="fw-semibold">Bước 6: Lấy mã giao dịch</h6>
-                            <p class="text-muted mb-0">Copy mã giao dịch hoàn tiền từ VNPay</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker bg-success"></div>
-                        <div class="timeline-content">
-                            <h6 class="fw-semibold">Bước 7: Hoàn thành</h6>
-                            <p class="text-muted mb-0">Click "Hoàn thành" và nhập mã giao dịch</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="alert alert-warning border-0 bg-light-warning mt-4">
-                    <div class="d-flex">
-                        <i class="fas fa-exclamation-triangle text-warning me-3 mt-1"></i>
-                        <div>
-                            <strong>Quan trọng:</strong> Phải hoàn tất bước 7 để cập nhật trạng thái
-                            và gửi thông báo cho học viên.
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Đóng
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Enhanced Refund Details Modal -->
-<div class="modal fade" id="refundDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-receipt me-2"></i>
-                    Chi tiết hoàn tiền
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="refundDetailsContent">
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Đang tải...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Đang tải thông tin...</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Đóng
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Enhanced Complete Refund Modal -->
-<div class="modal fade" id="completeRefundModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-check-circle me-2"></i>
-                    Hoàn thành hoàn tiền
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="completeRefundForm">
-                <div class="modal-body">
-                    <div class="alert alert-info border-0 bg-light-info">
-                        <div class="d-flex">
-                            <i class="fas fa-info-circle text-info me-3 mt-1"></i>
-                            <div>
-                                Vui lòng nhập mã giao dịch hoàn tiền từ VNPay portal để hoàn tất quá trình.
-                            </div>
-                        </div>
-                    </div>
-
-                    <input type="hidden" id="completeBookingId" name="booking_id">
-
-                    <div class="mb-3">
-                        <label for="vnpayRefundTxn" class="form-label fw-semibold">
-                            Mã giao dịch VNPay <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" class="form-control" id="vnpayRefundTxn" name="vnpay_refund_txn"
-                               required placeholder="Ví dụ: 14073973">
-                        <div class="form-text">Nhập mã giao dịch hoàn tiền từ VNPay portal</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="adminNotes" class="form-label fw-semibold">Ghi chú (tùy chọn)</label>
-                        <textarea class="form-control" id="adminNotes" name="admin_notes" rows="3"
-                                  placeholder="Thêm ghi chú về quá trình hoàn tiền..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i> Hủy
-                    </button>
-                    <button type="submit" class="btn btn-success" id="completeRefundBtn">
-                        <i class="fas fa-check me-1"></i> Hoàn thành
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Loading Overlay -->
-<div id="loadingOverlay" class="position-fixed top-0 start-0 w-100 h-100 d-none"
-     style="background: rgba(0,0,0,0.5); z-index: 9999;">
-    <div class="d-flex justify-content-center align-items-center h-100">
-        <div class="bg-white rounded-3 p-4 text-center">
-            <div class="spinner-border text-primary mb-2" role="status">
-                <span class="visually-hidden">Đang xử lý...</span>
-            </div>
-            <div class="fw-semibold">Đang xử lý...</div>
         </div>
     </div>
 </div>
 
 @endsection
 
-@section('styles')
-<style>
-.icon-circle {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.avatar-sm {
-    width: 2rem;
-    height: 2rem;
-}
-
-.avatar-title {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.bg-soft-primary {
-    background-color: rgba(13, 110, 253, 0.1);
-}
-
-.bg-light-info {
-    background-color: rgba(13, 202, 240, 0.1);
-}
-
-.bg-light-warning {
-    background-color: rgba(255, 193, 7, 0.1);
-}
-
-.timeline {
-    position: relative;
-    padding-left: 2rem;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 0.75rem;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: #e9ecef;
-}
-
-.timeline-item {
-    position: relative;
-    margin-bottom: 1.5rem;
-}
-
-.timeline-marker {
-    position: absolute;
-    left: -2.25rem;
-    top: 0.25rem;
-    width: 1.5rem;
-    height: 1.5rem;
-    border-radius: 50%;
-    border: 3px solid #fff;
-    box-shadow: 0 0 0 2px #e9ecef;
-}
-
-.timeline-content {
-    background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    border-left: 3px solid #dee2e6;
-}
-
-.table-hover tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.04);
-}
-
-.btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-@media (max-width: 768px) {
-    .table-responsive {
-        font-size: 0.875rem;
-    }
-
-    .timeline {
-        padding-left: 1.5rem;
-    }
-
-    .timeline-marker {
-        left: -1.75rem;
-        width: 1rem;
-        height: 1rem;
-    }
-}
-</style>
-@endsection
-
-@section('scripts')
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-function showLoading() {
-    document.getElementById('loadingOverlay').classList.remove('d-none');
-}
-
-function hideLoading() {
-    document.getElementById('loadingOverlay').classList.add('d-none');
-}
-
-function refreshPage() {
-    showLoading();
+// Refresh data function
+function refreshData() {
     window.location.reload();
 }
 
-function showRefundDetails(refundId) {
-    const modal = new bootstrap.Modal(document.getElementById('refundDetailsModal'));
-    modal.show();
-
-    // Reset content
-    document.getElementById('refundDetailsContent').innerHTML = `
-        <div class="text-center py-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Đang tải...</span>
-            </div>
-            <p class="mt-2 text-muted">Đang tải thông tin...</p>
-        </div>
-    `;
-
-    // Load refund details via AJAX
-    fetch(`/admin/refunds/${refundId}/details`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('refundDetailsContent').innerHTML = data.html;
-        })
-        .catch(error => {
-            document.getElementById('refundDetailsContent').innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Không thể tải chi tiết hoàn tiền. Vui lòng thử lại.
-                </div>
-            `;
-        });
+// Export data function
+function exportData() {
+    // Implementation for data export
+    alert('{{ __("admin.export") }} feature will be implemented');
 }
 
-function startProcessing(bookingId) {
-    // Enhanced confirmation dialog
-    if (confirm('🚀 Bắt đầu xử lý hoàn tiền cho booking #' + bookingId + '?\n\nSau khi xác nhận, bạn sẽ cần thực hiện hoàn tiền trên VNPay portal.')) {
-        showLoading();
-
-        fetch(`/admin/refunds/${bookingId}/start-processing`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            hideLoading();
-            if (data.success) {
-                // Success notification
-                const alert = document.createElement('div');
-                alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
-                alert.style.cssText = 'top: 20px; right: 20px; z-index: 10000; max-width: 400px;';
-                alert.innerHTML = `
-                    <i class="fas fa-check-circle me-2"></i>
-                    <strong>Thành công!</strong> Đã bắt đầu xử lý hoàn tiền.
-                    Vui lòng kiểm tra log để xem hướng dẫn chi tiết.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                document.body.appendChild(alert);
-
-                setTimeout(() => {
-                window.location.reload();
-                }, 2000);
-            } else {
-                alert('❌ Lỗi: ' + data.message);
-            }
-        })
-        .catch(error => {
-            hideLoading();
-            alert('❌ Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại.');
-        });
-    }
+// Print data function
+function printData() {
+    window.print();
 }
 
-function completeRefund(bookingId) {
-    document.getElementById('completeBookingId').value = bookingId;
-    document.getElementById('vnpayRefundTxn').value = '';
-    document.getElementById('adminNotes').value = '';
-    new bootstrap.Modal(document.getElementById('completeRefundModal')).show();
-}
-
-document.getElementById('completeRefundForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-    const bookingId = formData.get('booking_id');
-    const submitBtn = document.getElementById('completeRefundBtn');
-
-    // Disable button and show loading
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang xử lý...';
-
-    fetch(`/admin/refunds/${bookingId}/complete`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({
-            vnpay_refund_txn: formData.get('vnpay_refund_txn'),
-            admin_notes: formData.get('admin_notes')
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Success notification
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
-            alert.style.cssText = 'top: 20px; right: 20px; z-index: 10000; max-width: 400px;';
-            alert.innerHTML = `
-                <i class="fas fa-check-circle me-2"></i>
-                <strong>Thành công!</strong> Hoàn tiền đã được hoàn thành!
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.body.appendChild(alert);
-
-            bootstrap.Modal.getInstance(document.getElementById('completeRefundModal')).hide();
-            setTimeout(() => {
-            window.location.reload();
-            }, 1500);
-        } else {
-            alert('❌ Lỗi: ' + data.message);
-        }
-    })
-    .catch(error => {
-        alert('❌ Có lỗi xảy ra khi hoàn thành hoàn tiền. Vui lòng thử lại.');
-    })
-    .finally(() => {
-        // Re-enable button
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-check me-1"></i> Hoàn thành';
-    });
-});
-
-// Initialize tooltips
+// Trends Chart
 document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-});
+    const chartElement = document.getElementById('refundTrendsChart');
+    if (!chartElement) return;
 
-// Auto-submit filter form on status change
-document.getElementById('status').addEventListener('change', function() {
-    document.getElementById('filterForm').submit();
+    const ctx = chartElement.getContext('2d');
+    const isDarkMode = document.documentElement.classList.contains('dark');
+
+    const chartData = {!! json_encode($stats['daily_trends'] ?? []) !!};
+
+    // If no data, show empty chart with message
+    const hasData = chartData && chartData.length > 0;
+    const labels = hasData ? chartData.map(item => item.date) : ['Chưa có dữ liệu'];
+    const data = hasData ? chartData.map(item => item.count) : [0];
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Số yêu cầu hoàn tiền',
+                data: data,
+                borderColor: hasData ? 'rgb(59, 130, 246)' : 'rgb(156, 163, 175)',
+                backgroundColor: hasData ? 'rgba(59, 130, 246, 0.1)' : 'rgba(156, 163, 175, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: hasData ? 'rgb(59, 130, 246)' : 'rgb(156, 163, 175)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: hasData ? 4 : 0,
+                pointHoverRadius: hasData ? 6 : 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: isDarkMode ? '#e5e7eb' : '#374151',
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    enabled: hasData,
+                    backgroundColor: isDarkMode ? '#374151' : '#fff',
+                    titleColor: isDarkMode ? '#e5e7eb' : '#374151',
+                    bodyColor: isDarkMode ? '#e5e7eb' : '#374151',
+                    borderColor: isDarkMode ? '#4b5563' : '#e5e7eb',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            if (!hasData) return 'Chưa có dữ liệu';
+                            return `${context.dataset.label}: ${context.parsed.y} yêu cầu`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: hasData ? undefined : 5,
+                    ticks: {
+                        color: isDarkMode ? '#9ca3af' : '#6b7280',
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: isDarkMode ? '#374151' : '#e5e7eb',
+                        drawBorder: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Số yêu cầu',
+                        color: isDarkMode ? '#9ca3af' : '#6b7280'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: isDarkMode ? '#9ca3af' : '#6b7280'
+                    },
+                    grid: {
+                        color: isDarkMode ? '#374151' : '#e5e7eb',
+                        drawBorder: false
+                    },
+                    title: {
+                        display: true,
+                        text: hasData ? 'Ngày' : '7 ngày gần đây',
+                        color: isDarkMode ? '#9ca3af' : '#6b7280'
+                    }
+                }
+            },
+            elements: {
+                line: {
+                    borderWidth: hasData ? 3 : 2
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            onHover: function(event, activeElements) {
+                if (!hasData) {
+                    event.native.target.style.cursor = 'default';
+                    return;
+                }
+                event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
+            }
+        }
+    });
+
+    // Add no data overlay if needed
+    if (!hasData) {
+        const canvasContainer = chartElement.parentElement;
+        const overlay = document.createElement('div');
+        overlay.className = 'absolute inset-0 flex items-center justify-center pointer-events-none';
+        overlay.innerHTML = `
+            <div class="text-center">
+                <div class="w-12 h-12 mx-auto mb-2 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-chart-line text-gray-400 dark:text-gray-500"></i>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Chưa có dữ liệu hoàn tiền trong 7 ngày qua</p>
+            </div>
+        `;
+        canvasContainer.style.position = 'relative';
+        canvasContainer.appendChild(overlay);
+    }
 });
 </script>
-@endsection
+@endpush

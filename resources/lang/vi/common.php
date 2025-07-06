@@ -34,6 +34,7 @@ return [
     'search' => 'Tìm kiếm',
     'filter' => 'Lọc',
     'sort' => 'Sắp xếp',
+    'close' => 'Đóng',
     'loading' => 'Đang tải...',
     'no_results' => 'Không tìm thấy kết quả',
     'no_notifications' => 'Không có thông báo nào',
@@ -196,7 +197,4 @@ return [
     'accepted' => 'Đã chấp nhận',
     'rejected' => 'Đã từ chối',
     'cancelled' => 'Đã hủy',
-
-    // Booking ID translation
-    'booking_id' => 'Đặt lịch',
 ];

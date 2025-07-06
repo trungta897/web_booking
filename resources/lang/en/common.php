@@ -34,6 +34,7 @@ return [
     'search' => 'Search',
     'filter' => 'Filter',
     'sort' => 'Sort',
+    'close' => 'Close',
     'loading' => 'Loading...',
     'no_results' => 'No results found',
     'no_notifications' => 'No notifications',
@@ -192,6 +193,5 @@ return [
     'rejected' => 'Rejected',
     'cancelled' => 'Cancelled',
 
-    // Booking ID translation
-    'booking_id' => 'Booking',
+
 ];

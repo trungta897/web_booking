@@ -48,7 +48,7 @@ interface PaymentServiceInterface extends ServiceInterface
     public function handleVnpayIpn(array $ipnData): void;
 
     /**
-     * Get booking transactions
+     * Get booking transactions with summary
      */
-    public function getBookingTransactions(Booking $booking): \Illuminate\Database\Eloquent\Collection;
+    public function getBookingTransactions(Booking $booking): array;
 }

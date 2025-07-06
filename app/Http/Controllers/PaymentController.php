@@ -13,6 +13,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
@@ -173,7 +174,7 @@ class PaymentController extends Controller
             // Try to find booking by txn_ref to get proper redirect
             $booking = null;
             if ($txnRef) {
-                $booking = \App\Models\Booking::where('vnpay_txn_ref', $txnRef)->first();
+                $booking = Booking::where('vnpay_txn_ref', $txnRef)->first();
             }
 
             $result = $this->paymentService->handleVnpayReturn($request->all());
@@ -288,6 +289,7 @@ class PaymentController extends Controller
             $validated = $request->validate([
                 'refund_reason' => 'required|string|max:255',
                 'refund_description' => 'nullable|string|max:500',
+                'refund_amount' => 'nullable|numeric|min:1000|max:' . $booking->price,
             ]);
 
             // Check if booking can be refunded
@@ -295,35 +297,65 @@ class PaymentController extends Controller
                 throw new Exception(__('booking.errors.booking_not_paid_refund'));
             }
 
+            // Determine refund amount (full or partial)
+            $refundAmount = $validated['refund_amount'] ?? $booking->price;
+
+            // Validate partial refund amount
+            if ($refundAmount != $booking->price) {
+                $paymentService = app(PaymentService::class);
+                $transactions = $paymentService->getBookingTransactions($booking);
+                $totalRefunded = abs($transactions['total_refunded']);
+                $availableForRefund = $booking->price - $totalRefunded;
+
+                if ($refundAmount > $availableForRefund) {
+                    throw new Exception("Số tiền hoàn ({$refundAmount} VND) vượt quá số tiền có thể hoàn ({$availableForRefund} VND)");
+                }
+            }
+
             // Process refund
             $result = $this->paymentService->refundPayment(
                 $booking,
-                $booking->price,
+                $refundAmount,
                 $validated['refund_reason']
             );
 
             if ($result['success']) {
-                // Update booking status to cancelled with refund info
+                $isPartialRefund = $refundAmount < $booking->price;
+
+                // Update booking status based on refund type
+                if ($isPartialRefund) {
+                    $booking->update([
+                        'cancellation_reason' => 'partial_refund',
+                        'cancellation_description' => $validated['refund_description'] ?? null,
+                    ]);
+                } else {
                 $booking->update([
                     'status' => 'cancelled',
                     'cancellation_reason' => 'tutor_unavailable',
                     'cancellation_description' => $validated['refund_description'] ?? null,
-                    'payment_status' => 'refunded',
                 ]);
+                }
 
                 // Send notifications to student
+                if (!$isPartialRefund) {
                 $booking->student->notify(new \App\Notifications\BookingCancelled($booking, 'tutor'));
+                }
                 $booking->student->notify(new \App\Notifications\PaymentRefunded($booking, $validated['refund_reason']));
 
                 Log::info('Refund processed successfully', [
                     'booking_id' => $booking->id,
                     'tutor_id' => Auth::user()->tutor->id ?? null,
-                    'amount' => $booking->price,
+                    'amount' => $refundAmount,
+                    'type' => $isPartialRefund ? 'partial' : 'full',
                     'reason' => $validated['refund_reason'],
                 ]);
 
+                $message = $isPartialRefund
+                    ? "Hoàn tiền một phần thành công ({$refundAmount} VND). Học viên sẽ nhận được tiền hoàn trong vòng 3-5 ngày làm việc."
+                    : 'Hoàn tiền thành công. Học viên sẽ nhận được tiền hoàn trong vòng 3-5 ngày làm việc.';
+
                 return redirect()->route('bookings.show', $booking)
-                    ->with('success', 'Hoàn tiền thành công. Học viên sẽ nhận được tiền hoàn trong vòng 3-5 ngày làm việc.');
+                    ->with('success', $message);
             }
 
             return redirect()->route('bookings.show', $booking)
@@ -342,18 +374,34 @@ class PaymentController extends Controller
     }
 
     /**
-     * Show refund confirmation page
+     * Show refund confirmation form
      */
-    public function confirmRefund(Booking $booking): View
+    public function confirmRefund(Booking $booking): View|RedirectResponse
     {
+        try {
         $this->checkBookingAccess($booking);
         $this->checkRefundPermission($booking);
 
+            // Check if booking can be refunded
         if ($booking->payment_status !== 'paid') {
-            abort(422, 'Booking is not paid and cannot be refunded');
-        }
+                return redirect()->route('bookings.show', $booking)
+                    ->with('error', __('booking.errors.booking_not_paid_refund'));
+            }
 
-        return view('bookings.refund-confirm', compact('booking'));
+            // Get transaction history to check refund eligibility
+            $transactions = $this->paymentService->getBookingTransactions($booking);
+
+            return view('bookings.refund-confirm', compact('booking', 'transactions'));
+
+        } catch (Exception $e) {
+            Log::error('Error showing refund confirmation', [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('bookings.show', $booking)
+                ->with('error', $e->getMessage());
+        }
     }
 
     // ========== DEMO AND TEST METHODS ==========
@@ -513,6 +561,25 @@ class PaymentController extends Controller
         // Only the tutor of the booking can process refund
         if (!$user->tutor || $booking->tutor_id !== $user->tutor->id) {
             throw new Exception(__('booking.errors.only_tutor_can_refund'), 403);
+        }
+
+        // Additional business logic checks
+        $now = Carbon::now();
+        $sessionStart = Carbon::parse($booking->start_time);
+
+        // Không thể hoàn tiền sau khi buổi học đã bắt đầu quá 30 phút
+        if ($sessionStart->addMinutes(30)->isPast()) {
+            throw new Exception(__('booking.errors.refund_time_expired'), 422);
+        }
+
+        // Kiểm tra booking status - chỉ có thể hoàn tiền khi booking confirmed hoặc pending
+        if (!in_array($booking->status, ['confirmed', 'pending'])) {
+            throw new Exception(__('booking.errors.invalid_status_for_refund'), 422);
+        }
+
+        // Không thể hoàn tiền nếu đã hoàn tiền rồi
+        if ($booking->payment_status === 'refunded') {
+            throw new Exception(__('booking.errors.already_refunded'), 422);
         }
     }
 
