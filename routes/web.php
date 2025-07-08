@@ -283,7 +283,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/vnpay-demo', [PaymentController::class, 'showVnpayDemo'])->name('vnpay.demo.view');
     Route::post('/vnpay-demo', [PaymentController::class, 'createDemoVnpay'])->name('vnpay.demo.create');
 
-    // VNPay Test for admin only
+        // VNPay Test for admin only
     Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':admin')->group(function () {
         Route::get('/test-vnpay', [PaymentController::class, 'showVnpayTest'])->name('test.vnpay.view');
         Route::post('/test-vnpay', [PaymentController::class, 'createTestVnpay'])->name('test.vnpay');

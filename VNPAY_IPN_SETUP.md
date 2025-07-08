@@ -11,8 +11,8 @@
 VNPAY_TMN_CODE=your_terminal_code
 VNPAY_HASH_SECRET=your_hash_secret
 VNPAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-VNPAY_RETURN_URL=http://localhost:8000/payments/vnpay/return
-VNPAY_IPN_URL=http://localhost:8000/payments/vnpay/ipn
+VNPAY_RETURN_URL=http://localhost/web_booking/payments/vnpay/return
+VNPAY_IPN_URL=http://localhost/web_booking/payments/vnpay/ipn
 ```
 
 ### 2. Cấu hình trong VNPay Portal
@@ -32,27 +32,35 @@ VNPAY_IPN_URL=http://localhost:8000/payments/vnpay/ipn
 
 ## 🧪 Cho localhost development
 
-### Sử dụng ngrok (khuyến nghị)
+### Sử dụng ngrok với WAMP (khuyến nghị)
 ```bash
 # Cài đặt ngrok
 npm install -g ngrok
 
-# Tạo tunnel
-ngrok http 8000
+# Tạo tunnel cho WAMP (port 80)
+ngrok http 80
 
 # Sử dụng URL ngrok vào VNPay portal
-# Ví dụ: https://abc123.ngrok.io/payments/vnpay/ipn
+# Ví dụ: https://abc123.ngrok.io/web_booking/payments/vnpay/ipn
 ```
 
-### URL cấu hình với ngrok
-- **Return URL:** `https://abc123.ngrok.io/payments/vnpay/return`
-- **IPN URL:** `https://abc123.ngrok.io/payments/vnpay/ipn`
+### URL cấu hình với ngrok cho WAMP
+- **Return URL:** `https://abc123.ngrok.io/web_booking/payments/vnpay/return`
+- **IPN URL:** `https://abc123.ngrok.io/web_booking/payments/vnpay/ipn`
+
+### 🔧 Script tự động cho WAMP
+Chạy file `setup-ngrok-wamp.bat` để tự động kiểm tra và khởi động ngrok.
 
 ## ✅ Test IPN hoạt động
 
 ### 1. Kiểm tra endpoint
 ```bash
-curl -X POST http://localhost:8000/payments/vnpay/ipn \
+# Cho WAMP localhost
+curl -X POST http://localhost/web_booking/payments/vnpay/ipn \
+  -d "vnp_ResponseCode=00&vnp_TxnRef=TEST123"
+  
+# Hoặc với ngrok URL
+curl -X POST https://your-ngrok-url.ngrok.io/web_booking/payments/vnpay/ipn \
   -d "vnp_ResponseCode=00&vnp_TxnRef=TEST123"
 ```
 
