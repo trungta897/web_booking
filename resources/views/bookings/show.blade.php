@@ -130,40 +130,42 @@
                         <div class="md:col-span-2">
                             @if($booking->status === 'accepted' && auth()->user()->id === $booking->student_id)
                                 {{-- This block is for the student viewing their own accepted booking --}}
-                                                                                                @php
+                                @php
                                     // Ensure we have fresh transaction data
                                     $booking->load('transactions');
 
-                                    // Check multiple conditions for payment status
-                                    $paymentStatusIsPaid = $booking->payment_status === 'paid';
-                                    $paymentStatusIsPending = $booking->payment_status === 'pending';
-                                    $hasCompletedTransactions = $booking->completedTransactions()->exists();
-                                    $hasSuccessfulPaymentTransactions = $booking->transactions()
-                                        ->where('type', 'payment')
-                                        ->where('status', 'completed')
-                                        ->exists();
-
-                                    // Use comprehensive check for paid status
+                                    // Check if booking is fully paid (comprehensive check)
                                     $isAlreadyPaid = $booking->isFullyPaid();
 
-                                    // Check if payment is ready to be made
+                                    // Check for active/recent pending transactions (last 2 minutes for faster retry)
+                                    $hasRecentPendingTransaction = $booking->transactions()
+                                        ->where('type', 'payment')
+                                        ->where('status', 'pending')
+                                        ->where('created_at', '>', now()->subMinutes(2)) // Giảm từ 15 phút xuống 2 phút
+                                        ->exists();
+
+                                    // Determine if payment can be made/retried
                                     $canMakePayment = $booking->status === 'accepted' &&
                                                      !$isAlreadyPaid &&
-                                                     (!$paymentStatusIsPending || $booking->vnpay_txn_ref === null);
+                                                     !$hasRecentPendingTransaction;
 
-                                    $completedTransactionsCount = $booking->completedTransactions()->count();
-                                    $allTransactionsCount = $booking->transactions()->count();
+                                    // Show retry payment if:
+                                    // 1. Payment status is pending
+                                    // 2. No recent active transactions
+                                    // 3. Not fully paid yet
+                                    $showRetryPayment = $booking->payment_status === 'pending' &&
+                                                       !$isAlreadyPaid &&
+                                                       !$hasRecentPendingTransaction;
 
-                                    // Double check: if payment_status is not 'paid' but we have completed transactions,
-                                    // update the payment_status to sync
-                                    if (!$paymentStatusIsPaid && $hasSuccessfulPaymentTransactions) {
+                                    // Sync payment status if needed
+                                    if (!$isAlreadyPaid && $booking->payment_status !== 'paid' &&
+                                        $booking->transactions()->where('type', 'payment')->where('status', 'completed')->exists()) {
                                         $booking->update(['payment_status' => 'paid']);
-                                        $paymentStatusIsPaid = true;
                                         $isAlreadyPaid = true;
                                         $canMakePayment = false;
+                                        $showRetryPayment = false;
                                     }
                                 @endphp
-
 
                                 @if($isAlreadyPaid)
                                     <!-- Case 1: Already Paid - Hide payment button completely -->
@@ -208,48 +210,88 @@
                                             </div>
                                         </div>
                                     </div>
-                                @elseif($canMakePayment)
-                                    <!-- Case 2: Needs Payment - Only show if can make payment -->
-                                    <h4 class="text-sm font-medium text-gray-500">{{ __('common.Payment Required') }}</h4>
+                                @elseif($canMakePayment || $showRetryPayment)
+                                    <!-- Case 2: Needs Payment or Retry Payment -->
+                                    <h4 class="text-sm font-medium text-gray-500">
+                                        @if($showRetryPayment)
+                                            {{ __('booking.payment_retry_required') }}
+                                        @else
+                                            {{ __('common.Payment Required') }}
+                                        @endif
+                                    </h4>
                                     <div class="mt-2">
                                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                             <div class="flex items-center">
                                                 <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                                    @if($showRetryPayment)
+                                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                                                    @else
+                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                                    @endif
                                                 </svg>
-                                                <span class="text-sm text-blue-800">{{ __('common.This booking requires payment to confirm.') }}</span>
+                                                <span class="text-sm text-blue-800">
+                                                    @if($showRetryPayment)
+                                                        {{ __('booking.payment_retry_message') }}
+                                                    @else
+                                                        {{ __('common.This booking requires payment to confirm.') }}
+                                                    @endif
+                                                </span>
                                             </div>
+
+                                            @if($showRetryPayment)
+                                                <div class="mt-2 p-3 bg-blue-100 rounded-lg">
+                                                    <p class="text-xs text-blue-700">
+                                                        <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                        {{ __('booking.payment_retry_explanation') }}
+                                                    </p>
+                                                </div>
+                                            @endif
+
                                             <div class="mt-3">
                                                 <a href="{{ route('bookings.payment', $booking) }}"
                                                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:from-blue-700 hover:to-purple-700 transition-all duration-200">
                                                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
-                                                        <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                                                        @if($showRetryPayment)
+                                                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                                                        @else
+                                                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                                                            <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
+                                                        @endif
                                                     </svg>
-                                                    {{ __('common.Complete Payment') }} {{ $booking->display_amount }}
+                                                    @if($showRetryPayment)
+                                                        {{ __('booking.retry_payment') }} {{ $booking->display_amount }}
+                                                    @else
+                                                        {{ __('common.Complete Payment') }} {{ $booking->display_amount }}
+                                                    @endif
                                                 </a>
                                             </div>
                                         </div>
                                     </div>
-                                @elseif($paymentStatusIsPending && !$canMakePayment)
+                                @elseif($hasRecentPendingTransaction)
                                     <!-- Case 3: Payment In Progress - Show status message -->
                                     <h4 class="text-sm font-medium text-gray-500">{{ __('booking.payment_status') }}</h4>
                                     <div class="mt-2">
                                         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                                             <div class="flex items-center">
-                                                <svg class="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                                <svg class="w-5 h-5 text-yellow-600 mr-2 animate-spin" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
                                                 </svg>
                                                 <span class="text-sm text-yellow-800 font-medium">{{ __('booking.payment_processing') }}</span>
                                             </div>
                                             <p class="text-sm text-yellow-700 mt-2">
-                                                {{ __('booking.payment_processing_message') }}
+                                                {{ __('booking.payment_processing_active') }}
                                             </p>
-                                            @if($booking->vnpay_txn_ref)
-                                                <p class="text-xs text-yellow-600 mt-2 font-mono">
-                                                    {{ __('booking.transaction_code') }}: {{ $booking->vnpay_txn_ref }}
-                                                </p>
-                                            @endif
+                                            <div class="mt-3">
+                                                <button onclick="window.location.reload()"
+                                                        class="inline-flex items-center px-3 py-2 bg-yellow-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-700 transition-all duration-200">
+                                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    {{ __('booking.refresh_status') }}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 @endif

@@ -190,6 +190,34 @@ class TutorController extends Controller
     }
 
     /**
+     * Get bookings for specific date (AJAX)
+     */
+    public function getBookingsForDate(Request $request, string $date): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user->tutor) {
+                return response()->json(['error' => 'Tutor profile not found'], 404);
+            }
+
+            $bookings = $this->tutorService->getBookingsForDate($user->tutor, $date);
+
+            return response()->json([
+                'success' => true,
+                'date' => $date,
+                'bookings' => $bookings,
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+    }
+
+    /**
      * Update tutor availability
      */
     public function updateAvailability(Request $request): RedirectResponse

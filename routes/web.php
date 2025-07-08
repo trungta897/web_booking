@@ -109,6 +109,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':tutor')->group(function () {
         Route::get('/availability', [TutorController::class, 'availability'])->name('tutor.availability');
         Route::post('/availability', [TutorController::class, 'updateAvailability'])->name('tutor.availability.update');
+        Route::get('/calendar/bookings/{date}', [TutorController::class, 'getBookingsForDate'])->name('tutor.calendar.bookings');
     });
 
     // Review routes
@@ -246,6 +247,239 @@ Route::middleware(['auth'])->post('/debug-payment/{booking}', function (\App\Mod
     }
 })->name('debug.payment');
 
+// NEW: Comprehensive payment validation debug route
+Route::middleware(['auth'])->get('/debug-payment-validation/{booking}', function (\App\Models\Booking $booking) {
+    try {
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        // Load fresh relationships
+        $booking->load(['transactions', 'tutor', 'student']);
+
+        // Check each validation step
+        $validationResults = [];
+
+        // 1. Check booking access
+        try {
+            $isStudent = $booking->student_id === $user->id;
+            $isTutor = $booking->tutor && $booking->tutor->user_id === $user->id;
+            $isAdmin = $user->role === 'admin';
+
+            $hasAccess = $isStudent || $isTutor || $isAdmin;
+            $validationResults['booking_access'] = [
+                'passed' => $hasAccess,
+                'is_student' => $isStudent,
+                'is_tutor' => $isTutor,
+                'is_admin' => $isAdmin,
+                'error' => $hasAccess ? null : 'No access to this booking'
+            ];
+        } catch (\Exception $e) {
+            $validationResults['booking_access'] = [
+                'passed' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+
+        // 2. Check payment permission
+        try {
+            $canPay = $booking->student_id === $user->id;
+            $validationResults['payment_permission'] = [
+                'passed' => $canPay,
+                'booking_student_id' => $booking->student_id,
+                'current_user_id' => $user->id,
+                'error' => $canPay ? null : 'Only student who made booking can pay'
+            ];
+        } catch (\Exception $e) {
+            $validationResults['payment_permission'] = [
+                'passed' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+
+        // 3. Check booking status validations
+        $statusValidations = [];
+
+        // Check cancelled
+        $isCancelled = $booking->status === 'cancelled';
+        $statusValidations['not_cancelled'] = [
+            'passed' => !$isCancelled,
+            'booking_status' => $booking->status,
+            'error' => $isCancelled ? 'Booking is cancelled' : null
+        ];
+
+        // Check accepted
+        $isAccepted = $booking->status === 'accepted';
+        $statusValidations['is_accepted'] = [
+            'passed' => $isAccepted,
+            'booking_status' => $booking->status,
+            'error' => !$isAccepted ? 'Booking is not accepted by tutor' : null
+        ];
+
+        // Check if fully paid
+        $isFullyPaid = $booking->isFullyPaid();
+        $paymentStatusIsPaid = $booking->payment_status === 'paid';
+        $hasCompletedTransactions = $booking->transactions()
+            ->where('type', 'payment')
+            ->where('status', 'completed')
+            ->exists();
+
+        $statusValidations['not_fully_paid'] = [
+            'passed' => !$isFullyPaid,
+            'is_fully_paid' => $isFullyPaid,
+            'payment_status' => $booking->payment_status,
+            'payment_status_is_paid' => $paymentStatusIsPaid,
+            'has_completed_transactions' => $hasCompletedTransactions,
+            'error' => $isFullyPaid ? 'Booking is already fully paid' : null
+        ];
+
+        // Check active transactions
+        $hasActiveTransaction = $booking->transactions()
+            ->where('status', 'pending')
+            ->where('type', 'payment')
+            ->where('created_at', '>', now()->subMinutes(2))
+            ->exists();
+
+        $statusValidations['no_active_transactions'] = [
+            'passed' => !$hasActiveTransaction,
+            'has_active_transaction' => $hasActiveTransaction,
+            'error' => $hasActiveTransaction ? 'Has active payment transaction in last 2 minutes' : null
+        ];
+
+        $validationResults['booking_status_validation'] = $statusValidations;
+
+        // Overall validation result
+        $allValidationsPassed = $validationResults['booking_access']['passed'] &&
+                               $validationResults['payment_permission']['passed'] &&
+                               $statusValidations['not_cancelled']['passed'] &&
+                               $statusValidations['is_accepted']['passed'] &&
+                               $statusValidations['not_fully_paid']['passed'] &&
+                               $statusValidations['no_active_transactions']['passed'];
+
+        // Get all transactions details
+        $transactions = $booking->transactions()->get()->map(function($transaction) {
+            return [
+                'id' => $transaction->id,
+                'type' => $transaction->type,
+                'status' => $transaction->status,
+                'amount' => $transaction->amount,
+                'payment_method' => $transaction->payment_method,
+                'created_at' => $transaction->created_at->format('c'),
+                'processed_at' => $transaction->processed_at ? $transaction->processed_at->format('c') : null,
+                'gateway_transaction_id' => $transaction->gateway_transaction_id,
+                'metadata' => $transaction->metadata,
+            ];
+        });
+
+        return response()->json([
+            'booking_id' => $booking->id,
+            'booking_price' => $booking->price,
+            'booking_status' => $booking->status,
+            'payment_status' => $booking->payment_status,
+            'vnpay_txn_ref' => $booking->vnpay_txn_ref,
+            'payment_method' => $booking->payment_method,
+            'current_user' => [
+                'id' => $user->id,
+                'role' => $user->role,
+            ],
+            'validation_results' => $validationResults,
+            'can_make_payment' => $allValidationsPassed,
+            'transactions' => $transactions,
+            'transactions_count' => $transactions->count(),
+            'debug_timestamp' => now()->toISOString(),
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+})->name('debug.payment.validation');
+
+// NEW: Reset booking payment status (admin only)
+Route::middleware(['auth'])->post('/reset-booking-payment/{booking}', function (\App\Models\Booking $booking, \Illuminate\Http\Request $request) {
+    try {
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        // Only admin or booking owner can reset
+        if ($user->role !== 'admin' && $booking->student_id !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Load relationships
+        $booking->load('transactions');
+
+        $resetActions = [];
+
+        // 1. Mark pending transactions as failed
+        $pendingTransactions = $booking->transactions()
+            ->where('type', 'payment')
+            ->where('status', 'pending')
+            ->get();
+
+        foreach ($pendingTransactions as $transaction) {
+            $metadata = $transaction->metadata ?? [];
+            $metadata['failure_reason'] = 'manual_reset';
+            $metadata['reset_by'] = $user->id;
+            $metadata['reset_at'] = now()->toISOString();
+
+            $transaction->update([
+                'status' => 'failed',
+                'metadata' => $metadata
+            ]);
+
+            $resetActions[] = "Transaction #{$transaction->id} marked as failed";
+        }
+
+        // 2. Reset booking payment status if needed
+        $oldPaymentStatus = $booking->payment_status;
+        $oldVnpayTxnRef = $booking->vnpay_txn_ref;
+        $oldPaymentMethod = $booking->payment_method;
+
+        // Only reset if not actually completed
+        if (!$booking->transactions()->where('type', 'payment')->where('status', 'completed')->exists()) {
+            $booking->update([
+                'payment_status' => 'pending',
+                'vnpay_txn_ref' => null,
+                'payment_method' => null,
+                'payment_intent_id' => null,
+                'payment_at' => null,
+            ]);
+
+            $resetActions[] = "Booking payment status reset from '{$oldPaymentStatus}' to 'pending'";
+            $resetActions[] = "VNPay TxnRef cleared: '{$oldVnpayTxnRef}'";
+            $resetActions[] = "Payment method cleared: '{$oldPaymentMethod}'";
+        }
+
+        // 3. Log the reset action
+        \Illuminate\Support\Facades\Log::info('Booking payment reset', [
+            'booking_id' => $booking->id,
+            'reset_by' => $user->id,
+            'old_payment_status' => $oldPaymentStatus,
+            'old_vnpay_txn_ref' => $oldVnpayTxnRef,
+            'actions' => $resetActions,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'booking_id' => $booking->id,
+            'actions_taken' => $resetActions,
+            'new_status' => [
+                'booking_status' => $booking->fresh()->status,
+                'payment_status' => $booking->fresh()->payment_status,
+                'vnpay_txn_ref' => $booking->fresh()->vnpay_txn_ref,
+            ],
+            'message' => 'Booking payment reset successfully. You can now try payment again.',
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+})->name('reset.booking.payment');
+
 // Test VNPay success route
 Route::middleware(['auth'])->get('/test-vnpay-success/{booking}', function (\App\Models\Booking $booking) {
     $fakeVnpayData = [
@@ -293,5 +527,83 @@ Route::middleware(['auth'])->group(function () {
     // VNPay Result page
     Route::get('/vnpay-result', [PaymentController::class, 'showVnpayResult'])->name('vnpay.result');
 });
+
+// NEW: Debug VNPay amount calculation
+Route::middleware(['auth'])->get('/debug-vnpay-amount/{booking}', function (\App\Models\Booking $booking) {
+    try {
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        // Load booking data
+        $booking->load(['tutor', 'subject', 'student']);
+
+        // Get VnpayService
+        $vnpayService = app(\App\Services\VnpayService::class);
+
+        // Use reflection to access private method
+        $reflection = new \ReflectionClass($vnpayService);
+        $calculateVndAmountMethod = $reflection->getMethod('calculateVndAmount');
+        $calculateVndAmountMethod->setAccessible(true);
+
+        // Calculate VND amount using the private method
+        $vndAmount = $calculateVndAmountMethod->invoke($vnpayService, $booking);
+
+        // Calculate what would be sent to VNPay
+        $vnpayAmount = $vndAmount * 100; // This is what gets sent to VNPay
+
+        return response()->json([
+            'booking_id' => $booking->id,
+            'booking_data' => [
+                'price' => $booking->price,
+                'currency' => $booking->currency,
+                'original_amount' => $booking->original_amount,
+                'exchange_rate' => $booking->exchange_rate,
+                'display_amount' => $booking->display_amount,
+                'tutor_name' => $booking->tutor->user->name ?? 'N/A',
+                'subject_name' => $booking->subject->name ?? 'N/A',
+            ],
+            'amount_calculation' => [
+                'booking_price' => $booking->price,
+                'booking_currency' => $booking->currency ?? 'VND',
+                'calculated_vnd_amount' => $vndAmount,
+                'vnpay_amount_sent' => $vnpayAmount,
+                'vnpay_amount_formatted' => number_format($vnpayAmount, 0, '.', ','),
+            ],
+            'vnpay_validation' => [
+                'min_amount' => 5000,
+                'max_amount' => 1000000000, // 1 tỷ
+                'is_amount_valid' => ($vnpayAmount >= 5000 && $vnpayAmount < 1000000000),
+                'amount_in_millions' => $vnpayAmount / 1000000,
+            ],
+            'debug_info' => [
+                'currency_detection' => [
+                    'is_vnd_currency' => ($booking->currency ?? 'VND') === 'VND',
+                    'is_small_amount' => $booking->price < 1000,
+                    'would_convert_usd_to_vnd' => (($booking->currency ?? 'VND') === 'VND' && $booking->price < 1000),
+                ],
+                'raw_data' => [
+                    'booking_price_type' => gettype($booking->price),
+                    'booking_price_raw' => $booking->price,
+                    'vnd_amount_type' => gettype($vndAmount),
+                    'vnd_amount_raw' => $vndAmount,
+                ],
+            ],
+            'recommendations' => [
+                'issue_found' => $vnpayAmount >= 1000000000 || $vnpayAmount < 5000,
+                'issue_description' => $vnpayAmount >= 1000000000
+                    ? 'Amount too large (>= 1 billion) - possible double conversion'
+                    : ($vnpayAmount < 5000 ? 'Amount too small (< 5000)' : 'Amount is valid'),
+                'suggested_fix' => $vnpayAmount >= 1000000000
+                    ? 'Remove extra *100 multiplication or fix currency conversion'
+                    : 'Check booking price data',
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+})->name('debug.vnpay.amount');
 
 require __DIR__.'/auth.php';

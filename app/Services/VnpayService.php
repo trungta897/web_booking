@@ -54,12 +54,47 @@ class VnpayService
         // Calculate VND amount for VNPay
         $vndAmount = $this->calculateVndAmount($booking);
 
+        // Convert to VNPay format (VND * 100 for "xu" unit)
+        $vnpayAmount = (int) ($vndAmount * 100);
+
+        // Log detailed amount calculation for debugging
+        Log::info('VNPay payment URL creation', [
+            'booking_id' => $booking->id,
+            'booking_price' => $booking->price,
+            'booking_currency' => $booking->currency,
+            'calculated_vnd_amount' => $vndAmount,
+            'vnpay_amount_xu' => $vnpayAmount,
+            'vnpay_amount_formatted' => number_format($vnpayAmount, 0, '.', ','),
+            'is_amount_valid' => ($vnpayAmount >= 5000 && $vnpayAmount < 1000000000),
+            'amount_in_millions' => round($vnpayAmount / 1000000, 2),
+        ]);
+
+        // Validate amount range for VNPay
+        if ($vnpayAmount < 5000) {
+            Log::error('VNPay amount too small', [
+                'booking_id' => $booking->id,
+                'vnpay_amount' => $vnpayAmount,
+                'minimum_required' => 5000,
+            ]);
+            throw new \Exception('Số tiền thanh toán quá nhỏ (tối thiểu 5,000 VND)');
+        }
+
+        if ($vnpayAmount >= 1000000000) {
+            Log::error('VNPay amount too large', [
+                'booking_id' => $booking->id,
+                'vnpay_amount' => $vnpayAmount,
+                'maximum_allowed' => 999999999,
+                'amount_in_billions' => round($vnpayAmount / 1000000000, 2),
+            ]);
+            throw new \Exception('Số tiền thanh toán quá lớn (tối đa dưới 1 tỷ VND)');
+        }
+
         // Tham số VNPay
         $vnpData = [
             'vnp_Version' => '2.1.0',
             'vnp_Command' => 'pay',
             'vnp_TmnCode' => $this->vnpTmnCode,
-            'vnp_Amount' => $vndAmount * 100, // VNPay tính bằng VND * 100
+            'vnp_Amount' => $vnpayAmount, // Amount in "xu" (VND * 100)
             'vnp_CurrCode' => 'VND',
             'vnp_TxnRef' => $txnRef,
             'vnp_OrderInfo' => 'Thanh toan hoc phi - '.$booking->subject->name.' - '.$booking->tutor->user->name,
@@ -308,26 +343,36 @@ class VnpayService
     private function calculateVndAmount(Booking $booking): float
     {
         $currency = $booking->currency ?? 'VND';
-        $amount = $booking->price;
+        $amount = (float) $booking->price;
 
-        // Smart detection: If currency is VND but amount is small (< 1000),
-        // it's likely USD amount saved with wrong currency
-        if ($currency === 'VND' && $amount < 1000) {
-            // This is likely USD amount with wrong currency label
-            return $amount * 25000; // Convert USD to VND
-        }
+        // Log for debugging
+        Log::info('VNPay amount calculation', [
+            'booking_id' => $booking->id,
+            'original_amount' => $amount,
+            'currency' => $currency,
+            'price_type' => gettype($booking->price),
+        ]);
 
-        // Case 1: Currency is VND (real VND amounts)
-        if ($currency === 'VND') {
-            return $amount; // Already VND
-        }
-
-        // Case 2: Currency is USD (legacy)
+        // Simplified logic:
+        // If currency is USD, convert to VND
+        // Otherwise, assume it's already VND
         if ($currency === 'USD') {
-            return $amount * 25000; // Convert USD to VND
+            $vndAmount = $amount * 25000; // Convert USD to VND
+            Log::info('Converting USD to VND', [
+                'usd_amount' => $amount,
+                'vnd_amount' => $vndAmount,
+                'exchange_rate' => 25000,
+            ]);
+            return $vndAmount;
         }
 
-        // Default: assume VND
+        // For VND currency or no currency specified, use amount as-is
+        // The amount should already be in VND
+        Log::info('Using amount as VND', [
+            'vnd_amount' => $amount,
+            'currency' => $currency,
+        ]);
+
         return $amount;
     }
 }

@@ -197,4 +197,40 @@ return [
     'accepted' => 'Đã chấp nhận',
     'rejected' => 'Đã từ chối',
     'cancelled' => 'Đã hủy',
+    'paid' => 'Đã thanh toán',
+    'partial_refunded' => 'Hoàn tiền một phần',
+    'refunded' => 'Đã hoàn tiền',
+
+    // Payment summary
+    'Payment Summary' => 'Tóm Tắt Thanh Toán',
+    'total_paid' => 'Tổng Đã Thanh Toán',
+    'total_refunded' => 'Tổng Đã Hoàn Tiền',
+    'current_status' => 'Trạng Thái Hiện Tại',
+
+    // Calendar translations
+    'teaching_schedule' => 'Lịch Dạy Học',
+    'current_month' => 'Tháng Hiện Tại',
+    'next_month' => 'Tháng Tới',
+    'schedule_for' => 'Lịch học ngày',
+    'no_bookings_on_this_date' => 'Không có lịch học nào trong ngày này',
+    'has_classes' => 'Có lớp học',
+    'confirmed' => 'Đã xác nhận',
+
+    // Days of week
+    'sunday' => 'CN',
+    'monday' => 'T2',
+    'tuesday' => 'T3',
+    'wednesday' => 'T4',
+    'thursday' => 'T5',
+    'friday' => 'T6',
+    'saturday' => 'T7',
+
+    // Full day names
+    'sunday_full' => 'Chủ Nhật',
+    'monday_full' => 'Thứ Hai',
+    'tuesday_full' => 'Thứ Ba',
+    'wednesday_full' => 'Thứ Tư',
+    'thursday_full' => 'Thứ Năm',
+    'friday_full' => 'Thứ Sáu',
+    'saturday_full' => 'Thứ Bảy',
 ];

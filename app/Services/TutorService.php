@@ -199,9 +199,9 @@ class TutorService extends BaseService implements TutorServiceInterface
 
             // Format statistics for display
             if (! empty($stats)) {
-                $stats['formatted_total_earnings'] = $this->formatCurrency($stats['total_earnings']);
-                $stats['formatted_average_rating'] = number_format($stats['average_rating'], 1);
-                $stats['formatted_response_rate'] = number_format($stats['response_rate'], 1).'%';
+                $stats['formatted_total_earnings'] = $this->formatCurrency($stats['total_earnings'] ?? 0);
+                $stats['formatted_average_rating'] = number_format($stats['average_rating'] ?? 0, 1);
+                $stats['formatted_response_rate'] = number_format($stats['response_rate'] ?? 0, 1).'%';
             }
 
             return $stats;
@@ -246,11 +246,21 @@ class TutorService extends BaseService implements TutorServiceInterface
         Cache::forget('tutor_details_'.$tutorId);
         Cache::forget('tutor_stats_'.$tutorId);
 
-        // Clear tutors list cache (basic cache clearing)
-        $patterns = ['tutors_*', 'top_rated_tutors_*'];
-        foreach ($patterns as $pattern) {
-            Cache::flush(); // In production, use more specific cache clearing
+        // Clear related cache keys more efficiently
+        $cacheKeysToForget = [
+            'featured_tutors',
+            'top_rated_tutors_6',
+            'top_rated_tutors_10',
+            'top_rated_tutors_12',
+        ];
+
+        foreach ($cacheKeysToForget as $key) {
+            Cache::forget($key);
         }
+
+        // Note: For tutors_* cache patterns, we would need cache tagging
+        // or a more sophisticated cache store to efficiently clear patterns
+        // For now, we clear specific known keys to avoid performance issues
     }
 
     /**
@@ -583,6 +593,9 @@ class TutorService extends BaseService implements TutorServiceInterface
             ->where('status', 'completed')
             ->sum('price');
 
+        // Get calendar data for current month
+        $calendarData = $this->getCalendarData($tutor);
+
         return [
             'tutor' => $tutor,
             'stats' => $stats,
@@ -595,7 +608,136 @@ class TutorService extends BaseService implements TutorServiceInterface
             'upcomingBookings' => $upcomingBookings,
             'totalStudents' => $totalStudents,
             'totalEarnings' => $totalEarnings,
+            'calendarData' => $calendarData,
         ];
+    }
+
+    /**
+     * Get calendar data for tutor (current and next month)
+     */
+    public function getCalendarData(Tutor $tutor, \Carbon\Carbon $date = null): array
+    {
+        $currentDate = $date ?? now();
+        $startOfMonth = $currentDate->copy()->startOfMonth();
+        $endOfMonth = $currentDate->copy()->endOfMonth();
+        $nextMonth = $currentDate->copy()->addMonth();
+        $endOfNextMonth = $nextMonth->copy()->endOfMonth();
+
+        // Get all bookings for current and next month
+        $bookings = \App\Models\Booking::where('tutor_id', $tutor->id)
+            ->whereIn('status', ['confirmed', 'pending'])
+            ->whereBetween('start_time', [$startOfMonth, $endOfNextMonth])
+            ->with(['student', 'subject'])
+            ->orderBy('start_time')
+            ->get();
+
+        // Group bookings by date
+        $bookingsByDate = [];
+        foreach ($bookings as $booking) {
+            $date = $booking->start_time->format('Y-m-d');
+            if (!isset($bookingsByDate[$date])) {
+                $bookingsByDate[$date] = [];
+            }
+            $bookingsByDate[$date][] = [
+                'id' => $booking->id,
+                'student_name' => $booking->student->name ?? 'N/A',
+                'subject_name' => $booking->subject->name ?? 'N/A',
+                'start_time' => $booking->start_time->format('H:i'),
+                'end_time' => $booking->end_time->format('H:i'),
+                'status' => $booking->status,
+                'price' => $booking->price ?? 0,
+            ];
+        }
+
+        // Get days with bookings for highlighting
+        $daysWithBookings = array_keys($bookingsByDate);
+
+        return [
+            'current_month' => $currentDate->format('Y-m'),
+            'current_month_name' => $currentDate->format('F Y'),
+            'next_month' => $nextMonth->format('Y-m'),
+            'next_month_name' => $nextMonth->format('F Y'),
+            'bookings_by_date' => $bookingsByDate,
+            'days_with_bookings' => $daysWithBookings,
+            'calendar_weeks' => $this->generateCalendarWeeks($currentDate),
+            'next_calendar_weeks' => $this->generateCalendarWeeks($nextMonth),
+        ];
+    }
+
+    /**
+     * Generate calendar weeks for a given month
+     */
+    private function generateCalendarWeeks(\Carbon\Carbon $date): array
+    {
+        $startOfMonth = $date->copy()->startOfMonth();
+        $endOfMonth = $date->copy()->endOfMonth();
+
+        // Start from Sunday of the week containing the first day of month
+        $calendarStart = $startOfMonth->copy()->startOfWeek(\Carbon\Carbon::SUNDAY);
+
+        // End at Saturday of the week containing the last day of month
+        $calendarEnd = $endOfMonth->copy()->endOfWeek(\Carbon\Carbon::SATURDAY);
+
+        $weeks = [];
+        $currentWeek = [];
+        $currentDate = $calendarStart->copy();
+
+        while ($currentDate->lte($calendarEnd)) {
+            $currentWeek[] = [
+                'date' => $currentDate->format('Y-m-d'),
+                'day' => $currentDate->day,
+                'is_current_month' => $currentDate->month === $date->month,
+                'is_today' => $currentDate->isToday(),
+                'is_past' => $currentDate->isPast(),
+            ];
+
+            if ($currentDate->dayOfWeek === \Carbon\Carbon::SATURDAY) {
+                $weeks[] = $currentWeek;
+                $currentWeek = [];
+            }
+
+            $currentDate->addDay();
+        }
+
+        // Add remaining days if week is not complete
+        if (!empty($currentWeek)) {
+            $weeks[] = $currentWeek;
+        }
+
+        return $weeks;
+    }
+
+    /**
+     * Get bookings for specific date
+     */
+    public function getBookingsForDate(Tutor $tutor, string $date): array
+    {
+        $startOfDay = \Carbon\Carbon::parse($date)->startOfDay();
+        $endOfDay = \Carbon\Carbon::parse($date)->endOfDay();
+
+        $bookings = \App\Models\Booking::where('tutor_id', $tutor->id)
+            ->whereIn('status', ['confirmed', 'pending'])
+            ->whereBetween('start_time', [$startOfDay, $endOfDay])
+            ->with(['student', 'subject'])
+            ->orderBy('start_time')
+            ->get();
+
+        return $bookings->map(function ($booking) {
+            $durationInMinutes = $booking->start_time && $booking->end_time
+                ? $booking->start_time->diffInMinutes($booking->end_time)
+                : 0;
+
+            return [
+                'id' => $booking->id,
+                'student_name' => $booking->student->name ?? 'N/A',
+                'subject_name' => $booking->subject->name ?? 'N/A',
+                'start_time' => $booking->start_time->format('H:i'),
+                'end_time' => $booking->end_time->format('H:i'),
+                'status' => $booking->status,
+                'price' => $booking->price ?? 0,
+                'duration' => $durationInMinutes . ' phút',
+            ];
+        })->toArray();
     }
 
     /**

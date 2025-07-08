@@ -49,6 +49,7 @@ return [
         'booking_already_completed' => 'This booking is already completed and cannot be changed.',
         'booking_already_cancelled' => 'This booking has already been cancelled.',
         'invalid_payment_method' => 'Invalid payment method.',
+        'payment_in_progress' => 'There is a transaction being processed. Please wait 2 minutes or refresh the page to try again.',
     ],
     'info' => [
         'already_paid' => 'This booking has already been paid for.',
@@ -132,4 +133,12 @@ return [
     'refund_warning_1' => 'VNPay requires manual refund processing through portal',
     'refund_warning_2' => 'Student will receive refund within 3-5 business days',
     'refund_warning_3' => 'This action will send email notification to the student',
+
+    // Payment retry messages
+    'payment_retry_required' => 'Payment Retry Required',
+    'payment_retry_message' => 'Payment was not completed. You can try again.',
+    'payment_retry_explanation' => 'This may be because you left the payment page or the transaction was interrupted. Click the button below to try again.',
+    'retry_payment' => 'Retry Payment',
+    'payment_processing_active' => 'There is a transaction being processed. Please wait or refresh the page to check status.',
+    'refresh_status' => 'Refresh Status',
 ];

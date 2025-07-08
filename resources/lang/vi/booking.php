@@ -49,6 +49,7 @@ return [
         'booking_already_completed' => 'Booking này đã hoàn thành và không thể thay đổi.',
         'booking_already_cancelled' => 'Booking này đã bị hủy.',
         'invalid_payment_method' => 'Phương thức thanh toán không hợp lệ.',
+        'payment_in_progress' => 'Có giao dịch đang được xử lý. Vui lòng đợi 2 phút hoặc làm mới trang để thử lại.',
     ],
     'info' => [
         'already_paid' => 'Buổi học này đã được thanh toán.',
@@ -131,4 +132,12 @@ return [
     'refund_warning_1' => 'VNPay cần xử lý hoàn tiền thủ công qua portal',
     'refund_warning_2' => 'Học viên sẽ nhận được tiền trong vòng 3-5 ngày làm việc',
     'refund_warning_3' => 'Thao tác này sẽ gửi thông báo email đến học viên',
+
+    // Payment retry messages
+    'payment_retry_required' => 'Cần Thử Lại Thanh Toán',
+    'payment_retry_message' => 'Thanh toán chưa hoàn tất. Bạn có thể thử lại.',
+    'payment_retry_explanation' => 'Có thể do bạn đã thoát khỏi trang thanh toán hoặc giao dịch bị gián đoạn. Nhấn nút bên dưới để thử lại.',
+    'retry_payment' => 'Thử Lại Thanh Toán',
+    'payment_processing_active' => 'Có giao dịch đang được xử lý. Vui lòng đợi hoặc làm mới trang để kiểm tra trạng thái.',
+    'refresh_status' => 'Làm Mới Trạng Thái',
 ];

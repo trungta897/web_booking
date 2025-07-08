@@ -34,6 +34,11 @@
                 </div>
             </div>
 
+            <!-- Teaching Schedule Calendar -->
+            <div class="mb-6">
+                <x-tutor-calendar :calendarData="$calendarData" />
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Upcoming Sessions -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">

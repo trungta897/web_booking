@@ -135,15 +135,15 @@ class PaymentController extends Controller
             $success = $this->paymentService->confirmStripePayment($booking);
 
             if ($success) {
-                return redirect()->route('bookings.show', $booking)
+                return redirect()->route('bookings.show', $booking->id)
                     ->with('success', __('booking.payment_completed_successfully'));
             }
 
-            return redirect()->route('bookings.show', $booking)
+            return redirect()->route('bookings.show', $booking->id)
                 ->with('error', __('booking.payment_not_completed'));
 
         } catch (Exception $e) {
-            return redirect()->route('bookings.show', $booking)
+            return redirect()->route('bookings.show', $booking->id)
                 ->with('error', __('booking.error_confirming_payment', ['error' => $e->getMessage()]));
         }
     }
@@ -179,21 +179,25 @@ class PaymentController extends Controller
 
             $result = $this->paymentService->handleVnpayReturn($request->all());
 
-            if ($result['success']) {
-                return redirect()->route('bookings.show', $result['booking'])
+            if ($result['success'] && isset($result['booking']) && $result['booking'] instanceof Booking) {
+                return redirect()->route('bookings.show', $result['booking']->id)
                     ->with('success', $result['message']);
             }
 
-            // If we have a booking, redirect to booking page
-            if (isset($result['booking'])) {
-                return redirect()->route('bookings.show', $result['booking'])
-                    ->with('error', $result['message']);
+            // Try to find booking by txn_ref as fallback
+            if (!isset($result['booking']) || !($result['booking'] instanceof Booking)) {
+                if ($booking) {
+                    $result['booking'] = $booking;
+                }
             }
 
-            // If we found booking by txn_ref, redirect to booking page
-            if ($booking) {
-                return redirect()->route('bookings.show', $booking)
-                    ->with('error', $result['message'] ?? 'Thanh toán không thành công.');
+                        // If we have a valid booking, redirect to booking page
+            if (isset($result['booking']) && $result['booking'] instanceof Booking) {
+                $message = $result['message'] ?? ($result['success'] ? 'Thanh toán thành công.' : 'Thanh toán không thành công.');
+                $alertType = $result['success'] ? 'success' : 'error';
+
+                return redirect()->route('bookings.show', $result['booking']->id)
+                    ->with($alertType, $message);
             }
 
             // Fallback to student dashboard with error message
@@ -372,11 +376,11 @@ class PaymentController extends Controller
                     ? "Hoàn tiền một phần thành công ({$refundAmount} VND). Học viên sẽ nhận được tiền hoàn trong vòng 3-5 ngày làm việc."
                     : 'Hoàn tiền thành công. Học viên sẽ nhận được tiền hoàn trong vòng 3-5 ngày làm việc.';
 
-                return redirect()->route('bookings.show', $booking)
+                return redirect()->route('bookings.show', $booking->id)
                     ->with('success', $message);
             }
 
-            return redirect()->route('bookings.show', $booking)
+            return redirect()->route('bookings.show', $booking->id)
                 ->with('error', $result['message'] ?? 'Không thể xử lý hoàn tiền. Vui lòng thử lại sau.');
 
         } catch (Exception $e) {
@@ -386,7 +390,7 @@ class PaymentController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return redirect()->route('bookings.show', $booking)
+            return redirect()->route('bookings.show', $booking->id)
                 ->with('error', $e->getMessage());
         }
     }
@@ -402,7 +406,7 @@ class PaymentController extends Controller
 
             // Check if booking can be refunded
         if ($booking->payment_status !== 'paid') {
-                return redirect()->route('bookings.show', $booking)
+                return redirect()->route('bookings.show', $booking->id)
                     ->with('error', __('booking.errors.booking_not_paid_refund'));
             }
 
@@ -417,7 +421,7 @@ class PaymentController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return redirect()->route('bookings.show', $booking)
+            return redirect()->route('bookings.show', $booking->id)
                 ->with('error', $e->getMessage());
         }
     }

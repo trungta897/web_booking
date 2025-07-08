@@ -128,7 +128,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
                 $paymentIntent = $event->data->object;
 
                 // Find booking by payment intent ID
-                $booking = Booking::where('stripe_payment_intent_id', $paymentIntent->id)->first();
+                $booking = Booking::where('payment_intent_id', $paymentIntent->id)->first();
 
                 if ($booking && $booking->payment_status !== 'paid') {
                     $this->confirmStripePayment($booking);
@@ -484,26 +484,24 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Process VNPay refund (placeholder - implement based on VNPay API)
+     * Process VNPay refund (throws exception as VNPay requires manual processing)
      *
      * @param Transaction $transaction
      * @param string|null $reason
      * @param float|null $amount
      * @return array{success: bool, message: string}
+     * @throws Exception
      */
     protected function processVnpayRefund(Transaction $transaction, ?string $reason = null, ?float $amount = null): array
     {
-        // VNPay refund implementation would go here
-        // This is a placeholder as VNPay refund requires specific API integration
+        // VNPay refunds require manual processing through VNPay portal
+        // Throw an exception to indicate this cannot be processed automatically
 
         $message = app()->getLocale() === 'vi'
             ? 'Hoàn tiền VNPay cần được xử lý thủ công qua cổng thanh toán VNPay. Vui lòng liên hệ admin để được hỗ trợ.'
             : 'VNPay refunds must be processed manually through VNPay portal. Please contact admin for assistance.';
 
-        return [
-            'success' => false,
-            'message' => $message,
-        ];
+        throw new Exception($message);
     }
 
     /**
