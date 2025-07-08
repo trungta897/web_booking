@@ -31,6 +31,11 @@
                             <span class="w-4 h-4 rounded-full {{ config('services.vnpay.return_url') ? 'bg-green-500' : 'bg-red-500' }}"></span>
                             <span>Return URL: {{ config('services.vnpay.return_url') }}</span>
                         </div>
+
+                        <div class="flex items-center space-x-2">
+                            <span class="w-4 h-4 rounded-full {{ config('services.vnpay.ipn_url') ? 'bg-green-500' : 'bg-red-500' }}"></span>
+                            <span>IPN URL: {{ config('services.vnpay.ipn_url') ?? 'Not configured' }}</span>
+                        </div>
                     </div>
 
                     <div class="mt-8">
@@ -82,6 +87,33 @@
                             <li>VNPay Return: GET /payments/vnpay/return</li>
                             <li>VNPay IPN: POST /payments/vnpay/ipn</li>
                         </ul>
+                    </div>
+
+                    <div class="mt-8">
+                        <h4 class="text-md font-semibold mb-4">IPN Configuration</h4>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <p class="text-sm text-blue-700 mb-2">
+                                <strong>IPN URL for VNPay Portal:</strong>
+                            </p>
+                            <code class="text-sm bg-white px-2 py-1 rounded border">
+                                {{ config('services.vnpay.ipn_url') ?? 'Not configured' }}
+                            </code>
+                            <p class="text-xs text-blue-600 mt-2">
+                                Configure this URL in VNPay Portal → Cấu hình → Cấu hình IPN
+                            </p>
+                        </div>
+
+                        @if(str_contains(config('services.vnpay.ipn_url', ''), 'localhost'))
+                            <div class="bg-yellow-50 p-4 rounded-lg mt-4">
+                                <p class="text-sm text-yellow-700">
+                                    <strong>⚠️ Development Notice:</strong>
+                                    You're using localhost URL. For testing IPN, use ngrok:
+                                </p>
+                                <code class="text-xs bg-white px-2 py-1 rounded border mt-1 block">
+                                    ngrok http 8000
+                                </code>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="mt-8">

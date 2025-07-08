@@ -15,6 +15,7 @@ VNPAY_TMN_CODE=your_vnpay_terminal_code
 VNPAY_HASH_SECRET=your_vnpay_hash_secret
 VNPAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
 VNPAY_RETURN_URL=http://localhost:8000/payments/vnpay/return
+VNPAY_IPN_URL=http://localhost:8000/payments/vnpay/ipn
 ```
 
 ## 🏦 VNPay Setup
@@ -27,17 +28,105 @@ VNPAY_RETURN_URL=http://localhost:8000/payments/vnpay/return
    - **TMN Code**: Mã terminal do VNPay cấp
    - **Hash Secret**: Khóa bí mật để mã hóa
 
-### 2. Cấu hình Webhook URL
+### 2. Cấu hình Return URL và IPN URL
 
-Trong VNPay portal, cấu hình:
+#### 🔗 URLs cần cấu hình:
 - **Return URL**: `https://yourdomain.com/payments/vnpay/return`
 - **IPN URL**: `https://yourdomain.com/payments/vnpay/ipn`
+
+#### 📋 Bước cấu hình trong VNPay Sandbox Portal:
+
+1. **Truy cập VNPay Sandbox Portal**
+   - URL: https://sandbox.vnpayment.vn/
+   - Đăng nhập với tài khoản merchant đã đăng ký
+
+2. **Cấu hình Return URL**
+   - Vào menu: **Cấu hình** → **Cấu hình website**
+   - Tại mục "Return URL", nhập: `https://yourdomain.com/payments/vnpay/return`
+   - Nhấn **Lưu cấu hình**
+
+3. **Cấu hình IPN URL (Webhook)**
+   - Vào menu: **Cấu hình** → **Cấu hình IPN**
+   - Tại mục "IPN URL", nhập: `https://yourdomain.com/payments/vnpay/ipn`
+   - Chọn phương thức: **POST**
+   - Bật trạng thái: **Kích hoạt**
+   - Nhấn **Lưu cấu hình**
+
+#### 🧪 Đối với môi trường Development (localhost):
+
+Vì VNPay không thể gọi trực tiếp tới localhost, bạn có 2 lựa chọn:
+
+**Lựa chọn 1: Sử dụng ngrok (Khuyến nghị)**
+```bash
+# Cài đặt ngrok
+npm install -g ngrok
+
+# Tạo tunnel cho localhost:8000
+ngrok http 8000
+
+# Sử dụng URL ngrok cho cấu hình
+# Ví dụ: https://abc123.ngrok.io/payments/vnpay/return
+#        https://abc123.ngrok.io/payments/vnpay/ipn
+```
+
+**Lựa chọn 2: Deploy lên server test**
+- Deploy code lên server có domain thật
+- Cấu hình URL thật cho Return URL và IPN URL
 
 ### 3. Test với Sandbox
 
 VNPay Sandbox URLs:
 - **Payment Gateway**: `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html`
 - **Query API**: `https://sandbox.vnpayment.vn/merchant_webapi/api/transaction`
+
+#### 🧪 Test IPN URL
+
+1. **Kiểm tra IPN endpoint có hoạt động:**
+```bash
+# Test IPN endpoint bằng cURL
+curl -X POST https://yourdomain.com/payments/vnpay/ipn \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "vnp_Amount=10000000&vnp_BankCode=NCB&vnp_ResponseCode=00"
+```
+
+2. **Kiểm tra log để xác nhận IPN được nhận:**
+```bash
+# Xem log Laravel
+tail -f storage/logs/laravel.log | grep "VNPay IPN"
+```
+
+3. **Test thanh toán thật trên sandbox:**
+   - Tạo giao dịch test
+   - Hoàn tất thanh toán trên VNPay sandbox
+   - Kiểm tra log xem IPN có được gọi không
+
+#### ⚠️ Troubleshooting IPN
+
+**Lỗi thường gặp:**
+
+1. **IPN không được gọi:**
+   - Kiểm tra URL có đúng không
+   - Kiểm tra firewall/security group
+   - Đảm bảo endpoint trả về status 200
+
+2. **IPN signature verification failed:**
+   - Kiểm tra VNPAY_HASH_SECRET đúng không
+   - Kiểm tra encoding của dữ liệu
+
+3. **500 Error từ IPN endpoint:**
+   - Kiểm tra log Laravel: `storage/logs/laravel.log`
+   - Kiểm tra database connection
+   - Kiểm tra permissions
+
+**Debug IPN:**
+```php
+// Thêm vào PaymentController::vnpayIpn() để debug
+Log::info('VNPay IPN received', [
+    'all_data' => $request->all(),
+    'headers' => $request->headers->all(),
+    'ip' => $request->ip(),
+]);
+```
 
 ## 💰 Stripe Setup
 

@@ -209,11 +209,16 @@
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white flex items-center">
                     <i class="fas fa-chart-line mr-2 text-indigo-600 dark:text-indigo-400"></i>
-                    {{ __('admin.refund_trends') }}
+                    {{ __('admin.refund_trends') }} ({{ __('admin.monthly_view') }})
                 </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    {{ __('admin.refund_trends_description') }}
+                </p>
             </div>
             <div class="p-6">
-                <canvas id="refundTrendsChart" width="100%" height="60"></canvas>
+                <div style="position: relative; height: 400px;">
+                    <canvas id="refundTrendsChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -228,10 +233,10 @@
             </div>
             <div class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @foreach($stats['top_reasons'] as $reason)
+                    @foreach($stats['top_reasons'] as $reasonText => $count)
                         <div class="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $reason->reason }}</span>
-                            <span class="text-lg font-bold text-gray-900 dark:text-white">{{ $reason->count }}</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $reasonText }}</span>
+                            <span class="text-lg font-bold text-gray-900 dark:text-white">{{ $count }}</span>
                         </div>
                     @endforeach
                 </div>
@@ -386,10 +391,14 @@
                                         {{ $refund->booking->student->name }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                        <span class="font-semibold">{{ number_format(abs($refund->amount), 0, ',', '.') }}₫</span>
+                                        <span class="font-semibold">{{ number_format(abs((float) $refund->amount), 0, ',', '.') }}₫</span>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900 dark:text-white max-w-xs truncate">
-                                        {{ $refund->metadata['reason'] ?? 'N/A' }}
+                                        @php
+                                            $metadata = is_array($refund->metadata) ? $refund->metadata : [];
+                                            $reason = $metadata['reason'] ?? $metadata['refund_reason'] ?? 'N/A';
+                                        @endphp
+                                        {{ $reason }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @php
@@ -465,42 +474,70 @@ function printData() {
 
 // Trends Chart
 document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for layout to be fully ready
+    setTimeout(function() {
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded!');
+        return;
+    }
+
     const chartElement = document.getElementById('refundTrendsChart');
-    if (!chartElement) return;
+    if (!chartElement) {
+        console.error('Chart element not found!');
+        return;
+    }
 
     const ctx = chartElement.getContext('2d');
     const isDarkMode = document.documentElement.classList.contains('dark');
 
     const chartData = {!! json_encode($stats['daily_trends'] ?? []) !!};
 
-    // If no data, show empty chart with message
-    const hasData = chartData && chartData.length > 0;
-    const labels = hasData ? chartData.map(item => item.date) : ['Chưa có dữ liệu'];
-    const data = hasData ? chartData.map(item => item.count) : [0];
+    // Always show chart with line, even with zero data
+    const labels = chartData && chartData.length > 0 ? chartData.map(item => item.date) : ['01/2024', '02/2024', '03/2024'];
+    const countData = chartData && chartData.length > 0 ? chartData.map(item => item.count) : [0, 0, 0];
+    const amountData = chartData && chartData.length > 0 ? chartData.map(item => item.amount / 1000) : [0, 0, 0]; // Convert to thousands
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
+        try {
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
                 label: 'Số yêu cầu hoàn tiền',
-                data: data,
-                borderColor: hasData ? 'rgb(59, 130, 246)' : 'rgb(156, 163, 175)',
-                backgroundColor: hasData ? 'rgba(59, 130, 246, 0.1)' : 'rgba(156, 163, 175, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: hasData ? 'rgb(59, 130, 246)' : 'rgb(156, 163, 175)',
+                data: countData,
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.3,
+                fill: false,
+                pointBackgroundColor: 'rgb(59, 130, 246)',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2,
-                pointRadius: hasData ? 4 : 0,
-                pointHoverRadius: hasData ? 6 : 0
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                yAxisID: 'y'
+            }, {
+                label: 'Tổng tiền hoàn (nghìn VND)',
+                data: amountData,
+                borderColor: 'rgb(34, 197, 94)',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                tension: 0.3,
+                fill: false,
+                pointBackgroundColor: 'rgb(34, 197, 94)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                yAxisID: 'y1'
             }]
         },
-        options: {
+                options: {
             responsive: true,
-            maintainAspectRatio: false,
+            maintainAspectRatio: true,
             plugins: {
                 legend: {
+                    display: true,
+                    position: 'top',
                     labels: {
                         color: isDarkMode ? '#e5e7eb' : '#374151',
                         usePointStyle: true,
@@ -508,7 +545,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 },
                 tooltip: {
-                    enabled: hasData,
                     backgroundColor: isDarkMode ? '#374151' : '#fff',
                     titleColor: isDarkMode ? '#e5e7eb' : '#374151',
                     bodyColor: isDarkMode ? '#e5e7eb' : '#374151',
@@ -518,16 +554,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     displayColors: true,
                     callbacks: {
                         label: function(context) {
-                            if (!hasData) return 'Chưa có dữ liệu';
-                            return `${context.dataset.label}: ${context.parsed.y} yêu cầu`;
+                            if (context.datasetIndex === 0) {
+                                return `${context.dataset.label}: ${context.parsed.y} yêu cầu`;
+                            } else {
+                                return `${context.dataset.label}: ${context.parsed.y.toLocaleString()} nghìn VND`;
+                            }
                         }
                     }
                 }
             },
             scales: {
                 y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
                     beginAtZero: true,
-                    max: hasData ? undefined : 5,
                     ticks: {
                         color: isDarkMode ? '#9ca3af' : '#6b7280',
                         stepSize: 1
@@ -538,7 +579,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     title: {
                         display: true,
-                        text: 'Số yêu cầu',
+                        text: 'Số yêu cầu hoàn tiền',
+                        color: isDarkMode ? '#9ca3af' : '#6b7280'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    beginAtZero: true,
+                    ticks: {
+                        color: isDarkMode ? '#9ca3af' : '#6b7280'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Số tiền (nghìn VND)',
                         color: isDarkMode ? '#9ca3af' : '#6b7280'
                     }
                 },
@@ -552,46 +610,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     title: {
                         display: true,
-                        text: hasData ? 'Ngày' : '7 ngày gần đây',
+                        text: 'Thời gian (tháng/năm)',
                         color: isDarkMode ? '#9ca3af' : '#6b7280'
                     }
                 }
             },
             elements: {
                 line: {
-                    borderWidth: hasData ? 3 : 2
+                    borderWidth: 3
                 }
             },
             interaction: {
                 intersect: false,
                 mode: 'index'
-            },
-            onHover: function(event, activeElements) {
-                if (!hasData) {
-                    event.native.target.style.cursor = 'default';
-                    return;
-                }
-                event.native.target.style.cursor = activeElements.length > 0 ? 'pointer' : 'default';
             }
         }
-    });
+                });
 
-    // Add no data overlay if needed
-    if (!hasData) {
-        const canvasContainer = chartElement.parentElement;
-        const overlay = document.createElement('div');
-        overlay.className = 'absolute inset-0 flex items-center justify-center pointer-events-none';
-        overlay.innerHTML = `
-            <div class="text-center">
-                <div class="w-12 h-12 mx-auto mb-2 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center">
-                    <i class="fas fa-chart-line text-gray-400 dark:text-gray-500"></i>
+    } catch (error) {
+        console.error('Error creating chart:', error);
+        // Show error message in chart container
+        const container = chartElement.parentElement;
+        container.innerHTML = `
+            <div class="flex items-center justify-center h-full">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-2xl mb-2"></i>
+                    <p class="text-red-600 dark:text-red-400">Error loading chart</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Check browser console for details</p>
                 </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Chưa có dữ liệu hoàn tiền trong 7 ngày qua</p>
             </div>
         `;
-        canvasContainer.style.position = 'relative';
-        canvasContainer.appendChild(overlay);
     }
+
+    // Chart is always displayed - no overlay needed
+    }, 100); // 100ms delay to ensure layout is ready
 });
 </script>
 @endpush

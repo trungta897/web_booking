@@ -218,13 +218,31 @@ class PaymentController extends Controller
      */
     public function vnpayIpn(Request $request): Response
     {
+        // Log IPN received
+        Log::info('VNPay IPN received', [
+            'method' => $request->method(),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'data_count' => count($request->all()),
+            'has_signature' => $request->has('vnp_SecureHash'),
+            'response_code' => $request->input('vnp_ResponseCode'),
+            'txn_ref' => $request->input('vnp_TxnRef'),
+        ]);
+
         try {
             $this->paymentService->handleVnpayIpn($request->all());
+
+            Log::info('VNPay IPN processed successfully', [
+                'txn_ref' => $request->input('vnp_TxnRef'),
+                'response_code' => $request->input('vnp_ResponseCode'),
+            ]);
+
             return response('OK', 200);
         } catch (Exception $e) {
             Log::error('VNPay IPN handling failed', [
                 'request_data' => $request->all(),
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             return response('ERROR', 400);
         }
@@ -514,6 +532,44 @@ class PaymentController extends Controller
         }
 
         return view('vnpay-result', compact('result', 'params'));
+    }
+
+    public function testVnpayIpn(Request $request): JsonResponse
+    {
+        try {
+            Log::info('Test VNPay IPN called', [
+                'ip' => $request->ip(),
+                'timestamp' => now(),
+            ]);
+
+            // Test IPN endpoint connectivity
+            $testData = [
+                'vnp_Amount' => '10000000',
+                'vnp_BankCode' => 'NCB',
+                'vnp_ResponseCode' => '00',
+                'vnp_TxnRef' => 'TEST_IPN_' . time(),
+                'vnp_TransactionNo' => '12345678',
+                'vnp_PayDate' => now()->format('YmdHis'),
+            ];
+
+            // Make internal request to IPN endpoint
+            $ipnResponse = $this->vnpayIpn(
+                Request::create('/payments/vnpay/ipn', 'POST', $testData)
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'IPN test completed. Check logs for details.',
+                'ipn_status_code' => $ipnResponse->getStatusCode(),
+                'ipn_content' => $ipnResponse->getContent(),
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 400);
+        }
     }
 
     // ========== PRIVATE HELPER METHODS ==========

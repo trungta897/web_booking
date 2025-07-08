@@ -204,7 +204,9 @@ return [
     'by_refund_type' => 'Theo loại hoàn tiền',
     'full_refund' => 'Hoàn tiền toàn bộ',
     'partial_refund' => 'Hoàn tiền một phần',
-    'refund_trends' => 'Xu hướng hoàn tiền (7 ngày gần đây)',
+    'refund_trends' => 'Xu hướng hoàn tiền',
+    'monthly_view' => 'Xem theo tháng',
+    'refund_trends_description' => 'Xu hướng hoàn tiền lịch sử hiển thị dữ liệu theo tháng từ đầu',
     'top_refund_reasons' => 'Lý do hoàn tiền phổ biến',
 
     // Refund List

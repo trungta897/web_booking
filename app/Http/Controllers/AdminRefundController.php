@@ -116,26 +116,61 @@ class AdminRefundController extends Controller
     }
 
     /**
-     * Get daily refund trends for the last 7 days
+     * Get daily refund trends - shows all historical data by month
      */
     private function getDailyRefundTrends(): array
     {
-        $trends = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $trends[] = [
-                'date' => $date->format('d/m'),
-                'count' => Transaction::whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
-                    ->whereDate('created_at', $date)
-                    ->count(),
-                'amount' => abs(Transaction::whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
-                    ->whereDate('created_at', $date)
-                    ->where('status', 'completed')
-                    ->sum('amount'))
-            ];
+        // Get the first refund transaction date, or use 12 months ago as fallback
+        $firstRefundDate = Transaction::whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
+            ->orderBy('created_at', 'asc')
+            ->value('created_at');
+
+        if (!$firstRefundDate) {
+            // If no refunds exist, show last 12 months with zero data
+            $startDate = Carbon::now()->subMonths(11)->startOfMonth();
+        } else {
+            $startDate = Carbon::parse($firstRefundDate)->startOfMonth();
+            // Limit to maximum 24 months for performance
+            if ($startDate->diffInMonths(Carbon::now()) > 24) {
+                $startDate = Carbon::now()->subMonths(23)->startOfMonth();
+            }
         }
 
-        // Always return data for chart display - even if all counts are 0
+        $trends = [];
+        $currentDate = $startDate->copy();
+
+        while ($currentDate->lte(Carbon::now()->endOfMonth())) {
+            $nextMonth = $currentDate->copy()->endOfMonth();
+
+            $monthlyCount = Transaction::whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
+                ->whereBetween('created_at', [$currentDate, $nextMonth])
+                ->count();
+
+            $monthlyAmount = abs(Transaction::whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
+                ->whereBetween('created_at', [$currentDate, $nextMonth])
+                ->where('status', 'completed')
+                ->sum('amount'));
+
+            $trends[] = [
+                'date' => $currentDate->format('m/Y'),
+                'count' => $monthlyCount,
+                'amount' => $monthlyAmount
+            ];
+
+            $currentDate->addMonth();
+        }
+
+        // Ensure we always have at least 3 months of data for chart display
+        while (count($trends) < 3) {
+            $currentDate = $startDate->copy()->subMonth();
+            array_unshift($trends, [
+                'date' => $currentDate->format('m/Y'),
+                'count' => 0,
+                'amount' => 0
+            ]);
+            $startDate = $currentDate;
+        }
+
         return $trends;
     }
 
@@ -151,7 +186,8 @@ class AdminRefundController extends Controller
 
         $reasons = [];
         foreach ($refunds as $refund) {
-            $reason = $refund->metadata['refund_reason'] ?? 'Unknown';
+            $metadata = is_array($refund->metadata) ? $refund->metadata : [];
+            $reason = $metadata['reason'] ?? $metadata['refund_reason'] ?? 'Unknown';
             $reasons[$reason] = ($reasons[$reason] ?? 0) + 1;
         }
 
@@ -196,7 +232,7 @@ class AdminRefundController extends Controller
                     'Login to VNPay Merchant Portal',
                     'Go to Transaction Management > Refund',
                     'Find transaction: ' . ($originalTransaction->gateway_transaction_id ?? $booking->vnpay_txn_ref),
-                    'Process refund amount: ' . number_format($refundTransaction->amount, 0, ',', '.') . ' VND',
+                    'Process refund amount: ' . number_format((float) $refundTransaction->amount, 0, ',', '.') . ' VND',
                     'After completing, run: php artisan vnpay:refund complete --booking=' . $bookingId . ' --txn=REFUND_TXN_ID'
                 ]
             ]);

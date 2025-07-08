@@ -204,7 +204,9 @@ return [
     'by_refund_type' => 'By refund type',
     'full_refund' => 'Full refund',
     'partial_refund' => 'Partial refund',
-    'refund_trends' => 'Refund trends (Last 7 days)',
+    'refund_trends' => 'Refund trends',
+    'monthly_view' => 'Monthly view',
+    'refund_trends_description' => 'Historical refund trends showing monthly data from the beginning',
     'top_refund_reasons' => 'Top refund reasons',
 
     // Refund List

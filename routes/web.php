@@ -287,6 +287,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':admin')->group(function () {
         Route::get('/test-vnpay', [PaymentController::class, 'showVnpayTest'])->name('test.vnpay.view');
         Route::post('/test-vnpay', [PaymentController::class, 'createTestVnpay'])->name('test.vnpay');
+        Route::post('/test-vnpay-ipn', [PaymentController::class, 'testVnpayIpn'])->name('test.vnpay.ipn');
     });
 
     // VNPay Result page
