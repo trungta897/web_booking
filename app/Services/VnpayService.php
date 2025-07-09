@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\Log;
 
 class VnpayService
 {
-    protected $vnpTmnCode;
+    protected string $vnpTmnCode;
 
-    protected $vnpHashSecret;
+    protected string $vnpHashSecret;
 
-    protected $vnpUrl;
+    protected string $vnpUrl;
 
-    protected $vnpReturnUrl;
+    protected string $vnpReturnUrl;
 
     public function __construct()
     {
@@ -28,27 +28,53 @@ class VnpayService
     /**
      * Tạo URL thanh toán VNPay
      */
-    public function createPaymentUrl(Booking $booking, $ipAddr = null)
+    public function createPaymentUrl(Booking $booking, ?string $ipAddr = null): string
     {
-        // Tạo transaction reference
-        $txnRef = 'BOOKING_'.$booking->id.'_'.time();
+        // Kiểm tra và cleanup pending transactions cũ trước
+        $this->cleanupOldPendingTransactions($booking);
+
+        // Kiểm tra xem có pending transaction còn active không (tạo trong 2 phút qua)
+        $recentPendingTransaction = Transaction::where('booking_id', $booking->id)
+            ->where('type', Transaction::TYPE_PAYMENT)
+            ->where('status', Transaction::STATUS_PENDING)
+            ->where('created_at', '>', now()->subMinutes(2))
+            ->first();
+
+        if ($recentPendingTransaction) {
+            // Sử dụng lại transaction hiện tại
+            $txnRef = $recentPendingTransaction->transaction_id;
+
+            Log::info('Reusing existing pending transaction', [
+                'booking_id' => $booking->id,
+                'transaction_id' => $recentPendingTransaction->id,
+                'txn_ref' => $txnRef,
+            ]);
+        } else {
+            // Tạo transaction reference mới
+            $txnRef = 'BOOKING_'.$booking->id.'_'.time();
+
+            // Tạo transaction record mới
+            Transaction::create([
+                'booking_id' => $booking->id,
+                'user_id' => $booking->student_id,
+                'transaction_id' => $txnRef,
+                'payment_method' => Transaction::PAYMENT_METHOD_VNPAY,
+                'type' => Transaction::TYPE_PAYMENT,
+                'amount' => $booking->price,
+                'currency' => $booking->currency ?? 'VND',
+                'status' => Transaction::STATUS_PENDING,
+            ]);
+
+            Log::info('Created new pending transaction', [
+                'booking_id' => $booking->id,
+                'txn_ref' => $txnRef,
+            ]);
+        }
 
         // Cập nhật booking với txn_ref
         $booking->update([
             'vnpay_txn_ref' => $txnRef,
             'payment_method' => 'vnpay',
-        ]);
-
-        // Tạo transaction record
-        Transaction::create([
-            'booking_id' => $booking->id,
-            'user_id' => $booking->student_id,
-            'transaction_id' => $txnRef,
-            'payment_method' => Transaction::PAYMENT_METHOD_VNPAY,
-            'type' => Transaction::TYPE_PAYMENT,
-            'amount' => $booking->price,
-            'currency' => $booking->currency ?? 'VND',
-            'status' => Transaction::STATUS_PENDING,
         ]);
 
         // Calculate VND amount for VNPay
@@ -61,7 +87,7 @@ class VnpayService
         Log::info('VNPay payment URL creation', [
             'booking_id' => $booking->id,
             'booking_price' => $booking->price,
-            'booking_currency' => $booking->currency,
+            'booking_currency' => $booking->currency ?? 'VND',
             'calculated_vnd_amount' => $vndAmount,
             'vnpay_amount_xu' => $vnpayAmount,
             'vnpay_amount_formatted' => number_format($vnpayAmount, 0, '.', ','),
@@ -135,7 +161,7 @@ class VnpayService
     /**
      * Xác thực IPN từ VNPay
      */
-    public function verifyIpn($vnpData)
+    public function verifyIpn(array $vnpData): bool
     {
         $vnpSecureHash = $vnpData['vnp_SecureHash'] ?? '';
         unset($vnpData['vnp_SecureHash']);
@@ -169,7 +195,7 @@ class VnpayService
     /**
      * Xử lý kết quả thanh toán từ VNPay
      */
-    public function handlePaymentResult($vnpData)
+    public function handlePaymentResult(array $vnpData): array
     {
         try {
             // Verify security hash
@@ -282,7 +308,7 @@ class VnpayService
     /**
      * Chuyển đổi mã phản hồi VNPay thành thông báo
      */
-    protected function getResponseMessage($responseCode)
+    protected function getResponseMessage(string $responseCode): string
     {
         $messages = [
             '00' => 'Giao dịch thành công',
@@ -306,7 +332,7 @@ class VnpayService
     /**
      * Tạo refund request (VNPay không hỗ trợ API refund tự động)
      */
-    public function createRefundRequest(Booking $booking, $amount = null)
+    public function createRefundRequest(Booking $booking, ?float $amount = null): Transaction
     {
         $refundAmount = $amount ?? $booking->price;
 
@@ -316,7 +342,7 @@ class VnpayService
             'user_id' => $booking->student_id,
             'transaction_id' => 'REFUND_'.$booking->id.'_'.time(),
             'payment_method' => Transaction::PAYMENT_METHOD_VNPAY,
-            'type' => $amount < $booking->price ? Transaction::TYPE_PARTIAL_REFUND : Transaction::TYPE_REFUND,
+            'type' => ($amount !== null && $amount < $booking->price) ? Transaction::TYPE_PARTIAL_REFUND : Transaction::TYPE_REFUND,
             'amount' => $refundAmount,
             'currency' => $booking->currency ?? 'VND',
             'status' => Transaction::STATUS_PENDING,
@@ -374,5 +400,37 @@ class VnpayService
         ]);
 
         return $amount;
+    }
+
+    /**
+     * Cleanup old pending transactions for a booking
+     */
+    private function cleanupOldPendingTransactions(Booking $booking): void
+    {
+        // Tìm các pending transactions cũ hơn 5 phút
+        $oldPendingTransactions = Transaction::where('booking_id', $booking->id)
+            ->where('type', Transaction::TYPE_PAYMENT)
+            ->where('status', Transaction::STATUS_PENDING)
+            ->where('created_at', '<', now()->subMinutes(5))
+            ->get();
+
+        if ($oldPendingTransactions->isNotEmpty()) {
+            Log::info('Cleaning up old pending transactions', [
+                'booking_id' => $booking->id,
+                'count' => $oldPendingTransactions->count(),
+                'transaction_ids' => $oldPendingTransactions->pluck('id')->toArray(),
+            ]);
+
+            // Mark old pending transactions as failed
+            foreach ($oldPendingTransactions as $transaction) {
+                $transaction->update([
+                    'status' => Transaction::STATUS_FAILED,
+                    'metadata' => array_merge($transaction->metadata ?? [], [
+                        'failure_reason' => 'timeout_cleanup',
+                        'cleaned_up_at' => now()->toISOString(),
+                    ]),
+                ]);
+            }
+        }
     }
 }

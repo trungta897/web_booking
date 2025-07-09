@@ -52,7 +52,7 @@ class PaymentReceived extends Notification implements ShouldQueue
         $student = $this->booking->student->name;
         $startTime = $this->booking->start_time->format('F j, Y g:i A');
         $endTime = $this->booking->end_time->format('g:i A');
-        $amount = number_format($this->booking->price, 2);
+        $amount = number_format((float) $this->booking->price, 2);
 
         return (new MailMessage)
             ->subject("Payment Received for {$subject} Session")
@@ -73,7 +73,7 @@ class PaymentReceived extends Notification implements ShouldQueue
      */
     public function toArray($notifiable)
     {
-        $amount = number_format($this->booking->price, 2);
+        $amount = number_format((float) $this->booking->price, 2);
 
         return [
             'title' => 'Payment Received',

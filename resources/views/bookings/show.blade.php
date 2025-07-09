@@ -137,25 +137,14 @@
                                     // Check if booking is fully paid (comprehensive check)
                                     $isAlreadyPaid = $booking->isFullyPaid();
 
-                                    // Check for active/recent pending transactions (last 2 minutes for faster retry)
-                                    $hasRecentPendingTransaction = $booking->transactions()
-                                        ->where('type', 'payment')
-                                        ->where('status', 'pending')
-                                        ->where('created_at', '>', now()->subMinutes(2)) // Giảm từ 15 phút xuống 2 phút
-                                        ->exists();
-
-                                    // Determine if payment can be made/retried
-                                    $canMakePayment = $booking->status === 'accepted' &&
-                                                     !$isAlreadyPaid &&
-                                                     !$hasRecentPendingTransaction;
+                                    // Determine if payment can be made/retried - không kiểm tra pending transaction nữa
+                                    $canMakePayment = $booking->status === 'accepted' && !$isAlreadyPaid;
 
                                     // Show retry payment if:
                                     // 1. Payment status is pending
-                                    // 2. No recent active transactions
-                                    // 3. Not fully paid yet
-                                    $showRetryPayment = $booking->payment_status === 'pending' &&
-                                                       !$isAlreadyPaid &&
-                                                       !$hasRecentPendingTransaction;
+                                    // 2. Not fully paid yet
+                                    // Không kiểm tra recent active transactions nữa - cho phép retry ngay lập tức
+                                    $showRetryPayment = $booking->payment_status === 'pending' && !$isAlreadyPaid;
 
                                     // Sync payment status if needed
                                     if (!$isAlreadyPaid && $booking->payment_status !== 'paid' &&
@@ -266,31 +255,6 @@
                                                         {{ __('common.Complete Payment') }} {{ $booking->display_amount }}
                                                     @endif
                                                 </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @elseif($hasRecentPendingTransaction)
-                                    <!-- Case 3: Payment In Progress - Show status message -->
-                                    <h4 class="text-sm font-medium text-gray-500">{{ __('booking.payment_status') }}</h4>
-                                    <div class="mt-2">
-                                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                            <div class="flex items-center">
-                                                <svg class="w-5 h-5 text-yellow-600 mr-2 animate-spin" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
-                                                </svg>
-                                                <span class="text-sm text-yellow-800 font-medium">{{ __('booking.payment_processing') }}</span>
-                                            </div>
-                                            <p class="text-sm text-yellow-700 mt-2">
-                                                {{ __('booking.payment_processing_active') }}
-                                            </p>
-                                            <div class="mt-3">
-                                                <button onclick="window.location.reload()"
-                                                        class="inline-flex items-center px-3 py-2 bg-yellow-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-700 transition-all duration-200">
-                                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
-                                                    </svg>
-                                                    {{ __('booking.refresh_status') }}
-                                                </button>
                                             </div>
                                         </div>
                                     </div>

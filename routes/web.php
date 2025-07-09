@@ -331,7 +331,7 @@ Route::middleware(['auth'])->get('/debug-payment-validation/{booking}', function
             'error' => $isFullyPaid ? 'Booking is already fully paid' : null
         ];
 
-        // Check active transactions
+        // Check active transactions - UPDATED: Không block dựa trên pending transaction nữa
         $hasActiveTransaction = $booking->transactions()
             ->where('status', 'pending')
             ->where('type', 'payment')
@@ -339,9 +339,10 @@ Route::middleware(['auth'])->get('/debug-payment-validation/{booking}', function
             ->exists();
 
         $statusValidations['no_active_transactions'] = [
-            'passed' => !$hasActiveTransaction,
+            'passed' => true, // Luôn pass - không block dựa trên pending transaction
             'has_active_transaction' => $hasActiveTransaction,
-            'error' => $hasActiveTransaction ? 'Has active payment transaction in last 2 minutes' : null
+            'note' => 'Pending transaction check disabled - allows immediate retry',
+            'error' => null
         ];
 
         $validationResults['booking_status_validation'] = $statusValidations;
@@ -480,29 +481,7 @@ Route::middleware(['auth'])->post('/reset-booking-payment/{booking}', function (
     }
 })->name('reset.booking.payment');
 
-// Test VNPay success route
-Route::middleware(['auth'])->get('/test-vnpay-success/{booking}', function (\App\Models\Booking $booking) {
-    $fakeVnpayData = [
-        'vnp_Amount' => ($booking->price * 100),
-        'vnp_BankCode' => 'NCB',
-        'vnp_CardType' => 'ATM',
-        'vnp_OrderInfo' => 'Thanh toan hoc phi - ' . $booking->subject->name,
-        'vnp_PayDate' => now()->format('YmdHis'),
-        'vnp_ResponseCode' => '00', // Success code
-        'vnp_TmnCode' => 'TEST123',
-        'vnp_TransactionNo' => '14562789',
-        'vnp_TxnRef' => $booking->vnpay_txn_ref ?: 'BOOKING_' . $booking->id . '_' . time(),
-    ];
 
-    // Simulate successful payment
-    $booking->update([
-        'payment_status' => 'paid',
-        'payment_method' => 'vnpay',
-    ]);
-
-    return redirect()->route('bookings.show', $booking)
-        ->with('success', 'Thanh toán thành công! (Test mode)');
-})->name('test.vnpay.success');
 
 // Rate limited routes
 Route::middleware('throttle:60,1')->group(function () {
@@ -511,99 +490,19 @@ Route::middleware('throttle:60,1')->group(function () {
     Route::get('/tutors/{tutor}/availability/{day}', [TutorController::class, 'checkAvailability'])->name('tutors.availability');
 });
 
-// VNPay Demo & Test routes
-Route::middleware(['auth'])->group(function () {
-    // VNPay Demo for users (general access)
-    Route::get('/vnpay-demo', [PaymentController::class, 'showVnpayDemo'])->name('vnpay.demo.view');
-    Route::post('/vnpay-demo', [PaymentController::class, 'createDemoVnpay'])->name('vnpay.demo.create');
+// VNPay Result page (can accept query parameters from redirects)
+Route::middleware(['auth'])->get('/vnpay-result', [PaymentController::class, 'showVnpayResult'])->name('vnpay.result');
 
-        // VNPay Test for admin only
-    Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':admin')->group(function () {
-        Route::get('/test-vnpay', [PaymentController::class, 'showVnpayTest'])->name('test.vnpay.view');
-        Route::post('/test-vnpay', [PaymentController::class, 'createTestVnpay'])->name('test.vnpay');
-        Route::post('/test-vnpay-ipn', [PaymentController::class, 'testVnpayIpn'])->name('test.vnpay.ipn');
-    });
 
-    // VNPay Result page
-    Route::get('/vnpay-result', [PaymentController::class, 'showVnpayResult'])->name('vnpay.result');
-});
 
-// NEW: Debug VNPay amount calculation
-Route::middleware(['auth'])->get('/debug-vnpay-amount/{booking}', function (\App\Models\Booking $booking) {
-    try {
-        $user = \Illuminate\Support\Facades\Auth::user();
 
-        // Load booking data
-        $booking->load(['tutor', 'subject', 'student']);
 
-        // Get VnpayService
-        $vnpayService = app(\App\Services\VnpayService::class);
 
-        // Use reflection to access private method
-        $reflection = new \ReflectionClass($vnpayService);
-        $calculateVndAmountMethod = $reflection->getMethod('calculateVndAmount');
-        $calculateVndAmountMethod->setAccessible(true);
 
-        // Calculate VND amount using the private method
-        $vndAmount = $calculateVndAmountMethod->invoke($vnpayService, $booking);
 
-        // Calculate what would be sent to VNPay
-        $vnpayAmount = $vndAmount * 100; // This is what gets sent to VNPay
-
-        return response()->json([
-            'booking_id' => $booking->id,
-            'booking_data' => [
-                'price' => $booking->price,
-                'currency' => $booking->currency,
-                'original_amount' => $booking->original_amount,
-                'exchange_rate' => $booking->exchange_rate,
-                'display_amount' => $booking->display_amount,
-                'tutor_name' => $booking->tutor->user->name ?? 'N/A',
-                'subject_name' => $booking->subject->name ?? 'N/A',
-            ],
-            'amount_calculation' => [
-                'booking_price' => $booking->price,
-                'booking_currency' => $booking->currency ?? 'VND',
-                'calculated_vnd_amount' => $vndAmount,
-                'vnpay_amount_sent' => $vnpayAmount,
-                'vnpay_amount_formatted' => number_format($vnpayAmount, 0, '.', ','),
-            ],
-            'vnpay_validation' => [
-                'min_amount' => 5000,
-                'max_amount' => 1000000000, // 1 tỷ
-                'is_amount_valid' => ($vnpayAmount >= 5000 && $vnpayAmount < 1000000000),
-                'amount_in_millions' => $vnpayAmount / 1000000,
-            ],
-            'debug_info' => [
-                'currency_detection' => [
-                    'is_vnd_currency' => ($booking->currency ?? 'VND') === 'VND',
-                    'is_small_amount' => $booking->price < 1000,
-                    'would_convert_usd_to_vnd' => (($booking->currency ?? 'VND') === 'VND' && $booking->price < 1000),
-                ],
-                'raw_data' => [
-                    'booking_price_type' => gettype($booking->price),
-                    'booking_price_raw' => $booking->price,
-                    'vnd_amount_type' => gettype($vndAmount),
-                    'vnd_amount_raw' => $vndAmount,
-                ],
-            ],
-            'recommendations' => [
-                'issue_found' => $vnpayAmount >= 1000000000 || $vnpayAmount < 5000,
-                'issue_description' => $vnpayAmount >= 1000000000
-                    ? 'Amount too large (>= 1 billion) - possible double conversion'
-                    : ($vnpayAmount < 5000 ? 'Amount too small (< 5000)' : 'Amount is valid'),
-                'suggested_fix' => $vnpayAmount >= 1000000000
-                    ? 'Remove extra *100 multiplication or fix currency conversion'
-                    : 'Check booking price data',
-            ]
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ], 500);
-    }
-})->name('debug.vnpay.amount');
 
 require __DIR__.'/auth.php';
+
+
+
+

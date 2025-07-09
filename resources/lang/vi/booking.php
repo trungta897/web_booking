@@ -49,7 +49,7 @@ return [
         'booking_already_completed' => 'Booking này đã hoàn thành và không thể thay đổi.',
         'booking_already_cancelled' => 'Booking này đã bị hủy.',
         'invalid_payment_method' => 'Phương thức thanh toán không hợp lệ.',
-        'payment_in_progress' => 'Có giao dịch đang được xử lý. Vui lòng đợi 2 phút hoặc làm mới trang để thử lại.',
+        'payment_in_progress' => 'Có giao dịch đang được xử lý. Bạn có thể thử lại ngay lập tức nếu gặp lỗi.',
     ],
     'info' => [
         'already_paid' => 'Buổi học này đã được thanh toán.',

@@ -9,6 +9,8 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
+
+
                     <!-- Result Status -->
                     <div class="text-center mb-8">
                         @if($result['success'])
@@ -147,16 +149,6 @@
 
                     <!-- Actions -->
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                        @if(str_starts_with($params['vnp_TxnRef'] ?? '', 'DEMO_') || str_starts_with($params['vnp_TxnRef'] ?? '', 'TEST_'))
-                            <!-- Demo/Test specific actions -->
-                            <a href="{{ route('vnpay.demo.view') }}" class="inline-flex justify-center items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest hover:from-blue-700 hover:to-blue-800 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 transform hover:scale-105">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                </svg>
-                                {{ __('Thử lại Demo') }}
-                            </a>
-                        @else
-                            <!-- Real booking actions -->
                             @if(isset($params['vnp_ResponseCode']) && $params['vnp_ResponseCode'] === '24')
                                 <!-- User cancelled - show dashboard and retry options -->
                                 @auth
@@ -186,7 +178,7 @@
                         @endif
 
                         @auth
-                            @if(auth()->user()->role === 'student' && !str_starts_with($params['vnp_TxnRef'] ?? '', 'DEMO_') && !str_starts_with($params['vnp_TxnRef'] ?? '', 'TEST_'))
+                            @if(auth()->user()->role === 'student')
                                 <a href="{{ route('student.dashboard') }}" class="inline-flex justify-center items-center px-8 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest hover:from-indigo-700 hover:to-indigo-800 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 transform hover:scale-105">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -234,7 +226,7 @@
     @push('scripts')
     <script>
         // Auto redirect after successful payment (optional)
-        @if($result['success'] && !str_starts_with($params['vnp_TxnRef'] ?? '', 'DEMO_') && !str_starts_with($params['vnp_TxnRef'] ?? '', 'TEST_'))
+        @if($result['success'])
             // Uncomment if you want auto redirect after 10 seconds
             // setTimeout(() => {
             //     window.location.href = '{{ route("bookings.index") }}';

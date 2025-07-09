@@ -165,6 +165,8 @@ class PaymentController extends Controller
                 'all_params' => $request->all(),
             ]);
 
+
+
             // Handle cancellation or specific error codes
             if ($responseCode === '24') { // User cancelled
                 return redirect()->route('student.dashboard')
@@ -191,7 +193,7 @@ class PaymentController extends Controller
                 }
             }
 
-                        // If we have a valid booking, redirect to booking page
+            // If we have a valid booking, redirect to booking page
             if (isset($result['booking']) && $result['booking'] instanceof Booking) {
                 $message = $result['message'] ?? ($result['success'] ? 'Thanh toán thành công.' : 'Thanh toán không thành công.');
                 $alertType = $result['success'] ? 'success' : 'error';
@@ -426,97 +428,7 @@ class PaymentController extends Controller
         }
     }
 
-    // ========== DEMO AND TEST METHODS ==========
-
-    public function showVnpayDemo(): View
-    {
-        return view('vnpay-demo');
-    }
-
-    public function createDemoVnpay(Request $request): JsonResponse
-    {
-        $request->validate([
-            'amount' => 'required|numeric|min:10000|max:50000000',
-            'order_info' => 'required|string|max:255',
-        ]);
-
-        try {
-            $demoData = [
-                'vnp_Version' => '2.1.0',
-                'vnp_Command' => 'pay',
-                'vnp_TmnCode' => config('services.vnpay.tmn_code'),
-                'vnp_Amount' => $request->amount * 100,
-                'vnp_CurrCode' => 'VND',
-                'vnp_TxnRef' => 'DEMO_' . time(),
-                'vnp_OrderInfo' => $request->order_info,
-                'vnp_OrderType' => 'demo',
-                'vnp_Locale' => app()->getLocale() === 'vi' ? 'vn' : 'en',
-                'vnp_ReturnUrl' => route('vnpay.result'),
-                'vnp_IpAddr' => $request->ip(),
-                'vnp_CreateDate' => now()->format('YmdHis'),
-                'vnp_ExpireDate' => now()->addMinutes(30)->format('YmdHis'),
-            ];
-
-            $vnpUrl = $this->buildVnpayUrl($demoData);
-
-            return response()->json([
-                'success' => true,
-                'payment_url' => $vnpUrl,
-            ]);
-
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 400);
-        }
-    }
-
-    public function showVnpayTest(): View
-    {
-        return view('test-vnpay');
-    }
-
-    public function createTestVnpay(Request $request): JsonResponse
-    {
-        $request->validate([
-            'amount' => 'required|numeric|min:1000',
-            'order_info' => 'required|string|max:255',
-        ]);
-
-        try {
-            $testData = [
-                'vnp_Version' => '2.1.0',
-                'vnp_Command' => 'pay',
-                'vnp_TmnCode' => config('services.vnpay.tmn_code'),
-                'vnp_Amount' => $request->amount * 100,
-                'vnp_CurrCode' => 'VND',
-                'vnp_TxnRef' => 'TEST_' . time(),
-                'vnp_OrderInfo' => $request->order_info,
-                'vnp_OrderType' => 'test',
-                'vnp_Locale' => app()->getLocale() === 'vi' ? 'vn' : 'en',
-                'vnp_ReturnUrl' => route('vnpay.result'),
-                'vnp_IpAddr' => $request->ip(),
-                'vnp_CreateDate' => now()->format('YmdHis'),
-                'vnp_ExpireDate' => now()->addMinutes(30)->format('YmdHis'),
-            ];
-
-            $vnpUrl = $this->buildVnpayUrl($testData);
-
-            return response()->json([
-                'success' => true,
-                'payment_url' => $vnpUrl,
-            ]);
-
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 400);
-        }
-    }
-
-    public function showVnpayResult(Request $request): View
+        public function showVnpayResult(Request $request): View
     {
         $params = $request->all();
 
@@ -536,44 +448,6 @@ class PaymentController extends Controller
         }
 
         return view('vnpay-result', compact('result', 'params'));
-    }
-
-    public function testVnpayIpn(Request $request): JsonResponse
-    {
-        try {
-            Log::info('Test VNPay IPN called', [
-                'ip' => $request->ip(),
-                'timestamp' => now(),
-            ]);
-
-            // Test IPN endpoint connectivity
-            $testData = [
-                'vnp_Amount' => '10000000',
-                'vnp_BankCode' => 'NCB',
-                'vnp_ResponseCode' => '00',
-                'vnp_TxnRef' => 'TEST_IPN_' . time(),
-                'vnp_TransactionNo' => '12345678',
-                'vnp_PayDate' => now()->format('YmdHis'),
-            ];
-
-            // Make internal request to IPN endpoint
-            $ipnResponse = $this->vnpayIpn(
-                Request::create('/payments/vnpay/ipn', 'POST', $testData)
-            );
-
-            return response()->json([
-                'success' => true,
-                'message' => 'IPN test completed. Check logs for details.',
-                'ipn_status_code' => $ipnResponse->getStatusCode(),
-                'ipn_content' => $ipnResponse->getContent(),
-            ]);
-
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 400);
-        }
     }
 
     // ========== PRIVATE HELPER METHODS ==========
@@ -665,16 +539,8 @@ class PaymentController extends Controller
             throw new Exception(__('booking.errors.booking_not_accepted_payment'), 422);
         }
 
-        // Kiểm tra xem có giao dịch pending nào không
-        $pendingTransaction = $booking->transactions()
-            ->where('status', 'pending')
-            ->where('type', 'payment')
-            ->where('created_at', '>', now()->subMinutes(30)) // Chỉ kiểm tra 30 phút gần đây
-            ->first();
-
-        if ($pendingTransaction) {
-            throw new Exception('Có một giao dịch đang được xử lý. Vui lòng đợi hoặc thử lại sau.', 422);
-        }
+        // Không kiểm tra pending transaction nữa - cho phép retry payment ngay cả khi có pending transaction
+        // User có thể retry khi gặp lỗi server hoặc kết nối
     }
 
     /**

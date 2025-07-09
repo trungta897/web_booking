@@ -49,7 +49,7 @@ return [
         'booking_already_completed' => 'This booking is already completed and cannot be changed.',
         'booking_already_cancelled' => 'This booking has already been cancelled.',
         'invalid_payment_method' => 'Invalid payment method.',
-        'payment_in_progress' => 'There is a transaction being processed. Please wait 2 minutes or refresh the page to try again.',
+        'payment_in_progress' => 'There is a transaction being processed. You can retry immediately if you encounter errors.',
     ],
     'info' => [
         'already_paid' => 'This booking has already been paid for.',
