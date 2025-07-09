@@ -1,0 +1,39 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - app/
+        - routes/
+        - database/migrations/
+        - database/seeders/
+        - tests/
+
+    # Laravel specific configurations
+    excludePaths:
+        - app/helpers.php
+        - vendor/
+        - node_modules/
+        - bootstrap/cache/
+        - storage/
+
+    # Custom error ignores
+    ignoreErrors:
+        # Allow Laravel specific patterns
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder::#'
+        - '#Call to an undefined method Illuminate\\Database\\Query\\Builder::#'
+        - '#Access to an undefined property App\\Models\\.*::\$.*#'
+        - '#Cannot call method.*on.*\|null#'
+
+        # VNPay service patterns
+        - '#Parameter.*of method.*expects.*but.*given#'
+
+        # Laravel specific settings
+    checkOctaneCompatibility: false
+    checkModelProperties: true
+
+    # Performance optimization
+    parallel:
+        jobSize: 20
+        maximumNumberOfProcesses: 32

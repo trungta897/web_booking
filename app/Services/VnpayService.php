@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Booking;
 use App\Models\Transaction;
+use App\Services\LogService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -23,6 +24,40 @@ class VnpayService
         $this->vnpHashSecret = config('services.vnpay.hash_secret');
         $this->vnpUrl = config('services.vnpay.url');
         $this->vnpReturnUrl = config('services.vnpay.return_url');
+
+        // Validate essential VNPay configurations
+        $this->validateConfiguration();
+    }
+
+    /**
+     * Validate VNPay configuration
+     */
+    private function validateConfiguration(): void
+    {
+        $errors = [];
+
+        if (empty($this->vnpTmnCode)) {
+            $errors[] = 'VNPAY_TMN_CODE is not configured';
+        }
+
+        if (empty($this->vnpHashSecret)) {
+            $errors[] = 'VNPAY_HASH_SECRET is not configured';
+        }
+
+        if (empty($this->vnpUrl)) {
+            $errors[] = 'VNPAY_URL is not configured';
+        }
+
+        if (empty($this->vnpReturnUrl)) {
+            $errors[] = 'VNPAY_RETURN_URL is not configured';
+        } elseif (str_contains($this->vnpReturnUrl, 'localhost')) {
+            $errors[] = 'VNPAY_RETURN_URL cannot use localhost - VNPay needs a public URL';
+        }
+
+        if (!empty($errors)) {
+            Log::error('VNPay configuration errors', ['errors' => $errors]);
+            throw new \Exception('VNPay configuration error: ' . implode(', ', $errors));
+        }
     }
 
     /**
@@ -44,7 +79,7 @@ class VnpayService
             // Sử dụng lại transaction hiện tại
             $txnRef = $recentPendingTransaction->transaction_id;
 
-            Log::info('Reusing existing pending transaction', [
+            LogService::vnpay('Reusing existing pending transaction', [
                 'booking_id' => $booking->id,
                 'transaction_id' => $recentPendingTransaction->id,
                 'txn_ref' => $txnRef,
@@ -65,7 +100,7 @@ class VnpayService
                 'status' => Transaction::STATUS_PENDING,
             ]);
 
-            Log::info('Created new pending transaction', [
+            LogService::vnpay('Created new pending transaction', [
                 'booking_id' => $booking->id,
                 'txn_ref' => $txnRef,
             ]);
@@ -84,7 +119,7 @@ class VnpayService
         $vnpayAmount = (int) ($vndAmount * 100);
 
         // Log detailed amount calculation for debugging
-        Log::info('VNPay payment URL creation', [
+        LogService::vnpay('Payment URL creation', [
             'booking_id' => $booking->id,
             'booking_price' => $booking->price,
             'booking_currency' => $booking->currency ?? 'VND',
@@ -97,21 +132,21 @@ class VnpayService
 
         // Validate amount range for VNPay
         if ($vnpayAmount < 5000) {
-            Log::error('VNPay amount too small', [
+            LogService::vnpay('VNPay amount too small', [
                 'booking_id' => $booking->id,
                 'vnpay_amount' => $vnpayAmount,
                 'minimum_required' => 5000,
-            ]);
+            ], 'error');
             throw new \Exception('Số tiền thanh toán quá nhỏ (tối thiểu 5,000 VND)');
         }
 
         if ($vnpayAmount >= 1000000000) {
-            Log::error('VNPay amount too large', [
+            LogService::vnpay('VNPay amount too large', [
                 'booking_id' => $booking->id,
                 'vnpay_amount' => $vnpayAmount,
                 'maximum_allowed' => 999999999,
                 'amount_in_billions' => round($vnpayAmount / 1000000000, 2),
-            ]);
+            ], 'error');
             throw new \Exception('Số tiền thanh toán quá lớn (tối đa dưới 1 tỷ VND)');
         }
 
@@ -200,7 +235,7 @@ class VnpayService
         try {
             // Verify security hash
             if (! $this->verifyIpn($vnpData)) {
-                Log::error('VNPay IPN verification failed', $vnpData);
+                LogService::vnpay('IPN verification failed', $vnpData, 'error');
 
                 return ['success' => false, 'message' => 'Invalid signature'];
             }
@@ -213,7 +248,7 @@ class VnpayService
             // Tìm booking
             $booking = Booking::where('vnpay_txn_ref', $txnRef)->first();
             if (! $booking) {
-                Log::error('Booking not found for VNPay txn_ref: '.$txnRef);
+                LogService::vnpay('Booking not found for txn_ref: '.$txnRef, ['txn_ref' => $txnRef], 'error');
 
                 return ['success' => false, 'message' => 'Booking not found'];
             }
@@ -251,7 +286,7 @@ class VnpayService
                     ]);
                 }
 
-                Log::info('VNPay payment successful', [
+                LogService::vnpay('Payment successful', [
                     'booking_id' => $booking->id,
                     'txn_ref' => $txnRef,
                     'amount' => $amount,
@@ -279,12 +314,12 @@ class VnpayService
                     ]);
                 }
 
-                Log::warning('VNPay payment failed', [
+                LogService::vnpay('Payment failed', [
                     'booking_id' => $booking->id,
                     'response_code' => $responseCode,
                     'txn_ref' => $txnRef,
                     'response_message' => $this->getResponseMessage($responseCode),
-                ]);
+                ], 'warning');
 
                 return [
                     'success' => false,
@@ -293,10 +328,10 @@ class VnpayService
                 ];
             }
         } catch (\Exception $e) {
-            Log::error('VNPay payment processing error: '.$e->getMessage(), [
+            LogService::vnpay('Payment processing error: '.$e->getMessage(), [
                 'vnp_data' => $vnpData,
                 'trace' => $e->getTraceAsString(),
-            ]);
+            ], 'error');
 
             return [
                 'success' => false,
@@ -354,7 +389,7 @@ class VnpayService
         ]);
 
         // VNPay yêu cầu refund thủ công qua portal
-        Log::info('VNPay refund request created', [
+        LogService::vnpay('Refund request created', [
             'booking_id' => $booking->id,
             'transaction_id' => $transaction->id,
             'amount' => $refundAmount,
@@ -372,7 +407,7 @@ class VnpayService
         $amount = (float) $booking->price;
 
         // Log for debugging
-        Log::info('VNPay amount calculation', [
+        LogService::vnpay('Amount calculation', [
             'booking_id' => $booking->id,
             'original_amount' => $amount,
             'currency' => $currency,
@@ -384,7 +419,7 @@ class VnpayService
         // Otherwise, assume it's already VND
         if ($currency === 'USD') {
             $vndAmount = $amount * 25000; // Convert USD to VND
-            Log::info('Converting USD to VND', [
+            LogService::vnpay('Converting USD to VND', [
                 'usd_amount' => $amount,
                 'vnd_amount' => $vndAmount,
                 'exchange_rate' => 25000,
@@ -394,7 +429,7 @@ class VnpayService
 
         // For VND currency or no currency specified, use amount as-is
         // The amount should already be in VND
-        Log::info('Using amount as VND', [
+        LogService::vnpay('Using amount as VND', [
             'vnd_amount' => $amount,
             'currency' => $currency,
         ]);
@@ -415,7 +450,7 @@ class VnpayService
             ->get();
 
         if ($oldPendingTransactions->isNotEmpty()) {
-            Log::info('Cleaning up old pending transactions', [
+            LogService::vnpay('Cleaning up old pending transactions', [
                 'booking_id' => $booking->id,
                 'count' => $oldPendingTransactions->count(),
                 'transaction_ids' => $oldPendingTransactions->pluck('id')->toArray(),
