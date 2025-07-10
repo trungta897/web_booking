@@ -96,6 +96,16 @@ if (! function_exists('formatBookingAmount')) {
         $currency = $booking->currency ?? 'VND';
         $amount = $booking->price;
 
+        // Protection against negative prices - should not happen but just in case
+        if ($amount < 0) {
+            \App\Services\LogService::error('Negative price detected in formatBookingAmount', null, [
+                'booking_id' => $booking->id,
+                'price' => $amount,
+                'currency' => $currency
+            ]);
+            $amount = abs($amount); // Use absolute value for display
+        }
+
         // Get current locale
         $locale = session('locale') ?: app()->getLocale();
         if (!$locale || !in_array($locale, ['en', 'vi'])) {
@@ -151,6 +161,15 @@ if (! function_exists('formatHourlyRate')) {
      */
         function formatHourlyRate(float $amount, string $currency = 'USD'): string
     {
+        // Protection against negative rates
+        if ($amount < 0) {
+            \App\Services\LogService::error('Negative hourly rate detected in formatHourlyRate', null, [
+                'amount' => $amount,
+                'currency' => $currency
+            ]);
+            $amount = abs($amount); // Use absolute value for display
+        }
+
         // Get current locale with multiple fallbacks
         $locale = session('locale') ?: app()->getLocale();
         if (!$locale || !in_array($locale, ['en', 'vi'])) {
@@ -250,7 +269,8 @@ if (! function_exists('calculateBookingDuration')) {
         $start = \Carbon\Carbon::parse($startTime);
         $end = \Carbon\Carbon::parse($endTime);
 
-        $duration = $end->diffInMinutes($start);
+        // Use correct order to avoid negative duration
+        $duration = $start->diffInMinutes($end);
         $hours = intval($duration / 60);
         $minutes = $duration % 60;
 

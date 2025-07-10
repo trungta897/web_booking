@@ -51,7 +51,17 @@ class VnpayService
         if (empty($this->vnpReturnUrl)) {
             $errors[] = 'VNPAY_RETURN_URL is not configured';
         } elseif (str_contains($this->vnpReturnUrl, 'localhost')) {
-            $errors[] = 'VNPAY_RETURN_URL cannot use localhost - VNPay needs a public URL';
+            if (app()->environment('production')) {
+                // Block localhost in production
+                $errors[] = 'VNPAY_RETURN_URL cannot use localhost in production - VNPay needs a public URL';
+            } else {
+                // Allow localhost in development but log warning
+                Log::warning('VNPay using localhost URL in development environment', [
+                    'return_url' => $this->vnpReturnUrl,
+                    'environment' => app()->environment(),
+                    'note' => 'Real VNPay callbacks will not work with localhost URLs'
+                ]);
+            }
         }
 
         if (!empty($errors)) {

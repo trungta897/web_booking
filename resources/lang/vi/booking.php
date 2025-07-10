@@ -19,6 +19,8 @@ return [
         'booking_advance_notice' => 'Đặt lịch phải trước ít nhất 30 phút.',
         'max_duration' => 'Thời lượng đặt lịch không được vượt quá 4 giờ.',
         'pending_booking_exists' => 'Bạn đã có một lịch đang chờ duyệt với gia sư này.',
+        'end_time_must_be_after_start_time' => 'Thời gian kết thúc phải sau thời gian bắt đầu.',
+        'invalid_price_calculation' => 'Tính toán giá booking không hợp lệ. Vui lòng kiểm tra lại thời gian và giá của gia sư.',
     ],
     'success' => [
         'booking_requested' => 'Yêu cầu đặt lịch đã được gửi thành công.',

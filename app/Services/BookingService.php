@@ -96,9 +96,20 @@ class BookingService extends BaseService
             // Calculate price based on duration and tutor's hourly rate
             $startTime = Carbon::parse($data['start_time']);
             $endTime = Carbon::parse($data['end_time']);
-            $duration = $endTime->diffInMinutes($startTime);
+
+            // Ensure end time is after start time
+            if ($endTime->lte($startTime)) {
+                throw new Exception(__('booking.validation.end_time_must_be_after_start_time'));
+            }
+
+            $duration = $startTime->diffInMinutes($endTime); // Correct order: start->diffInMinutes(end)
             $hours = $duration / 60;
             $price = $hours * $tutor->hourly_rate;
+
+            // Ensure price is positive
+            if ($price <= 0) {
+                throw new Exception(__('booking.validation.invalid_price_calculation'));
+            }
 
             // Create booking
             $booking = new Booking();
@@ -346,10 +357,22 @@ class BookingService extends BaseService
     {
         $start = Carbon::parse($startTime);
         $end = Carbon::parse($endTime);
-        $duration = $end->diffInMinutes($start);
-        $hours = $duration / 60;
 
-        return $hours * $tutor->hourly_rate;
+        // Ensure end time is after start time
+        if ($end->lte($start)) {
+            throw new Exception(__('booking.validation.end_time_must_be_after_start_time'));
+        }
+
+        $duration = $start->diffInMinutes($end); // Correct order: start->diffInMinutes(end)
+        $hours = $duration / 60;
+        $price = $hours * $tutor->hourly_rate;
+
+        // Ensure price is positive
+        if ($price <= 0) {
+            throw new Exception(__('booking.validation.invalid_price_calculation'));
+        }
+
+        return $price;
     }
 
     /**

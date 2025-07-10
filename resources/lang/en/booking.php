@@ -19,6 +19,8 @@ return [
         'booking_advance_notice' => 'Booking must be at least 30 minutes in advance.',
         'max_duration' => 'Booking duration cannot exceed 4 hours.',
         'pending_booking_exists' => 'You already have a pending booking with this tutor.',
+        'end_time_must_be_after_start_time' => 'End time must be after start time.',
+        'invalid_price_calculation' => 'Invalid price calculation for booking. Please check the time and tutor rate.',
     ],
     'success' => [
         'booking_requested' => 'Booking request sent successfully.',

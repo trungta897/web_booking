@@ -36,7 +36,7 @@ class DatabaseRestore extends Command
 
             if (!$backupFile) {
                 $this->error('❌ No backup file specified or found');
-                return Command::FAILURE;
+                return self::FAILURE;
             }
 
             // Validate backup file
@@ -48,7 +48,7 @@ class DatabaseRestore extends Command
             // Confirm restore operation
             if (!$this->confirmRestore()) {
                 $this->info('🚫 Restore operation cancelled');
-                return Command::SUCCESS;
+                return self::SUCCESS;
             }
 
             // Prepare for restore
@@ -74,7 +74,7 @@ class DatabaseRestore extends Command
                 'duration_seconds' => $duration,
             ]);
 
-            return Command::SUCCESS;
+            return self::SUCCESS;
 
         } catch (\Exception $e) {
             $this->error("❌ Restore failed: " . $e->getMessage());
@@ -84,7 +84,7 @@ class DatabaseRestore extends Command
                 'duration' => round(microtime(true) - $startTime, 2),
             ]);
 
-            return Command::FAILURE;
+            return self::FAILURE;
         }
     }
 
@@ -94,14 +94,14 @@ class DatabaseRestore extends Command
 
         if (!is_dir($backupDir)) {
             $this->warn('📁 No backup directory found');
-            return Command::SUCCESS;
+            return self::SUCCESS;
         }
 
         $backups = glob($backupDir . '/*.sql*');
 
         if (empty($backups)) {
             $this->info('📁 No backup files found');
-            return Command::SUCCESS;
+            return self::SUCCESS;
         }
 
         // Sort by modification time (newest first)
@@ -125,7 +125,7 @@ class DatabaseRestore extends Command
         $this->newLine();
         $this->info('💡 To restore a backup, run: php artisan db:restore <filename>');
 
-        return Command::SUCCESS;
+        return self::SUCCESS;
     }
 
     private function getBackupFile(): ?string

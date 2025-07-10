@@ -21,7 +21,7 @@ class TutorProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'hourly_rate' => 'required|numeric|min:0|max:1000',
+            'hourly_rate' => 'required|numeric|min:0.01|max:1000',
             'experience_years' => 'required|integer|min:0|max:50',
             'bio' => 'required|string|max:1000|min:50',
             'specialization' => 'nullable|string|max:255',
@@ -67,7 +67,7 @@ class TutorProfileRequest extends FormRequest
         return [
             'hourly_rate.required' => __('Please enter your hourly rate'),
             'hourly_rate.numeric' => __('Hourly rate must be a number'),
-            'hourly_rate.min' => __('Hourly rate cannot be negative'),
+            'hourly_rate.min' => __('Hourly rate must be at least 0.01'),
             'hourly_rate.max' => __('Hourly rate cannot exceed 1000'),
             'experience_years.required' => __('Please enter your years of experience'),
             'experience_years.integer' => __('Years of experience must be a whole number'),

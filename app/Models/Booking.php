@@ -158,7 +158,15 @@ class Booking extends Model
 
     public function getDurationAttribute()
     {
-        return Carbon::parse($this->start_time)->diffInMinutes(Carbon::parse($this->end_time));
+        if (!$this->start_time || !$this->end_time) {
+            return 0;
+        }
+
+        $start = Carbon::parse($this->start_time);
+        $end = Carbon::parse($this->end_time);
+
+        // Return absolute value to ensure positive duration
+        return abs($start->diffInMinutes($end));
     }
 
     public function getTotalPriceAttribute()
