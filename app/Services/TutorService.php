@@ -590,7 +590,7 @@ class TutorService extends BaseService implements TutorServiceInterface
             ->distinct()
             ->count();
         $totalEarnings = \App\Models\Booking::where('tutor_id', $tutor->id)
-            ->where('status', 'completed')
+            ->where('payment_status', 'paid')
             ->sum('price');
 
         // Get calendar data for current month

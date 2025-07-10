@@ -121,6 +121,7 @@ class BookingService extends BaseService
                 'end_time' => $data['end_time'],
                 'notes' => $data['notes'] ?? null,
                 'price' => $price,
+                'currency' => 'VND', // Always save as VND
                 'status' => Booking::STATUS_PENDING
             ]);
             $booking->save();
@@ -287,14 +288,12 @@ class BookingService extends BaseService
     public function getTutorEarnings(int $tutorId, ?int $year = null, ?int $month = null): array
     {
         $totalEarnings = Booking::where('tutor_id', $tutorId)
-            ->where('status', 'completed')
             ->where('payment_status', 'paid')
             ->sum('price');
 
         $monthlyEarnings = 0;
         if ($year && $month) {
             $monthlyEarnings = Booking::where('tutor_id', $tutorId)
-                ->where('status', 'completed')
                 ->where('payment_status', 'paid')
                 ->whereYear('start_time', $year)
                 ->whereMonth('start_time', $month)

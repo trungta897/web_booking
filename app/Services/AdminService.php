@@ -193,18 +193,15 @@ class AdminService extends BaseService
      */
     protected function getRevenueStatistics(): array
     {
-        $totalRevenue = Booking::where('status', 'completed')
-            ->where('payment_status', 'paid')
+        $totalRevenue = Booking::where('payment_status', 'paid')
             ->sum('price');
 
-        $monthlyRevenue = Booking::where('status', 'completed')
-            ->where('payment_status', 'paid')
+        $monthlyRevenue = Booking::where('payment_status', 'paid')
             ->whereMonth('created_at', Carbon::now()->month)
             ->whereYear('created_at', Carbon::now()->year)
             ->sum('price');
 
-        $weeklyRevenue = Booking::where('status', 'completed')
-            ->where('payment_status', 'paid')
+        $weeklyRevenue = Booking::where('payment_status', 'paid')
             ->whereBetween('created_at', [
                 Carbon::now()->startOfWeek(),
                 Carbon::now()->endOfWeek(),
@@ -285,8 +282,7 @@ class AdminService extends BaseService
 
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
-            $revenue = Booking::where('status', 'completed')
-                ->where('payment_status', 'paid')
+            $revenue = Booking::where('payment_status', 'paid')
                 ->whereDate('created_at', $date)
                 ->sum('price');
 

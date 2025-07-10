@@ -75,12 +75,12 @@ if (! function_exists('formatCurrency')) {
         // If Vietnamese locale and currency is USD, convert to VND
         if ($locale === 'vi' && $currency === 'USD') {
             $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
-            return number_format($vndAmount, 0, ',', '.') . ' ₫';
+            return number_format($vndAmount, 0, ',', '.') . ' VND';
         }
 
         // For other cases, format normally
         if ($currency === 'VND') {
-            return number_format($amount, 0, ',', '.') . ' ₫';
+            return number_format($amount, 0, ',', '.') . ' VND';
         }
 
         return '$' . number_format($amount, 2);
@@ -119,7 +119,7 @@ if (! function_exists('formatBookingAmount')) {
             if ($locale === 'vi') {
                 // Vietnamese: Convert USD to VND for display
                 $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
-                return number_format($vndAmount, 0, ',', '.') . ' ₫';
+                return number_format($vndAmount, 0, ',', '.') . ' VND';
             } else {
                 // English: Display as USD
                 return '$' . number_format($amount, 2);
@@ -130,7 +130,7 @@ if (! function_exists('formatBookingAmount')) {
         if ($currency === 'VND') {
             if ($locale === 'vi') {
                 // Vietnamese: Display VND as is
-                return number_format($amount, 0, ',', '.') . ' ₫';
+                return number_format($amount, 0, ',', '.') . ' VND';
             } else {
                 // English: Convert VND to USD for display
                 $usdAmount = $amount / 25000; // 1 USD = 25,000 VND
@@ -143,7 +143,7 @@ if (! function_exists('formatBookingAmount')) {
             if ($locale === 'vi') {
                 // Vietnamese: Convert USD to VND for display
                 $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
-                return number_format($vndAmount, 0, ',', '.') . ' ₫';
+                return number_format($vndAmount, 0, ',', '.') . ' VND';
             } else {
                 // English: Display USD as is
                 return '$' . number_format($amount, 2);
@@ -177,12 +177,12 @@ if (! function_exists('formatHourlyRate')) {
         }
 
         if ($locale === 'vi') {
-            // Vietnamese: convert USD to VND and show as "₫/giờ"
+            // Vietnamese: convert USD to VND and show as "VND/giờ"
             if ($currency === 'USD') {
                 $vndAmount = $amount * 25000;
-                return number_format($vndAmount, 0, ',', '.') . ' ₫/giờ';
+                return number_format($vndAmount, 0, ',', '.') . ' VND/giờ';
             }
-            return number_format($amount, 0, ',', '.') . ' ₫/giờ';
+            return number_format($amount, 0, ',', '.') . ' VND/giờ';
         } else {
             // English: show as "$/hr"
             return '$' . number_format($amount, 2) . '/hr';

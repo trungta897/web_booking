@@ -280,6 +280,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     public function getTransactionHistory(Booking $booking): Collection
     {
         return Transaction::where('booking_id', $booking->id)
+            ->whereIn('status', [Transaction::STATUS_PENDING, Transaction::STATUS_COMPLETED])
             ->orderBy('created_at', 'desc')
             ->get();
     }

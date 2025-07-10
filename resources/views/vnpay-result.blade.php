@@ -91,7 +91,7 @@
                             @if(isset($params['vnp_Amount']))
                             <div class="bg-white rounded-lg p-4 shadow-sm">
                                 <span class="text-sm text-gray-500 font-medium">{{ __('Số tiền:') }}</span>
-                                <p class="font-bold text-green-600 text-xl">{{ number_format($params['vnp_Amount'] / 100, 0, ',', '.') }} ₫</p>
+                                <p class="font-bold text-green-600 text-xl">{{ number_format($params['vnp_Amount'] / 100, 0, ',', '.') }} VND</p>
                             </div>
                             @endif
 
@@ -175,7 +175,6 @@
                                     {{ __('Xem đặt lịch') }}
                                 </a>
                             @endif
-                        @endif
 
                         @auth
                             @if(auth()->user()->role === 'student')

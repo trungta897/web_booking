@@ -50,7 +50,7 @@
             <div class="admin-stat-icon danger">
                 <i class="fas fa-dollar-sign text-xl"></i>
             </div>
-            <div class="admin-stat-value">${{ number_format($totalRevenue ?? 0, 2) }}</div>
+            <div class="admin-stat-value">{{ formatCurrency($totalRevenue ?? 0, 'VND') }}</div>
             <div class="admin-stat-label">{{ __('admin.total_revenue') }}</div>
         </div>
     </div>

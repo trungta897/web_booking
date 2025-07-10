@@ -203,7 +203,7 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
         return [
             'total_bookings' => $tutor->bookings()->count(),
             'completed_bookings' => $tutor->bookings()->where('status', 'completed')->count(),
-            'total_earnings' => $tutor->bookings()->where('status', 'completed')->where('payment_status', 'paid')->sum('price'),
+            'total_earnings' => $tutor->bookings()->where('payment_status', 'paid')->sum('price'),
             'average_rating' => $tutor->reviews()->avg('rating'),
             'total_reviews' => $tutor->reviews()->count(),
             'response_rate' => $this->calculateResponseRate($tutorId),

@@ -118,7 +118,6 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     public function getTutorTotalEarnings(int $tutorId): float
     {
         return $this->query()->where('tutor_id', $tutorId)
-            ->where('status', 'completed')
             ->where('payment_status', 'paid')
             ->sum('price');
     }
@@ -129,7 +128,6 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     public function getTutorMonthlyEarnings(int $tutorId, int $year, int $month): float
     {
         return $this->query()->where('tutor_id', $tutorId)
-            ->where('status', 'completed')
             ->where('payment_status', 'paid')
             ->whereYear('end_time', $year)
             ->whereMonth('end_time', $month)
