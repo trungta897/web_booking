@@ -26,13 +26,13 @@ class TutorController extends Controller
     }
 
     /**
-     * Display tutor dashboard
+     * Display tutor dashboard.
      */
     public function dashboard(): View|RedirectResponse
     {
         $user = Auth::user();
 
-        if (! $user->tutor) {
+        if (!$user->tutor) {
             return redirect()->route('profile.edit')
                 ->with('error', __('Please complete your tutor profile first'));
         }
@@ -43,7 +43,7 @@ class TutorController extends Controller
     }
 
     /**
-     * Display tutors listing with filters
+     * Display tutors listing with filters.
      */
     public function index(Request $request): View
     {
@@ -59,24 +59,24 @@ class TutorController extends Controller
 
         return view('tutors.index', [
             'tutors' => $tutors,
-            'subjects' => $subjects
+            'subjects' => $subjects,
         ]);
     }
 
     /**
-     * Display tutor profile
+     * Display tutor profile.
      */
     public function show(Tutor $tutor): View
     {
         $tutorData = $this->tutorService->getTutorDetails($tutor->id);
 
         return view('tutors.show', [
-            'tutor' => $tutorData
+            'tutor' => $tutorData,
         ]);
     }
 
     /**
-     * Toggle favorite tutor
+     * Toggle favorite tutor.
      */
     public function toggleFavorite(Tutor $tutor): JsonResponse
     {
@@ -90,7 +90,6 @@ class TutorController extends Controller
                     ? __('Tutor added to favorites')
                     : __('Tutor removed from favorites'),
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -100,7 +99,7 @@ class TutorController extends Controller
     }
 
     /**
-     * Check tutor availability for a specific day
+     * Check tutor availability for a specific day.
      */
     public function checkAvailability(Tutor $tutor, string $day): JsonResponse
     {
@@ -111,7 +110,6 @@ class TutorController extends Controller
                 'success' => true,
                 'availability' => $availability,
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -121,7 +119,7 @@ class TutorController extends Controller
     }
 
     /**
-     * Store tutor review
+     * Store tutor review.
      */
     public function storeReview(ReviewRequest $request, Tutor $tutor): RedirectResponse
     {
@@ -132,14 +130,13 @@ class TutorController extends Controller
             $this->tutorService->createTutorReview($tutor, $data);
 
             return back()->with('success', __('Review submitted successfully'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
     /**
-     * Update review
+     * Update review.
      */
     public function updateReview(ReviewRequest $request, Review $review): RedirectResponse
     {
@@ -149,14 +146,13 @@ class TutorController extends Controller
             $review->update($request->validated());
 
             return back()->with('success', __('Review updated successfully'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
     /**
-     * Delete review
+     * Delete review.
      */
     public function destroyReview(Review $review): RedirectResponse
     {
@@ -166,20 +162,19 @@ class TutorController extends Controller
             $review->delete();
 
             return back()->with('success', __('Review deleted successfully'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
     /**
-     * Display availability management page
+     * Display availability management page.
      */
     public function availability(): View|RedirectResponse
     {
         $user = Auth::user();
 
-        if (! $user->tutor) {
+        if (!$user->tutor) {
             return redirect()->route('profile.edit')
                 ->with('error', __('Please complete your tutor profile first'));
         }
@@ -190,7 +185,7 @@ class TutorController extends Controller
     }
 
     /**
-     * Get bookings for specific date (AJAX)
+     * Get bookings for specific date (AJAX).
      */
     public function getBookingsForDate(Request $request, string $date): JsonResponse
     {
@@ -208,7 +203,6 @@ class TutorController extends Controller
                 'date' => $date,
                 'bookings' => $bookings,
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -218,7 +212,7 @@ class TutorController extends Controller
     }
 
     /**
-     * Update tutor availability
+     * Update tutor availability.
      */
     public function updateAvailability(Request $request): RedirectResponse
     {
@@ -234,7 +228,6 @@ class TutorController extends Controller
             $this->tutorService->updateTutorAvailability(Auth::user()->tutor, $request->availability);
 
             return back()->with('success', __('Availability updated successfully'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

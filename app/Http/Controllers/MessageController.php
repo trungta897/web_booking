@@ -21,7 +21,7 @@ class MessageController extends Controller
     }
 
     /**
-     * Display conversations list
+     * Display conversations list.
      */
     public function index(): View
     {
@@ -31,7 +31,7 @@ class MessageController extends Controller
     }
 
     /**
-     * Store new message
+     * Store new message.
      */
     public function store(MessageRequest $request): RedirectResponse
     {
@@ -39,14 +39,13 @@ class MessageController extends Controller
             $this->messageService->sendMessage(Auth::user(), $request->validated());
 
             return back()->with('success', __('Message sent successfully'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
     /**
-     * Display conversation with specific user
+     * Display conversation with specific user.
      */
     public function show(User $user): View|RedirectResponse
     {
@@ -58,7 +57,6 @@ class MessageController extends Controller
                 'messages' => $conversationData['messages'],
                 'unread_count' => $conversationData['unread_count'],
             ]);
-
         } catch (Exception $e) {
             return redirect()->route('messages.index')
                 ->withErrors(['error' => $e->getMessage()]);
@@ -66,7 +64,7 @@ class MessageController extends Controller
     }
 
     /**
-     * Mark message as read
+     * Mark message as read.
      */
     public function markAsRead(Message $message): RedirectResponse
     {
@@ -76,19 +74,18 @@ class MessageController extends Controller
                 throw new Exception(__('Unauthorized action'));
             }
 
-            if (! $message->read_at) {
+            if (!$message->read_at) {
                 $message->update(['read_at' => now()]);
             }
 
             return back()->with('success', __('Message marked as read'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
     /**
-     * Delete message
+     * Delete message.
      */
     public function destroy(Message $message): RedirectResponse
     {
@@ -100,7 +97,6 @@ class MessageController extends Controller
             }
 
             return back()->withErrors(['error' => __('Failed to delete message')]);
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

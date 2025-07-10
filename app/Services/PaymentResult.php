@@ -9,5 +9,6 @@ class PaymentResult
         public readonly ?string $clientSecret = null,
         public readonly ?string $error = null,
         public readonly ?string $paymentUrl = null
-    ) {}
+    ) {
+    }
 }

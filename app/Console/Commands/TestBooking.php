@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 class TestBooking extends Command
 {
     protected $signature = 'test:booking {id}';
+
     protected $description = 'Test booking access';
 
     public function handle()
@@ -29,7 +30,8 @@ class TestBooking extends Command
 
             return 0;
         } catch (\Exception $e) {
-            $this->error("❌ Error: " . $e->getMessage());
+            $this->error('❌ Error: ' . $e->getMessage());
+
             return 1;
         }
     }

@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\Booking;
-use App\Models\Transaction;
 use Illuminate\Console\Command;
 
 class ResetBookingPayment extends Command
@@ -33,28 +32,32 @@ class ResetBookingPayment extends Command
 
         if (!$booking) {
             $this->error("Booking #{$bookingId} not found.");
+
             return 1;
         }
 
         $this->info("=== BOOKING #{$bookingId} PAYMENT RESET ===");
         $this->info("Current Status: {$booking->status}");
         $this->info("Payment Status: {$booking->payment_status}");
-        $this->info("Payment Method: " . ($booking->payment_method ?? 'null'));
-        $this->info("VNPay TxnRef: " . ($booking->vnpay_txn_ref ?? 'null'));
+        $this->info('Payment Method: ' . ($booking->payment_method ?? 'null'));
+        $this->info('VNPay TxnRef: ' . ($booking->vnpay_txn_ref ?? 'null'));
 
         // Check if booking can be reset
         if ($booking->status !== 'accepted') {
             $this->error("Cannot reset payment: Booking status is not 'accepted'");
+
             return 1;
         }
 
         if ($booking->payment_status === 'paid' || $booking->isFullyPaid()) {
-            $this->error("Cannot reset payment: Booking is already paid");
+            $this->error('Cannot reset payment: Booking is already paid');
+
             return 1;
         }
 
         if (!$this->confirm("Are you sure you want to reset payment for booking #{$bookingId}?")) {
-            $this->info("Operation cancelled.");
+            $this->info('Operation cancelled.');
+
             return 0;
         }
 
@@ -78,8 +81,8 @@ class ResetBookingPayment extends Command
             'payment_metadata' => [],
         ]);
 
-        $this->info("✅ Payment reset completed!");
-        $this->info("User can now make a fresh payment attempt.");
+        $this->info('✅ Payment reset completed!');
+        $this->info('User can now make a fresh payment attempt.');
 
         return 0;
     }

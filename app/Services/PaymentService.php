@@ -6,7 +6,6 @@ use App\Contracts\Services\PaymentServiceInterface;
 use App\Models\Booking;
 use App\Models\Transaction;
 use App\Notifications\PaymentReceived;
-use App\Services\PaymentResult;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -29,7 +28,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Create Stripe payment intent
+     * Create Stripe payment intent.
      */
     public function createStripePaymentIntent(Booking $booking): PaymentResult
     {
@@ -73,7 +72,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Confirm Stripe payment with payment intent
+     * Confirm Stripe payment with payment intent.
      */
     public function confirmStripePayment(Booking $booking, array $paymentData = []): bool
     {
@@ -106,7 +105,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Handle Stripe webhook
+     * Handle Stripe webhook.
      */
     public function handleStripeWebhook(Request $request): void
     {
@@ -138,17 +137,17 @@ class PaymentService extends BaseService implements PaymentServiceInterface
             $this->logActivity('Stripe webhook handled', [
                 'event_type' => $event->type,
             ]);
-
         } catch (Exception $e) {
             $this->logActivity('Stripe webhook error', [
                 'error' => $e->getMessage(),
             ]);
+
             throw $e;
         }
     }
 
     /**
-     * Handle VNPay IPN
+     * Handle VNPay IPN.
      */
     public function handleVnpayIpn(array $ipnData): void
     {
@@ -165,16 +164,15 @@ class PaymentService extends BaseService implements PaymentServiceInterface
                 'vnp_TxnRef' => $ipnData['vnp_TxnRef'] ?? 'N/A',
                 'error' => $result['message'],
             ]);
+
             // Throw an exception to signal failure to the VNPay server if needed.
             // This ensures VNPay might retry sending the IPN.
             throw new Exception($result['message']);
         }
     }
 
-
-
     /**
-     * Create transaction record
+     * Create transaction record.
      */
     /*
     protected function createTransactionRecord(Booking $booking, string $method, string $status): void
@@ -194,7 +192,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     */
 
     /**
-     * Send payment notifications
+     * Send payment notifications.
      */
     protected function sendPaymentNotifications(Booking $booking): void
     {
@@ -204,7 +202,6 @@ class PaymentService extends BaseService implements PaymentServiceInterface
 
             // Notify tutor
             $booking->tutor->user->notify(new PaymentReceived($booking));
-
         } catch (Exception $e) {
             // Log error but don't throw - payment was successful
             $this->logActivity('Payment notification error', [
@@ -215,7 +212,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Create VNPay payment
+     * Create VNPay payment.
      */
     public function createVnpayPayment(Booking $booking, string $ipAddr = null): PaymentResult
     {
@@ -234,7 +231,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Handle VNPay return
+     * Handle VNPay return.
      */
     public function handleVnpayReturn(array $params): array
     {
@@ -242,7 +239,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Get payment methods for booking
+     * Get payment methods for booking.
      *
      * @param Booking $booking
      * @return array<int, array{method: string, name: string, description: string, icon: string}>
@@ -275,7 +272,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Get transaction history for booking
+     * Get transaction history for booking.
      */
     public function getTransactionHistory(Booking $booking): Collection
     {
@@ -286,7 +283,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Get payment history for booking
+     * Get payment history for booking.
      *
      * @param Booking $booking
      * @return array{transactions: Collection, total_paid: float, total_refunded: float, payment_status: string, formatted: array{total_paid: string, total_refunded: string}}
@@ -312,7 +309,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Get booking transactions summary
+     * Get booking transactions summary.
      *
      * @param Booking $booking
      * @return array{transactions: Collection, total_paid: float, total_refunded: float, payment_status: string, formatted: array{total_paid: string, total_refunded: string}}
@@ -338,7 +335,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Refund payment
+     * Refund payment.
      *
      * @param Booking $booking
      * @param float $amount
@@ -368,7 +365,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
                     ->where('type', Transaction::TYPE_PAYMENT)
                     ->first();
 
-                if (! $transaction) {
+                if (!$transaction) {
                     throw new Exception('No completed payment transaction found');
                 }
 
@@ -398,7 +395,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
                             'refund_reason' => $reason,
                             'original_transaction_id' => $transaction->id,
                             'refund_type' => $isPartialRefund ? 'partial' : 'full',
-                        ]
+                        ],
                     ]);
 
                     $this->logActivity('Payment refunded', [
@@ -425,7 +422,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Process refund based on payment method
+     * Process refund based on payment method.
      *
      * @param Transaction $transaction
      * @param string|null $reason
@@ -447,7 +444,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Process Stripe refund
+     * Process Stripe refund.
      *
      * @param Transaction $transaction
      * @param string|null $reason
@@ -480,12 +477,12 @@ class PaymentService extends BaseService implements PaymentServiceInterface
                 'message' => 'Refund processed successfully',
             ];
         } catch (ApiErrorException $e) {
-            throw new Exception('Stripe refund failed: '.$e->getMessage());
+            throw new Exception('Stripe refund failed: ' . $e->getMessage());
         }
     }
 
     /**
-     * Process VNPay refund (throws exception as VNPay requires manual processing)
+     * Process VNPay refund (throws exception as VNPay requires manual processing).
      *
      * @param Transaction $transaction
      * @param string|null $reason
@@ -506,7 +503,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Get total paid amount for booking
+     * Get total paid amount for booking.
      */
     private function getTotalPaidAmount(Booking $booking): float
     {
@@ -517,7 +514,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Get total refunded amount for booking
+     * Get total refunded amount for booking.
      */
     private function getTotalRefundedAmount(Booking $booking): float
     {

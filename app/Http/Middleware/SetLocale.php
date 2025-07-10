@@ -25,7 +25,7 @@ class SetLocale
         $locale = $request->session()->get('locale', Config::get('app.locale', 'vi'));
 
         // Validate locale
-        if (! in_array($locale, $availableLocales)) {
+        if (!in_array($locale, $availableLocales)) {
             $locale = 'vi';
         }
 
@@ -33,7 +33,7 @@ class SetLocale
         App::setLocale($locale);
 
         // Store in session for persistence if not already set
-        if (! $request->session()->has('locale')) {
+        if (!$request->session()->has('locale')) {
             $request->session()->put('locale', $locale);
         }
 

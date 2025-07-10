@@ -35,6 +35,7 @@ class CreateTestBooking extends Command
         // Kiểm tra booking đã tồn tại
         if (Booking::find($bookingId)) {
             $this->error("Booking ID {$bookingId} already exists!");
+
             return 1;
         }
 
@@ -44,11 +45,13 @@ class CreateTestBooking extends Command
 
         if (!$student) {
             $this->error('No student found!');
+
             return 1;
         }
 
         if (!$tutor) {
             $this->error('No tutor found!');
+
             return 1;
         }
 
@@ -57,7 +60,7 @@ class CreateTestBooking extends Command
             $startTime = Carbon::now()->addDay()->setHour(14)->setMinute(0)->setSecond(0);
             $endTime = Carbon::now()->addDay()->setHour(16)->setMinute(0)->setSecond(0);
 
-            DB::statement("
+            DB::statement('
                 INSERT INTO bookings (
                     id, student_id, tutor_id, subject_id,
                     start_time, end_time, status, payment_status,
@@ -67,7 +70,7 @@ class CreateTestBooking extends Command
                     ?, ?, ?, ?,
                     ?, ?, ?, NOW(), NOW()
                 )
-            ", [
+            ', [
                 $bookingId,
                 $student->id,
                 $tutor->id,
@@ -78,26 +81,26 @@ class CreateTestBooking extends Command
                 'pending',
                 2000000, // 2,000,000 VND
                 1000000, // 1,000,000 VND per hour
-                'Test booking for payment system'
+                'Test booking for payment system',
             ]);
 
-            $this->info("✅ Successfully created test booking!");
+            $this->info('✅ Successfully created test booking!');
             $this->line("ID: {$bookingId}");
             $this->line("Student: {$student->name} (ID: {$student->id})");
             $this->line("Tutor: {$tutor->user->name} (ID: {$tutor->id})");
-            $this->line("Status: accepted");
-            $this->line("Payment Status: pending");
-            $this->line("Total Price: 2,000,000 VND");
+            $this->line('Status: accepted');
+            $this->line('Payment Status: pending');
+            $this->line('Total Price: 2,000,000 VND');
             $this->line("Start Time: {$startTime->format('Y-m-d H:i:s')}");
             $this->line("End Time: {$endTime->format('Y-m-d H:i:s')}");
-            $this->line("");
+            $this->line('');
             $this->line("🎯 Payment URL: /bookings/{$bookingId}/payment");
-            $this->line("📝 You can now test the payment system!");
+            $this->line('📝 You can now test the payment system!');
 
             return 0;
-
         } catch (\Exception $e) {
-            $this->error("❌ Error creating booking: " . $e->getMessage());
+            $this->error('❌ Error creating booking: ' . $e->getMessage());
+
             return 1;
         }
     }

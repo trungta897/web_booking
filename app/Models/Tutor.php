@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Booking;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -63,7 +62,7 @@ class Tutor extends Model
     }
 
     /**
-     * Check if the tutor is available at the given time slot
+     * Check if the tutor is available at the given time slot.
      *
      * @param  string  $startTime
      * @param  string  $endTime
@@ -101,11 +100,12 @@ class Tutor extends Model
             $availEnd = Carbon::createFromFormat('H:i:s', $endTimeStr)->setDate($startDateTime->year, $startDateTime->month, $startDateTime->day);
             if ($startDateTime->greaterThanOrEqualTo($availStart) && $endDateTime->lessThanOrEqualTo($availEnd)) {
                 $found = true;
+
                 break;
             }
         }
-        \Illuminate\Support\Facades\Log::info('Availability match found: '.($found ? 'Yes' : 'No'));
-        if (! $found) {
+        \Illuminate\Support\Facades\Log::info('Availability match found: ' . ($found ? 'Yes' : 'No'));
+        if (!$found) {
             return false;
         }
 
@@ -119,7 +119,7 @@ class Tutor extends Model
                 });
             })
             ->exists();
-        \Illuminate\Support\Facades\Log::info('Overlapping bookings check found: '.($overlappingBookingsExist ? 'Yes' : 'No'));
+        \Illuminate\Support\Facades\Log::info('Overlapping bookings check found: ' . ($overlappingBookingsExist ? 'Yes' : 'No'));
         if ($overlappingBookingsExist) {
             \Illuminate\Support\Facades\Log::info('Result: Not available (Overlapping booking found).');
 
@@ -132,14 +132,14 @@ class Tutor extends Model
 
     /**
      * Check if the tutor is available for booking
-     * This checks if the tutor is generally available and has at least one availability slot
+     * This checks if the tutor is generally available and has at least one availability slot.
      *
      * @return bool
      */
     public function isAvailableForBooking()
     {
         // Check if tutor is marked as available
-        if (! $this->is_available) {
+        if (!$this->is_available) {
             return false;
         }
 
@@ -148,19 +148,19 @@ class Tutor extends Model
             ->where('is_available', true)
             ->exists();
 
-        if (! $hasAvailability) {
+        if (!$hasAvailability) {
             return false;
         }
 
         // Check if tutor has any active subjects
         $hasSubjects = $this->subjects()->exists();
 
-        if (! $hasSubjects) {
+        if (!$hasSubjects) {
             return false;
         }
 
         // Check if tutor's account is active
-        if (! $this->user || $this->user->account_status !== 'active') {
+        if (!$this->user || $this->user->account_status !== 'active') {
             return false;
         }
 

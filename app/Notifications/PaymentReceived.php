@@ -54,7 +54,7 @@ class PaymentReceived extends Notification implements ShouldQueue
         $endTime = $this->booking->end_time->format('g:i A');
         $amount = number_format((float) $this->booking->price, 2);
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject("Payment Received for {$subject} Session")
             ->greeting("Hello {$notifiable->name}!")
             ->line("You've received payment from {$student} for the upcoming {$subject} session.")
@@ -77,7 +77,7 @@ class PaymentReceived extends Notification implements ShouldQueue
 
         return [
             'title' => 'Payment Received',
-            'message' => 'Payment of $'.$amount." received from {$this->booking->student->name} for {$this->booking->subject->name} session.",
+            'message' => 'Payment of $' . $amount . " received from {$this->booking->student->name} for {$this->booking->subject->name} session.",
             'booking_id' => $this->booking->id,
             'student_id' => $this->booking->student_id,
             'subject' => $this->booking->subject->name,

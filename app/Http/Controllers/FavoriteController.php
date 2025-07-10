@@ -20,7 +20,7 @@ class FavoriteController extends Controller
     }
 
     /**
-     * Display user's favorite tutors
+     * Display user's favorite tutors.
      */
     public function index(): View
     {
@@ -30,7 +30,7 @@ class FavoriteController extends Controller
     }
 
     /**
-     * Add tutor to favorites (AJAX)
+     * Add tutor to favorites (AJAX).
      */
     public function store(Request $request): JsonResponse
     {
@@ -49,7 +49,6 @@ class FavoriteController extends Controller
                 'is_favorite' => $result['is_favorite'],
                 'message' => $result['message'],
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -59,7 +58,7 @@ class FavoriteController extends Controller
     }
 
     /**
-     * Remove tutor from favorites
+     * Remove tutor from favorites.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -71,7 +70,6 @@ class FavoriteController extends Controller
             $this->tutorService->removeFavorite(Auth::user(), $validated['tutor_id']);
 
             return back()->with('success', __('Tutor removed from favorites'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

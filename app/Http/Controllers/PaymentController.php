@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Services\PaymentService;
 use App\Services\VnpayService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -13,11 +14,11 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
-use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
     protected PaymentService $paymentService;
+
     protected VnpayService $vnpayService;
 
     public function __construct(PaymentService $paymentService, VnpayService $vnpayService)
@@ -27,7 +28,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Process payment (unified endpoint)
+     * Process payment (unified endpoint).
      */
     public function processPayment(Request $request, Booking $booking): JsonResponse
     {
@@ -61,7 +62,6 @@ class PaymentController extends Controller
             } else {
                 return $this->handleStripePayment($booking, $request);
             }
-
         } catch (Exception $e) {
             Log::error('Payment processing failed', [
                 'booking_id' => $booking->id,
@@ -75,7 +75,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Create Stripe payment intent
+     * Create Stripe payment intent.
      */
     public function createIntent(Request $request, Booking $booking): JsonResponse
     {
@@ -93,14 +93,13 @@ class PaymentController extends Controller
             return response()->json([
                 'clientSecret' => $result->clientSecret,
             ]);
-
         } catch (Exception $e) {
             return $this->handlePaymentError($e);
         }
     }
 
     /**
-     * Create VNPay payment
+     * Create VNPay payment.
      */
     public function createVnpayPayment(Request $request, Booking $booking): JsonResponse
     {
@@ -118,14 +117,13 @@ class PaymentController extends Controller
             return response()->json([
                 'payment_url' => $result->paymentUrl,
             ]);
-
         } catch (Exception $e) {
             return $this->handlePaymentError($e);
         }
     }
 
     /**
-     * Confirm Stripe payment
+     * Confirm Stripe payment.
      */
     public function confirm(Request $request, Booking $booking): RedirectResponse
     {
@@ -141,7 +139,6 @@ class PaymentController extends Controller
 
             return redirect()->route('bookings.show', $booking->id)
                 ->with('error', __('booking.payment_not_completed'));
-
         } catch (Exception $e) {
             return redirect()->route('bookings.show', $booking->id)
                 ->with('error', __('booking.error_confirming_payment', ['error' => $e->getMessage()]));
@@ -149,7 +146,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle VNPay return
+     * Handle VNPay return.
      */
     public function vnpayReturn(Request $request): RedirectResponse
     {
@@ -164,8 +161,6 @@ class PaymentController extends Controller
                 'txn_ref' => $txnRef,
                 'all_params' => $request->all(),
             ]);
-
-
 
             // Handle cancellation or specific error codes
             if ($responseCode === '24') { // User cancelled
@@ -205,7 +200,6 @@ class PaymentController extends Controller
             // Fallback to student dashboard with error message
             return redirect()->route('student.dashboard')
                 ->with('error', $result['message'] ?? 'Có lỗi xảy ra trong quá trình thanh toán.');
-
         } catch (Exception $e) {
             Log::error('VNPay return handling failed', [
                 'request_data' => $request->all(),
@@ -220,7 +214,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle VNPay IPN
+     * Handle VNPay IPN.
      */
     public function vnpayIpn(Request $request): Response
     {
@@ -250,28 +244,31 @@ class PaymentController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return response('ERROR', 400);
         }
     }
 
     /**
-     * Handle Stripe webhook
+     * Handle Stripe webhook.
      */
     public function handleWebhook(Request $request): Response
     {
         try {
             $this->paymentService->handleStripeWebhook($request);
+
             return response('Webhook received', 200);
         } catch (Exception $e) {
             Log::error('Stripe webhook handling failed', [
                 'error' => $e->getMessage(),
             ]);
-            return response('Webhook Error: '.$e->getMessage(), 400);
+
+            return response('Webhook Error: ' . $e->getMessage(), 400);
         }
     }
 
     /**
-     * Get transaction history for booking
+     * Get transaction history for booking.
      */
     public function getTransactionHistory(Booking $booking): JsonResponse
     {
@@ -283,14 +280,13 @@ class PaymentController extends Controller
             return response()->json([
                 'transactions' => $transactions,
             ]);
-
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
 
     /**
-     * View transaction history page
+     * View transaction history page.
      */
     public function viewTransactionHistory(Booking $booking): View
     {
@@ -302,7 +298,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Process refund for booking
+     * Process refund for booking.
      */
     public function processRefund(Request $request, Booking $booking): RedirectResponse
     {
@@ -353,16 +349,16 @@ class PaymentController extends Controller
                         'cancellation_description' => $validated['refund_description'] ?? null,
                     ]);
                 } else {
-                $booking->update([
-                    'status' => 'cancelled',
-                    'cancellation_reason' => 'tutor_unavailable',
-                    'cancellation_description' => $validated['refund_description'] ?? null,
-                ]);
+                    $booking->update([
+                        'status' => 'cancelled',
+                        'cancellation_reason' => 'tutor_unavailable',
+                        'cancellation_description' => $validated['refund_description'] ?? null,
+                    ]);
                 }
 
                 // Send notifications to student
                 if (!$isPartialRefund) {
-                $booking->student->notify(new \App\Notifications\BookingCancelled($booking, 'tutor'));
+                    $booking->student->notify(new \App\Notifications\BookingCancelled($booking, 'tutor'));
                 }
                 $booking->student->notify(new \App\Notifications\PaymentRefunded($booking, $validated['refund_reason']));
 
@@ -384,7 +380,6 @@ class PaymentController extends Controller
 
             return redirect()->route('bookings.show', $booking->id)
                 ->with('error', $result['message'] ?? 'Không thể xử lý hoàn tiền. Vui lòng thử lại sau.');
-
         } catch (Exception $e) {
             Log::error('Refund processing failed', [
                 'booking_id' => $booking->id,
@@ -398,16 +393,16 @@ class PaymentController extends Controller
     }
 
     /**
-     * Show refund confirmation form
+     * Show refund confirmation form.
      */
     public function confirmRefund(Booking $booking): View|RedirectResponse
     {
         try {
-        $this->checkBookingAccess($booking);
-        $this->checkRefundPermission($booking);
+            $this->checkBookingAccess($booking);
+            $this->checkRefundPermission($booking);
 
             // Check if booking can be refunded
-        if ($booking->payment_status !== 'paid') {
+            if ($booking->payment_status !== 'paid') {
                 return redirect()->route('bookings.show', $booking->id)
                     ->with('error', __('booking.errors.booking_not_paid_refund'));
             }
@@ -416,7 +411,6 @@ class PaymentController extends Controller
             $transactions = $this->paymentService->getBookingTransactions($booking);
 
             return view('bookings.refund-confirm', compact('booking', 'transactions'));
-
         } catch (Exception $e) {
             Log::error('Error showing refund confirmation', [
                 'booking_id' => $booking->id,
@@ -428,14 +422,14 @@ class PaymentController extends Controller
         }
     }
 
-        public function showVnpayResult(Request $request): View
+    public function showVnpayResult(Request $request): View
     {
         $params = $request->all();
 
         $result = [
             'success' => false,
             'message' => 'Unknown result',
-            'data' => $params
+            'data' => $params,
         ];
 
         if (isset($params['vnp_ResponseCode'])) {
@@ -453,7 +447,7 @@ class PaymentController extends Controller
     // ========== PRIVATE HELPER METHODS ==========
 
     /**
-     * Check if user can access the booking
+     * Check if user can access the booking.
      */
     private function checkBookingAccess(Booking $booking): void
     {
@@ -473,7 +467,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Check if user can make payment for this booking
+     * Check if user can make payment for this booking.
      */
     private function checkPaymentPermission(Booking $booking): void
     {
@@ -486,7 +480,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Check if user can process refund for this booking
+     * Check if user can process refund for this booking.
      */
     private function checkRefundPermission(Booking $booking): void
     {
@@ -518,7 +512,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Validate booking status for payment
+     * Validate booking status for payment.
      */
     private function validateBookingForPayment(Booking $booking): void
     {
@@ -544,7 +538,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle VNPay payment processing
+     * Handle VNPay payment processing.
      */
     private function handleVnpayPayment(Booking $booking, Request $request): JsonResponse
     {
@@ -561,7 +555,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle Stripe payment processing
+     * Handle Stripe payment processing.
      */
     private function handleStripePayment(Booking $booking, Request $request): JsonResponse
     {
@@ -578,7 +572,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle payment errors with appropriate HTTP status codes
+     * Handle payment errors with appropriate HTTP status codes.
      */
     private function handlePaymentError(Exception $e): JsonResponse
     {
@@ -591,15 +585,21 @@ class PaymentController extends Controller
     }
 
     /**
-     * Determine appropriate HTTP status code for error
+     * Determine appropriate HTTP status code for error.
      */
     private function getErrorStatusCode(Exception $e): int
     {
         $code = $e->getCode();
 
-        if ($code === 401) return 401; // Unauthorized
-        if ($code === 403) return 403; // Forbidden
-        if ($code === 422) return 422; // Unprocessable Entity
+        if ($code === 401) {
+            return 401;
+        } // Unauthorized
+        if ($code === 403) {
+            return 403;
+        } // Forbidden
+        if ($code === 422) {
+            return 422;
+        } // Unprocessable Entity
 
         // Check error message for specific cases
         $message = strtolower($e->getMessage());
@@ -616,7 +616,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Build VNPay URL
+     * Build VNPay URL.
      */
     private function buildVnpayUrl(array $data): string
     {
@@ -646,7 +646,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Get VNPay response message
+     * Get VNPay response message.
      */
     private function getVnpayResponseMessage($responseCode): string
     {

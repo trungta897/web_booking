@@ -50,11 +50,11 @@ class TutorSubjectSeeder extends Seeder
             foreach ($randomSubjects as $subject) {
                 $syncData[$subject->id] = [
                     'hourly_rate' => $tutor->hourly_rate ?? 50.00,
-                    'description' => 'Proficient in '.$subject->name,
+                    'description' => 'Proficient in ' . $subject->name,
                 ];
             }
             $tutor->subjects()->sync($syncData);
-            $this->command->info("Assigned $subjectCount subjects to tutor '{$tutor->user->name}' (ID: {$tutor->id}, Rate: ".$tutor->hourly_rate.').');
+            $this->command->info("Assigned $subjectCount subjects to tutor '{$tutor->user->name}' (ID: {$tutor->id}, Rate: " . $tutor->hourly_rate . ').');
         }
         $this->command->info('Tutors now have subjects assigned based on pricing.');
     }

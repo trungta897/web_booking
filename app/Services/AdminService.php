@@ -27,16 +27,20 @@ class AdminService extends BaseService
 
     protected SubjectRepository $subjectRepository;
 
-    public function __construct()
-    {
-        $this->userRepository = new UserRepository(new User);
-        $this->bookingRepository = new BookingRepository(new Booking);
-        $this->tutorRepository = new TutorRepository(new Tutor);
-        $this->subjectRepository = new SubjectRepository(new Subject);
+    public function __construct(
+        UserRepository $userRepository,
+        BookingRepository $bookingRepository,
+        TutorRepository $tutorRepository,
+        SubjectRepository $subjectRepository
+    ) {
+        $this->userRepository = $userRepository;
+        $this->bookingRepository = $bookingRepository;
+        $this->tutorRepository = $tutorRepository;
+        $this->subjectRepository = $subjectRepository;
     }
 
     /**
-     * Get admin dashboard statistics
+     * Get admin dashboard statistics.
      */
     public function getDashboardStats(): array
     {
@@ -58,15 +62,15 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get all users with filters
+     * Get all users with filters.
      */
     public function getAllUsers(array $filters = []): LengthAwarePaginator
     {
-        if (isset($filters['search']) && ! empty($filters['search'])) {
+        if (isset($filters['search']) && !empty($filters['search'])) {
             return $this->userRepository->searchUsers($filters['search'], $filters['per_page'] ?? 15);
         }
 
-        if (isset($filters['role']) && ! empty($filters['role'])) {
+        if (isset($filters['role']) && !empty($filters['role'])) {
             // Use pagination instead of collection
             return $this->userRepository->where('role', $filters['role'])
                 ->latest()
@@ -84,7 +88,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get all bookings with filters
+     * Get all bookings with filters.
      */
     public function getAllBookings(array $filters = []): LengthAwarePaginator
     {
@@ -92,7 +96,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get all tutors with their statistics
+     * Get all tutors with their statistics.
      */
     public function getAllTutors(array $filters = []): LengthAwarePaginator
     {
@@ -100,7 +104,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get all subjects with statistics
+     * Get all subjects with statistics.
      */
     public function getAllSubjects(): Collection
     {
@@ -108,7 +112,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Suspend/unsuspend user
+     * Suspend/unsuspend user.
      */
     public function toggleUserSuspension(int $userId): User
     {
@@ -130,27 +134,14 @@ class AdminService extends BaseService
     }
 
     /**
-     * Delete user account
+     * Delete user account.
      */
     public function deleteUser(int $userId): bool
     {
         return $this->executeTransaction(function () use ($userId) {
             $user = $this->userRepository->findByIdOrFail($userId);
 
-            // Check if user has active bookings
-            if ($user->role === 'student') {
-                $activeBookings = Booking::where('student_id', $userId)
-                    ->whereIn('status', ['pending', 'accepted'])
-                    ->count();
-            } else {
-                $activeBookings = Booking::whereHas('tutor', function ($q) use ($userId) {
-                    $q->where('user_id', $userId);
-                })->whereIn('status', ['pending', 'accepted'])->count();
-            }
-
-            if ($activeBookings > 0) {
-                throw new Exception(__('Cannot delete user with active bookings'));
-            }
+            $this->validateUserCanBeDeleted($user);
 
             $result = $this->userRepository->delete($user->id);
 
@@ -167,7 +158,35 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get booking statistics
+     * Validate if user can be deleted.
+     */
+    protected function validateUserCanBeDeleted(User $user): void
+    {
+        $activeBookings = $this->getActiveBookingsCount($user);
+
+        if ($activeBookings > 0) {
+            throw new Exception(__('Cannot delete user with active bookings'));
+        }
+    }
+
+    /**
+     * Get count of active bookings for user.
+     */
+    protected function getActiveBookingsCount(User $user): int
+    {
+        if ($user->role === 'student') {
+            return Booking::where('student_id', $user->id)
+                ->whereIn('status', ['pending', 'accepted'])
+                ->count();
+        }
+
+        return Booking::whereHas('tutor', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->whereIn('status', ['pending', 'accepted'])->count();
+    }
+
+    /**
+     * Get booking statistics.
      */
     protected function getBookingStatistics(): array
     {
@@ -189,7 +208,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get revenue statistics
+     * Get revenue statistics.
      */
     protected function getRevenueStatistics(): array
     {
@@ -222,7 +241,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get system statistics
+     * Get system statistics.
      */
     protected function getSystemStatistics(): array
     {
@@ -237,7 +256,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get recent activities
+     * Get recent activities.
      */
     protected function getRecentActivities(int $limit = 10): array
     {
@@ -274,7 +293,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get daily revenue for the last 7 days
+     * Get daily revenue for the last 7 days.
      */
     protected function getDailyRevenue(): array
     {
@@ -298,7 +317,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Format dashboard statistics for display
+     * Format dashboard statistics for display.
      */
     protected function formatDashboardStats(array $userStats, array $bookingStats, array $revenueStats): array
     {
@@ -311,15 +330,15 @@ class AdminService extends BaseService
             ],
             'bookings' => [
                 'total' => number_format($bookingStats['total']),
-                'completion_rate' => $bookingStats['completion_rate'].'%',
-                'cancellation_rate' => $bookingStats['cancellation_rate'].'%',
+                'completion_rate' => $bookingStats['completion_rate'] . '%',
+                'cancellation_rate' => $bookingStats['cancellation_rate'] . '%',
             ],
             'revenue' => $revenueStats['formatted'],
         ];
     }
 
     /**
-     * Get storage usage (placeholder)
+     * Get storage usage (placeholder).
      */
     protected function getStorageUsage(): string
     {
@@ -328,7 +347,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get cache size (placeholder)
+     * Get cache size (placeholder).
      */
     protected function getCacheSize(): string
     {
@@ -337,7 +356,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Export data to CSV
+     * Export data to CSV.
      */
     public function exportData(string $type, array $filters = []): string
     {
@@ -354,7 +373,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Export users to CSV
+     * Export users to CSV.
      */
     protected function exportUsers(array $filters): string
     {
@@ -363,7 +382,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Export bookings to CSV
+     * Export bookings to CSV.
      */
     protected function exportBookings(array $filters): string
     {
@@ -372,7 +391,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Export tutors to CSV
+     * Export tutors to CSV.
      */
     protected function exportTutors(array $filters): string
     {
@@ -381,7 +400,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get recent bookings for dashboard
+     * Get recent bookings for dashboard.
      */
     public function getRecentBookings(int $limit = 5): Collection
     {
@@ -392,7 +411,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get popular subjects
+     * Get popular subjects.
      */
     public function getPopularSubjects(int $limit = 5): Collection
     {
@@ -403,7 +422,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get top rated tutors
+     * Get top rated tutors.
      */
     public function getTopRatedTutors(int $limit = 6): Collection
     {
@@ -416,7 +435,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get recently joined users
+     * Get recently joined users.
      */
     public function getRecentUsers(int $limit = 5): Collection
     {
@@ -424,7 +443,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get tutors with search and pagination
+     * Get tutors with search and pagination.
      */
     public function getTutors(?string $search = null, int $perPage = 10): LengthAwarePaginator
     {
@@ -444,7 +463,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get students with search and pagination
+     * Get students with search and pagination.
      */
     public function getStudents(?string $search = null, int $perPage = 10): LengthAwarePaginator
     {
@@ -462,7 +481,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get tutor details with related data
+     * Get tutor details with related data.
      */
     public function getTutorDetails(User $user): array
     {
@@ -490,7 +509,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get student details with related data
+     * Get student details with related data.
      */
     public function getStudentDetails(User $user): array
     {
@@ -514,7 +533,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Toggle user account status
+     * Toggle user account status.
      */
     public function toggleUserStatus(User $user): bool
     {
@@ -543,7 +562,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get bookings with search and pagination
+     * Get bookings with search and pagination.
      */
     public function getBookings(?string $search = null, int $perPage = 10): LengthAwarePaginator
     {
@@ -567,7 +586,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get booking details
+     * Get booking details.
      */
     public function getBookingDetails(Booking $booking): Booking
     {
@@ -580,7 +599,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get subjects with search and pagination
+     * Get subjects with search and pagination.
      */
     public function getSubjects(?string $search = null, int $perPage = 10): LengthAwarePaginator
     {
@@ -594,7 +613,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Create new subject
+     * Create new subject.
      */
     public function createSubject(array $data): Subject
     {
@@ -616,7 +635,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Update subject
+     * Update subject.
      */
     public function updateSubject(Subject $subject, array $data): bool
     {
@@ -641,7 +660,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Delete subject
+     * Delete subject.
      */
     public function deleteSubject(Subject $subject): bool
     {
@@ -672,7 +691,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get reports data
+     * Get reports data.
      */
     public function getReportsData(): array
     {
@@ -703,7 +722,7 @@ class AdminService extends BaseService
     }
 
     /**
-     * Get reviews with pagination
+     * Get reviews with pagination.
      */
     public function getReviews(?string $search = null, int $perPage = 10): LengthAwarePaginator
     {

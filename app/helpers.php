@@ -1,18 +1,18 @@
 <?php
 
-if (! function_exists('translateSubjectName')) {
+if (!function_exists('translateSubjectName')) {
     /**
-     * Translate subject name based on current locale
+     * Translate subject name based on current locale.
      *
      * @param  string  $subjectName
      * @return string
      */
     function translateSubjectName($subjectName)
     {
-        $translatedName = __('subjects.names.'.$subjectName);
+        $translatedName = __('subjects.names.' . $subjectName);
 
         // If translation not found, return original name
-        if ($translatedName === 'subjects.names.'.$subjectName) {
+        if ($translatedName === 'subjects.names.' . $subjectName) {
             return $subjectName;
         }
 
@@ -20,29 +20,29 @@ if (! function_exists('translateSubjectName')) {
     }
 }
 
-if (! function_exists('translateSubjectDescription')) {
+if (!function_exists('translateSubjectDescription')) {
     /**
-     * Translate subject description based on current locale
+     * Translate subject description based on current locale.
      *
      * @param  string  $subjectName
      * @return string
      */
     function translateSubjectDescription($subjectName)
     {
-        $translatedDescription = __('subjects.descriptions.'.$subjectName);
+        $translatedDescription = __('subjects.descriptions.' . $subjectName);
 
         // If translation not found, return default fallback
-        if ($translatedDescription === 'subjects.descriptions.'.$subjectName) {
-            return 'Explore '.$subjectName.' courses and find expert tutors.';
+        if ($translatedDescription === 'subjects.descriptions.' . $subjectName) {
+            return 'Explore ' . $subjectName . ' courses and find expert tutors.';
         }
 
         return $translatedDescription;
     }
 }
 
-if (! function_exists('getBookingCard')) {
+if (!function_exists('getBookingCard')) {
     /**
-     * Get BookingCard component instance
+     * Get BookingCard component instance.
      */
     function getBookingCard(\App\Models\Booking $booking, array $options = []): \App\Components\BookingCard
     {
@@ -50,9 +50,9 @@ if (! function_exists('getBookingCard')) {
     }
 }
 
-if (! function_exists('getTutorCard')) {
+if (!function_exists('getTutorCard')) {
     /**
-     * Get TutorCard component instance
+     * Get TutorCard component instance.
      */
     function getTutorCard(\App\Models\Tutor $tutor, array $options = []): \App\Components\TutorCard
     {
@@ -60,9 +60,9 @@ if (! function_exists('getTutorCard')) {
     }
 }
 
-if (! function_exists('formatCurrency')) {
+if (!function_exists('formatCurrency')) {
     /**
-     * Format currency for display with automatic conversion based on locale
+     * Format currency for display with automatic conversion based on locale.
      */
     function formatCurrency(float $amount, string $currency = 'USD'): string
     {
@@ -81,6 +81,7 @@ if (! function_exists('formatCurrency')) {
             } else {
                 // Convert VND to USD for English display
                 $usdAmount = $amount / 25000;
+
                 return '$' . number_format($usdAmount, 2);
             }
         } else {
@@ -88,6 +89,7 @@ if (! function_exists('formatCurrency')) {
             if ($locale === 'vi') {
                 // Convert USD to VND for Vietnamese display
                 $vndAmount = $amount * 25000;
+
                 return number_format($vndAmount, 0, ',', '.') . ' VND';
             } else {
                 // Display USD as-is for English
@@ -97,9 +99,9 @@ if (! function_exists('formatCurrency')) {
     }
 }
 
-if (! function_exists('formatBookingAmount')) {
+if (!function_exists('formatBookingAmount')) {
     /**
-     * Format booking amount using the booking's stored currency field
+     * Format booking amount using the booking's stored currency field.
      */
     function formatBookingAmount(\App\Models\Booking $booking): string
     {
@@ -111,7 +113,7 @@ if (! function_exists('formatBookingAmount')) {
             \App\Services\LogService::error('Negative price detected in formatBookingAmount', null, [
                 'booking_id' => $booking->id,
                 'price' => $amount,
-                'currency' => $currency
+                'currency' => $currency,
             ]);
             $amount = abs($amount); // Use absolute value for display
         }
@@ -129,6 +131,7 @@ if (! function_exists('formatBookingAmount')) {
             if ($locale === 'vi') {
                 // Vietnamese: Convert USD to VND for display
                 $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
+
                 return number_format($vndAmount, 0, ',', '.') . ' VND';
             } else {
                 // English: Display as USD
@@ -144,6 +147,7 @@ if (! function_exists('formatBookingAmount')) {
             } else {
                 // English: Convert VND to USD for display
                 $usdAmount = $amount / 25000; // 1 USD = 25,000 VND
+
                 return '$' . number_format($usdAmount, 2);
             }
         }
@@ -153,6 +157,7 @@ if (! function_exists('formatBookingAmount')) {
             if ($locale === 'vi') {
                 // Vietnamese: Convert USD to VND for display
                 $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
+
                 return number_format($vndAmount, 0, ',', '.') . ' VND';
             } else {
                 // English: Display USD as is
@@ -165,18 +170,18 @@ if (! function_exists('formatBookingAmount')) {
     }
 }
 
-if (! function_exists('formatHourlyRate')) {
+if (!function_exists('formatHourlyRate')) {
     /**
      * Format hourly rate with proper currency and unit based on locale
-     * Smart detection: if amount > 1000, assume it's already VND
+     * Smart detection: if amount > 1000, assume it's already VND.
      */
-        function formatHourlyRate(float $amount, string $currency = 'USD'): string
+    function formatHourlyRate(float $amount, string $currency = 'USD'): string
     {
         // Protection against negative rates
         if ($amount < 0) {
             \App\Services\LogService::error('Negative hourly rate detected in formatHourlyRate', null, [
                 'amount' => $amount,
-                'currency' => $currency
+                'currency' => $currency,
             ]);
             $amount = abs($amount); // Use absolute value for display
         }
@@ -196,6 +201,7 @@ if (! function_exists('formatHourlyRate')) {
             } else {
                 // Convert VND to USD for English display
                 $usdAmount = $amount / 25000;
+
                 return '$' . number_format($usdAmount, 2) . '/hr';
             }
         } else {
@@ -203,6 +209,7 @@ if (! function_exists('formatHourlyRate')) {
             if ($locale === 'vi') {
                 // Convert USD to VND for Vietnamese display
                 $vndAmount = $amount * 25000;
+
                 return number_format($vndAmount, 0, ',', '.') . ' VND/giờ';
             } else {
                 // Display USD as-is for English
@@ -212,9 +219,9 @@ if (! function_exists('formatHourlyRate')) {
     }
 }
 
-if (! function_exists('formatDateForDisplay')) {
+if (!function_exists('formatDateForDisplay')) {
     /**
-     * Format date using user preferred format (d-m-Y)
+     * Format date using user preferred format (d-m-Y).
      */
     function formatDateForDisplay($date, string $format = 'd-m-Y'): string
     {
@@ -226,9 +233,9 @@ if (! function_exists('formatDateForDisplay')) {
     }
 }
 
-if (! function_exists('formatDateTimeForDisplay')) {
+if (!function_exists('formatDateTimeForDisplay')) {
     /**
-     * Format datetime using user preferred format
+     * Format datetime using user preferred format.
      */
     function formatDateTimeForDisplay($dateTime, string $format = 'd-m-Y H:i'): string
     {
@@ -240,9 +247,9 @@ if (! function_exists('formatDateTimeForDisplay')) {
     }
 }
 
-if (! function_exists('getBookingStatusBadge')) {
+if (!function_exists('getBookingStatusBadge')) {
     /**
-     * Get booking status badge configuration
+     * Get booking status badge configuration.
      */
     function getBookingStatusBadge(string $status): array
     {
@@ -282,9 +289,9 @@ if (! function_exists('getBookingStatusBadge')) {
     }
 }
 
-if (! function_exists('calculateBookingDuration')) {
+if (!function_exists('calculateBookingDuration')) {
     /**
-     * Calculate booking duration
+     * Calculate booking duration.
      */
     function calculateBookingDuration($startTime, $endTime): string
     {
@@ -304,9 +311,9 @@ if (! function_exists('calculateBookingDuration')) {
     }
 }
 
-if (! function_exists('getTutorRatingStars')) {
+if (!function_exists('getTutorRatingStars')) {
     /**
-     * Generate star rating array for tutor
+     * Generate star rating array for tutor.
      */
     function getTutorRatingStars(float $rating): array
     {
@@ -334,9 +341,9 @@ if (! function_exists('getTutorRatingStars')) {
     }
 }
 
-if (! function_exists('isUpcomingBooking')) {
+if (!function_exists('isUpcomingBooking')) {
     /**
-     * Check if booking is upcoming
+     * Check if booking is upcoming.
      */
     function isUpcomingBooking($startTime): bool
     {
@@ -344,13 +351,13 @@ if (! function_exists('isUpcomingBooking')) {
     }
 }
 
-if (! function_exists('getBookingUrgency')) {
+if (!function_exists('getBookingUrgency')) {
     /**
-     * Get booking urgency level
+     * Get booking urgency level.
      */
     function getBookingUrgency($startTime): string
     {
-        if (! \Carbon\Carbon::parse($startTime)->isFuture()) {
+        if (!\Carbon\Carbon::parse($startTime)->isFuture()) {
             return 'none';
         }
 
@@ -377,6 +384,7 @@ if (!function_exists('formatCurrency')) {
         } else {
             // Convert USD to VND
             $vndAmount = $amount * 25000;
+
             return number_format($vndAmount, 0, ',', '.') . ' VND';
         }
     }
@@ -393,6 +401,7 @@ if (!function_exists('formatHourlyRate')) {
         } else {
             // Convert USD to VND
             $vndRate = $rate * 25000;
+
             return number_format($vndRate, 0, ',', '.') . ' VND/giờ';
         }
     }
@@ -400,7 +409,7 @@ if (!function_exists('formatHourlyRate')) {
 
 if (!function_exists('translateReasonCode')) {
     /**
-     * Translate reason codes (cancellation_reason, rejection_reason) to human readable text
+     * Translate reason codes (cancellation_reason, rejection_reason) to human readable text.
      */
     function translateReasonCode($reasonCode, $type = 'common')
     {
@@ -420,7 +429,7 @@ if (!function_exists('translateReasonCode')) {
             'tutor_unavailable' => 'booking.reason_tutor_unavailable',
             'emergency' => 'booking.reason_emergency',
             'technical_issues' => 'booking.reason_technical_issues',
-            'other' => 'common.other'
+            'other' => 'common.other',
         ];
 
         if (isset($reasonMap[$reasonCode])) {

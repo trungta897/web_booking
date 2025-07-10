@@ -10,7 +10,6 @@ use App\Repositories\TutorRepository;
 use App\Repositories\UserRepository;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class TutorService extends BaseService implements TutorServiceInterface
@@ -19,44 +18,45 @@ class TutorService extends BaseService implements TutorServiceInterface
 
     protected UserRepository $userRepository;
 
-    public function __construct()
-    {
-        $this->tutorRepository = new TutorRepository(new Tutor);
-        $this->userRepository = new UserRepository(new User);
+    public function __construct(
+        TutorRepository $tutorRepository,
+        UserRepository $userRepository
+    ) {
+        $this->tutorRepository = $tutorRepository;
+        $this->userRepository = $userRepository;
     }
 
     /**
-     * Get tutors with filters and caching
+     * Get tutors with filters and caching.
      */
     public function getTutorsWithFilters(array $filters = []): \Illuminate\Pagination\LengthAwarePaginator
     {
         // Don't cache paginated results, but cache the underlying data
         $filtersForCache = $filters;
         unset($filtersForCache['page'], $filtersForCache['per_page']);
-        $cacheKey = 'tutors_data_'.md5(serialize($filtersForCache));
+        $cacheKey = 'tutors_data_' . md5(serialize($filtersForCache));
         $page = $filters['page'] ?? 1;
         $perPage = $filters['per_page'] ?? 12;
 
-        // Cache for 30 minutes (1800 seconds) - shorter cache for dynamic content
-        return Cache::remember($cacheKey.'_page_'.$page.'_'.$perPage, 1800, function () use ($filters) {
+        return CacheService::remember($cacheKey . '_page_' . $page . '_' . $perPage, CacheService::TTL_MEDIUM, function () use ($filters) {
             return $this->tutorRepository->getTutorsWithFilters($filters);
         });
     }
 
     /**
-     * Get tutor details with caching
+     * Get tutor details with caching.
      */
     public function getTutorDetails(int $tutorId): ?Tutor
     {
-        $cacheKey = 'tutor_details_'.$tutorId;
+        $cacheKey = CacheService::tutorDetailsKey($tutorId);
 
-        return Cache::remember($cacheKey, 3600, function () use ($tutorId) {
+        return CacheService::remember($cacheKey, CacheService::TTL_LONG, function () use ($tutorId) {
             return $this->tutorRepository->getTutorWithDetails($tutorId);
         });
     }
 
     /**
-     * Toggle favorite tutor for user
+     * Toggle favorite tutor for user.
      */
     public function toggleFavoriteTutor(int $userId, int $tutorId): array
     {
@@ -72,7 +72,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Check tutor availability
+     * Check tutor availability.
      */
     public function checkTutorAvailability(Tutor $tutor, string $day): array
     {
@@ -87,7 +87,7 @@ class TutorService extends BaseService implements TutorServiceInterface
 
         $slots = [];
         foreach ($availability as $slot) {
-            $slots[] = $slot->start_time.' - '.$slot->end_time;
+            $slots[] = $slot->start_time . ' - ' . $slot->end_time;
         }
 
         return [
@@ -97,7 +97,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Create tutor review
+     * Create tutor review.
      */
     public function createTutorReview(Tutor $tutor, array $data): Review
     {
@@ -128,7 +128,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Update tutor availability
+     * Update tutor availability.
      */
     public function updateTutorAvailability(Tutor $tutor, array $availabilityData): void
     {
@@ -138,7 +138,7 @@ class TutorService extends BaseService implements TutorServiceInterface
 
             // Create new availability records
             foreach ($availabilityData as $day => $slots) {
-                if (! empty($slots)) {
+                if (!empty($slots)) {
                     foreach ($slots as $slot) {
                         $tutor->availability()->create([
                             'day_of_week' => $day,
@@ -160,11 +160,11 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get top rated tutors
+     * Get top rated tutors.
      */
     public function getTopRatedTutors(int $limit = 10): \Illuminate\Database\Eloquent\Collection
     {
-        $cacheKey = 'top_rated_tutors_'.$limit;
+        $cacheKey = 'top_rated_tutors_' . $limit;
 
         return Cache::remember($cacheKey, 7200, function () use ($limit) {
             return $this->tutorRepository->getTopRatedTutors($limit);
@@ -172,15 +172,15 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Search tutors
+     * Search tutors.
      */
     public function searchTutors(array $criteria): \Illuminate\Pagination\LengthAwarePaginator
     {
-        if (! empty($criteria['name'])) {
+        if (!empty($criteria['name'])) {
             return $this->tutorRepository->searchTutorsByName($criteria['name'], $criteria['per_page'] ?? 12);
         }
 
-        if (! empty($criteria['subject_id'])) {
+        if (!empty($criteria['subject_id'])) {
             return $this->tutorRepository->getTutorsBySubject($criteria['subject_id'], $criteria['per_page'] ?? 12);
         }
 
@@ -188,20 +188,20 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get tutor statistics
+     * Get tutor statistics.
      */
     public function getTutorStatistics(int $tutorId): array
     {
-        $cacheKey = 'tutor_stats_'.$tutorId;
+        $cacheKey = 'tutor_stats_' . $tutorId;
 
         return Cache::remember($cacheKey, 1800, function () use ($tutorId) {
             $stats = $this->tutorRepository->getTutorStatistics($tutorId);
 
             // Format statistics for display
-            if (! empty($stats)) {
+            if (!empty($stats)) {
                 $stats['formatted_total_earnings'] = $this->formatCurrency($stats['total_earnings'] ?? 0);
                 $stats['formatted_average_rating'] = number_format($stats['average_rating'] ?? 0, 1);
-                $stats['formatted_response_rate'] = number_format($stats['response_rate'] ?? 0, 1).'%';
+                $stats['formatted_response_rate'] = number_format($stats['response_rate'] ?? 0, 1) . '%';
             }
 
             return $stats;
@@ -209,7 +209,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get available tutors for time slot
+     * Get available tutors for time slot.
      */
     public function getAvailableTutors(string $dayOfWeek, string $startTime, string $endTime): \Illuminate\Database\Eloquent\Collection
     {
@@ -217,7 +217,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Validate review constraints
+     * Validate review constraints.
      */
     protected function validateReviewConstraints(Tutor $tutor, array $data): void
     {
@@ -228,7 +228,7 @@ class TutorService extends BaseService implements TutorServiceInterface
             ->where('status', 'completed')
             ->first();
 
-        if (! $booking) {
+        if (!$booking) {
             throw new Exception('Invalid booking for review');
         }
 
@@ -239,32 +239,15 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Clear tutor related cache
+     * Clear tutor related cache.
      */
     protected function clearTutorCache(int $tutorId): void
     {
-        Cache::forget('tutor_details_'.$tutorId);
-        Cache::forget('tutor_stats_'.$tutorId);
-
-        // Clear related cache keys more efficiently
-        $cacheKeysToForget = [
-            'featured_tutors',
-            'top_rated_tutors_6',
-            'top_rated_tutors_10',
-            'top_rated_tutors_12',
-        ];
-
-        foreach ($cacheKeysToForget as $key) {
-            Cache::forget($key);
-        }
-
-        // Note: For tutors_* cache patterns, we would need cache tagging
-        // or a more sophisticated cache store to efficiently clear patterns
-        // For now, we clear specific known keys to avoid performance issues
+        CacheService::clearTutorCaches($tutorId);
     }
 
     /**
-     * Handle errors specific to tutor service
+     * Handle errors specific to tutor service.
      */
     public function handleError(Exception $e, string $context = ''): void
     {
@@ -277,7 +260,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get tutor profile data
+     * Get tutor profile data.
      */
     public function getTutorProfileData(Tutor $tutor): array
     {
@@ -291,7 +274,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get edit profile data
+     * Get edit profile data.
      */
     public function getEditProfileData(Tutor $tutor): array
     {
@@ -305,7 +288,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Create tutor profile
+     * Create tutor profile.
      */
     public function createTutorProfile(User $user, array $data): Tutor
     {
@@ -326,12 +309,12 @@ class TutorService extends BaseService implements TutorServiceInterface
             ]);
 
             // Sync subjects
-            if (! empty($data['subjects'])) {
+            if (!empty($data['subjects'])) {
                 $tutor->subjects()->sync($data['subjects']);
             }
 
             // Add education if provided
-            if (! empty($data['education'])) {
+            if (!empty($data['education'])) {
                 foreach ($data['education'] as $eduData) {
                     $tutor->education()->create($eduData);
                 }
@@ -347,7 +330,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Update tutor profile
+     * Update tutor profile.
      */
     public function updateTutorProfile(Tutor $tutor, array $data): Tutor
     {
@@ -367,7 +350,7 @@ class TutorService extends BaseService implements TutorServiceInterface
             $tutor->update($tutorData);
 
             // Sync subjects
-            if (! empty($data['subjects'])) {
+            if (!empty($data['subjects'])) {
                 $tutor->subjects()->sync($data['subjects']);
             }
 
@@ -391,7 +374,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Delete tutor profile
+     * Delete tutor profile.
      */
     public function deleteTutorProfile(Tutor $tutor): bool
     {
@@ -422,7 +405,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get featured tutors
+     * Get featured tutors.
      */
     public function getFeaturedTutors(int $limit = 6): \Illuminate\Database\Eloquent\Collection
     {
@@ -438,7 +421,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get user favorite tutors
+     * Get user favorite tutors.
      */
     public function getUserFavoriteTutors(User $user): \Illuminate\Pagination\LengthAwarePaginator
     {
@@ -446,7 +429,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Toggle favorite
+     * Toggle favorite.
      */
     public function toggleFavorite(User $user, int $tutorId): array
     {
@@ -465,17 +448,17 @@ class TutorService extends BaseService implements TutorServiceInterface
         $this->logActivity('Favorite toggled', [
             'user_id' => $user->id,
             'tutor_id' => $tutorId,
-            'is_favorite' => ! $isFavorite,
+            'is_favorite' => !$isFavorite,
         ]);
 
         return [
-            'is_favorite' => ! $isFavorite,
+            'is_favorite' => !$isFavorite,
             'message' => $message,
         ];
     }
 
     /**
-     * Remove favorite
+     * Remove favorite.
      */
     public function removeFavorite(User $user, int $tutorId): bool
     {
@@ -492,7 +475,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get tutors for subject with filters
+     * Get tutors for subject with filters.
      */
     public function getTutorsForSubject(\App\Models\Subject $subject, array $filters = []): array
     {
@@ -502,17 +485,17 @@ class TutorService extends BaseService implements TutorServiceInterface
             ->withAvg('reviews', 'rating');
 
         // Apply filters
-        if (! empty($filters['search'])) {
+        if (!empty($filters['search'])) {
             $query->whereHas('user', function ($q) use ($filters) {
-                $q->where('name', 'like', '%'.$filters['search'].'%');
+                $q->where('name', 'like', '%' . $filters['search'] . '%');
             });
         }
 
-        if (! empty($filters['min_rating'])) {
+        if (!empty($filters['min_rating'])) {
             $query->having('reviews_avg_rating', '>=', $filters['min_rating']);
         }
 
-        if (! empty($filters['max_price'])) {
+        if (!empty($filters['max_price'])) {
             $query->where('hourly_rate', '<=', $filters['max_price']);
         }
 
@@ -523,12 +506,15 @@ class TutorService extends BaseService implements TutorServiceInterface
         switch ($sort) {
             case 'rating':
                 $query->orderBy('reviews_avg_rating', $order);
+
                 break;
             case 'price':
                 $query->orderBy('hourly_rate', $order);
+
                 break;
             case 'experience':
                 $query->orderBy('experience_years', $order);
+
                 break;
             default:
                 $query->orderBy('created_at', $order);
@@ -544,7 +530,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get dashboard data for tutor
+     * Get dashboard data for tutor.
      */
     public function getDashboardData(Tutor $tutor): array
     {
@@ -613,7 +599,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get calendar data for tutor (current and next month)
+     * Get calendar data for tutor (current and next month).
      */
     public function getCalendarData(Tutor $tutor, \Carbon\Carbon $date = null): array
     {
@@ -665,7 +651,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Generate calendar weeks for a given month
+     * Generate calendar weeks for a given month.
      */
     private function generateCalendarWeeks(\Carbon\Carbon $date): array
     {
@@ -708,7 +694,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get bookings for specific date
+     * Get bookings for specific date.
      */
     public function getBookingsForDate(Tutor $tutor, string $date): array
     {
@@ -741,7 +727,7 @@ class TutorService extends BaseService implements TutorServiceInterface
     }
 
     /**
-     * Get availability data for tutor
+     * Get availability data for tutor.
      */
     public function getAvailabilityData(Tutor $tutor): array
     {

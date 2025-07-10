@@ -14,11 +14,11 @@ class UserService extends BaseService
 
     public function __construct()
     {
-        $this->userRepository = new UserRepository(new User);
+        $this->userRepository = new UserRepository(new User());
     }
 
     /**
-     * Update user profile
+     * Update user profile.
      */
     public function updateProfile(User $user, array $data): User
     {
@@ -40,7 +40,7 @@ class UserService extends BaseService
     }
 
     /**
-     * Update user password
+     * Update user password.
      */
     public function updatePassword(User $user, array $data): bool
     {
@@ -58,17 +58,17 @@ class UserService extends BaseService
     }
 
     /**
-     * Upload avatar
+     * Upload avatar.
      */
     public function uploadAvatar(User $user, UploadedFile $avatar): string
     {
         // Delete old avatar if exists
         if ($user->avatar) {
-            Storage::delete('public/avatars/'.$user->avatar);
+            Storage::delete('public/avatars/' . $user->avatar);
         }
 
         // Store new avatar
-        $avatarName = time().'.'.$avatar->getClientOriginalExtension();
+        $avatarName = time() . '.' . $avatar->getClientOriginalExtension();
         $avatar->storeAs('public/avatars', $avatarName);
 
         // Update user
@@ -83,12 +83,12 @@ class UserService extends BaseService
     }
 
     /**
-     * Remove avatar
+     * Remove avatar.
      */
     public function removeAvatar(User $user): bool
     {
         if ($user->avatar) {
-            Storage::delete('public/avatars/'.$user->avatar);
+            Storage::delete('public/avatars/' . $user->avatar);
             $user->update(['avatar' => null]);
 
             $this->logActivity('Avatar removed', [
@@ -102,7 +102,7 @@ class UserService extends BaseService
     }
 
     /**
-     * Delete user account
+     * Delete user account.
      */
     public function deleteAccount(User $user): bool
     {
@@ -111,7 +111,7 @@ class UserService extends BaseService
 
             // Remove avatar
             if ($user->avatar) {
-                Storage::delete('public/avatars/'.$user->avatar);
+                Storage::delete('public/avatars/' . $user->avatar);
             }
 
             // Delete related data
@@ -137,17 +137,17 @@ class UserService extends BaseService
     }
 
     /**
-     * Handle avatar upload
+     * Handle avatar upload.
      */
     protected function handleAvatarUpload(User $user, UploadedFile $avatar): string
     {
         // Delete old avatar if exists
         if ($user->avatar) {
-            Storage::delete('public/avatars/'.$user->avatar);
+            Storage::delete('public/avatars/' . $user->avatar);
         }
 
         // Store new avatar
-        $avatarName = time().'.'.$avatar->getClientOriginalExtension();
+        $avatarName = time() . '.' . $avatar->getClientOriginalExtension();
         $avatar->storeAs('public/avatars', $avatarName);
 
         return $avatarName;

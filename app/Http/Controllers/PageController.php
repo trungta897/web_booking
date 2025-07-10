@@ -21,7 +21,7 @@ class PageController extends Controller
     }
 
     /**
-     * Display the landing page
+     * Display the landing page.
      */
     public function index(): View
     {
@@ -29,7 +29,6 @@ class PageController extends Controller
             $pageData = $this->getLandingPageData();
 
             return view('welcome', $pageData);
-
         } catch (Exception $e) {
             // Fallback with empty data if service fails
             return view('welcome', [
@@ -40,7 +39,7 @@ class PageController extends Controller
     }
 
     /**
-     * Display how it works page
+     * Display how it works page.
      */
     public function howItWorks(): View
     {
@@ -48,7 +47,7 @@ class PageController extends Controller
     }
 
     /**
-     * Display pricing page
+     * Display pricing page.
      */
     public function pricing(): View
     {
@@ -56,7 +55,7 @@ class PageController extends Controller
     }
 
     /**
-     * Get landing page data with caching
+     * Get landing page data with caching.
      */
     protected function getLandingPageData(): array
     {

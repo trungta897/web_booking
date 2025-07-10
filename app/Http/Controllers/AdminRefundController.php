@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Transaction;
 use App\Models\Booking;
+use App\Models\Transaction;
 use App\Notifications\PaymentRefunded;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class AdminRefundController extends Controller
 {
@@ -43,7 +43,7 @@ class AdminRefundController extends Controller
     }
 
     /**
-     * Get comprehensive refund statistics
+     * Get comprehensive refund statistics.
      */
     private function getRefundStatistics(Request $request): array
     {
@@ -102,7 +102,7 @@ class AdminRefundController extends Controller
     }
 
     /**
-     * Get average refund processing time
+     * Get average refund processing time.
      */
     private function getAverageProcessingTime(): ?float
     {
@@ -116,7 +116,7 @@ class AdminRefundController extends Controller
     }
 
     /**
-     * Get daily refund trends - shows all historical data by month
+     * Get daily refund trends - shows all historical data by month.
      */
     private function getDailyRefundTrends(): array
     {
@@ -154,7 +154,7 @@ class AdminRefundController extends Controller
             $trends[] = [
                 'date' => $currentDate->format('m/Y'),
                 'count' => $monthlyCount,
-                'amount' => $monthlyAmount
+                'amount' => $monthlyAmount,
             ];
 
             $currentDate->addMonth();
@@ -166,7 +166,7 @@ class AdminRefundController extends Controller
             array_unshift($trends, [
                 'date' => $currentDate->format('m/Y'),
                 'count' => 0,
-                'amount' => 0
+                'amount' => 0,
             ]);
             $startDate = $currentDate;
         }
@@ -175,7 +175,7 @@ class AdminRefundController extends Controller
     }
 
     /**
-     * Get top refund reasons from metadata
+     * Get top refund reasons from metadata.
      */
     private function getTopRefundReasons(): array
     {
@@ -192,6 +192,7 @@ class AdminRefundController extends Controller
         }
 
         arsort($reasons);
+
         return array_slice($reasons, 0, 5, true);
     }
 
@@ -217,8 +218,8 @@ class AdminRefundController extends Controller
                 'status' => 'processing',
                 'metadata' => array_merge($refundTransaction->metadata ?? [], [
                     'processing_started_at' => Carbon::now(),
-                    'admin_notes' => 'Started manual processing via admin panel'
-                ])
+                    'admin_notes' => 'Started manual processing via admin panel',
+                ]),
             ]);
 
             // Log detailed instructions
@@ -233,24 +234,23 @@ class AdminRefundController extends Controller
                     'Go to Transaction Management > Refund',
                     'Find transaction: ' . ($originalTransaction->gateway_transaction_id ?? $booking->vnpay_txn_ref),
                     'Process refund amount: ' . number_format((float) $refundTransaction->amount, 0, ',', '.') . ' VND',
-                    'After completing, run: php artisan vnpay:refund complete --booking=' . $bookingId . ' --txn=REFUND_TXN_ID'
-                ]
+                    'After completing, run: php artisan vnpay:refund complete --booking=' . $bookingId . ' --txn=REFUND_TXN_ID',
+                ],
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Đã bắt đầu xử lý hoàn tiền. Kiểm tra log để xem hướng dẫn chi tiết.'
+                'message' => 'Đã bắt đầu xử lý hoàn tiền. Kiểm tra log để xem hướng dẫn chi tiết.',
             ]);
-
         } catch (\Exception $e) {
             Log::error('Failed to start refund processing', [
                 'booking_id' => $bookingId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Lỗi: ' . $e->getMessage()
+                'message' => 'Lỗi: ' . $e->getMessage(),
             ], 500);
         }
     }
@@ -259,7 +259,7 @@ class AdminRefundController extends Controller
     {
         $request->validate([
             'vnpay_refund_txn' => 'required|string',
-            'admin_notes' => 'nullable|string'
+            'admin_notes' => 'nullable|string',
         ]);
 
         try {
@@ -280,8 +280,8 @@ class AdminRefundController extends Controller
                     'vnpay_refund_txn_id' => $request->vnpay_refund_txn,
                     'completed_at' => Carbon::now(),
                     'admin_completed' => true,
-                    'admin_notes' => $request->admin_notes
-                ])
+                    'admin_notes' => $request->admin_notes,
+                ]),
             ]);
 
             // Update booking
@@ -293,18 +293,17 @@ class AdminRefundController extends Controller
             Log::info('VNPay manual refund completed via admin panel', [
                 'booking_id' => $booking->id,
                 'refund_txn_id' => $request->vnpay_refund_txn,
-                'amount' => $refundTransaction->amount
+                'amount' => $refundTransaction->amount,
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Hoàn tiền đã được hoàn thành thành công!'
+                'message' => 'Hoàn tiền đã được hoàn thành thành công!',
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Lỗi: ' . $e->getMessage()
+                'message' => 'Lỗi: ' . $e->getMessage(),
             ], 500);
         }
     }

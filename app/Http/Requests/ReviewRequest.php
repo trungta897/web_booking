@@ -28,7 +28,7 @@ class ReviewRequest extends FormRequest
     }
 
     /**
-     * Get custom attribute names
+     * Get custom attribute names.
      */
     public function attributes(): array
     {
@@ -40,7 +40,7 @@ class ReviewRequest extends FormRequest
     }
 
     /**
-     * Get custom error messages
+     * Get custom error messages.
      */
     public function messages(): array
     {

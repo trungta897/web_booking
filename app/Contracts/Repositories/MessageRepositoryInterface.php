@@ -9,32 +9,32 @@ use Illuminate\Pagination\LengthAwarePaginator;
 interface MessageRepositoryInterface extends RepositoryInterface
 {
     /**
-     * Get conversations for user
+     * Get conversations for user.
      */
     public function getConversationsForUser(int $userId): Collection;
 
     /**
-     * Get messages between users
+     * Get messages between users.
      */
     public function getMessagesBetweenUsers(int $user1Id, int $user2Id): LengthAwarePaginator;
 
     /**
-     * Get unread messages for user
+     * Get unread messages for user.
      */
     public function getUnreadMessagesForUser(int $userId): Collection;
 
     /**
-     * Mark messages as read
+     * Mark messages as read.
      */
     public function markMessagesAsRead(int $userId, int $fromUserId): void;
 
     /**
-     * Search messages
+     * Search messages.
      */
     public function searchMessages(int $userId, string $query): Collection;
 
     /**
-     * Get message statistics
+     * Get message statistics.
      */
     public function getMessageStatistics(int $userId): array;
 }

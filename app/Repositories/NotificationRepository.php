@@ -16,7 +16,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Get notifications for user
+     * Get notifications for user.
      */
     public function getNotificationsForUser(int $userId, int $perPage = 15): LengthAwarePaginator
     {
@@ -28,7 +28,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Get unread notifications for user
+     * Get unread notifications for user.
      */
     public function getUnreadNotificationsForUser(int $userId): Collection
     {
@@ -41,7 +41,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Count unread notifications for user
+     * Count unread notifications for user.
      */
     public function countUnreadNotificationsForUser(int $userId): int
     {
@@ -53,7 +53,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Mark notification as read
+     * Mark notification as read.
      */
     public function markAsRead(string $notificationId): bool
     {
@@ -64,7 +64,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Mark all notifications as read for user
+     * Mark all notifications as read for user.
      */
     public function markAllAsReadForUser(int $userId): void
     {
@@ -76,7 +76,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Delete notification
+     * Delete notification.
      */
     public function deleteNotification(string $notificationId): bool
     {
@@ -86,7 +86,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Delete all notifications for user
+     * Delete all notifications for user.
      */
     public function deleteAllForUser(int $userId): bool
     {
@@ -97,7 +97,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Get notifications by type for user
+     * Get notifications by type for user.
      */
     public function getNotificationsByType(int $userId, string $type): Collection
     {
@@ -110,7 +110,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Get recent notifications for user
+     * Get recent notifications for user.
      */
     public function getRecentNotificationsForUser(int $userId, int $limit = 10): Collection
     {
@@ -123,7 +123,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Get notification statistics for user
+     * Get notification statistics for user.
      */
     public function getNotificationStatistics(int $userId): array
     {
@@ -144,7 +144,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Clean old notifications
+     * Clean old notifications.
      */
     public function cleanOldNotifications(int $days = 30): int
     {
@@ -154,7 +154,7 @@ class NotificationRepository extends BaseRepository implements NotificationRepos
     }
 
     /**
-     * Clean old notifications for specific user
+     * Clean old notifications for specific user.
      */
     public function cleanOldNotificationsForUser(int $userId, int $daysOld = 30): int
     {

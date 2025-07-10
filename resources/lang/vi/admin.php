@@ -240,7 +240,7 @@ return [
         'step6' => 'Lấy mã giao dịch',
         'step6_desc' => 'Copy mã giao dịch hoàn tiền từ VNPay',
         'step7' => 'Hoàn thành',
-        'step7_desc' => 'Click "Hoàn thành" và nhập mã giao dịch'
+        'step7_desc' => 'Click "Hoàn thành" và nhập mã giao dịch',
     ],
 
     // Status badges

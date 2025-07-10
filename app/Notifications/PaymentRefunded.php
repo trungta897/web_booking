@@ -12,6 +12,7 @@ class PaymentRefunded extends Notification
     use Queueable;
 
     public $booking;
+
     public $refundReason;
 
     /**
@@ -41,7 +42,7 @@ class PaymentRefunded extends Notification
         $locale = app()->getLocale();
 
         if ($locale === 'vi') {
-            return (new MailMessage)
+            return (new MailMessage())
                 ->subject('Hoàn tiền thanh toán - Buổi học đã bị hủy')
                 ->greeting('Xin chào ' . $notifiable->name . ',')
                 ->line('Thanh toán của bạn đã được hoàn lại cho buổi học bị hủy.')
@@ -55,7 +56,7 @@ class PaymentRefunded extends Notification
                 ->salutation('Trân trọng,\nĐội ngũ ' . config('app.name'));
         }
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject('Payment Refunded - Booking Cancelled')
             ->greeting('Hello ' . $notifiable->name . ',')
             ->line('Your payment has been refunded for the cancelled booking.')

@@ -11,7 +11,8 @@ use Illuminate\Support\Carbon;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -99,7 +100,7 @@ class User extends Authenticatable
     // notifications() and unreadNotifications are provided by Notifiable trait
 
     /**
-     * Get unread notifications count - backup method for views
+     * Get unread notifications count - backup method for views.
      */
     public function getUnreadNotificationsCountAttribute()
     {
@@ -197,11 +198,11 @@ class User extends Authenticatable
      */
     public function getProfilePhotoUrlAttribute()
     {
-        if ($this->avatar && file_exists(public_path('storage/'.$this->avatar))) {
-            return asset('storage/'.$this->avatar);
+        if ($this->avatar && file_exists(public_path('storage/' . $this->avatar))) {
+            return asset('storage/' . $this->avatar);
         }
 
         // Return default avatar using UI Avatars service
-        return 'https://ui-avatars.com/api/?name='.urlencode($this->name ?? 'User').'&color=7F9CF5&background=EBF4FF';
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name ?? 'User') . '&color=7F9CF5&background=EBF4FF';
     }
 }

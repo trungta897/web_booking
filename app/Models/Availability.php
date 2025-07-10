@@ -32,7 +32,7 @@ class Availability extends Model
     }
 
     /**
-     * Convert day of week number to string representation
+     * Convert day of week number to string representation.
      *
      * @return string
      */
@@ -52,7 +52,7 @@ class Availability extends Model
     }
 
     /**
-     * Format the start time for display
+     * Format the start time for display.
      *
      * @return string
      */
@@ -62,7 +62,7 @@ class Availability extends Model
     }
 
     /**
-     * Format the end time for display
+     * Format the end time for display.
      *
      * @return string
      */
@@ -72,7 +72,7 @@ class Availability extends Model
     }
 
     /**
-     * Check if a given time slot falls within this availability window
+     * Check if a given time slot falls within this availability window.
      *
      * @param  string|Carbon  $startTime
      * @param  string|Carbon  $endTime
@@ -80,7 +80,7 @@ class Availability extends Model
      */
     public function isTimeSlotAvailable($startTime, $endTime)
     {
-        if (! $this->is_available) {
+        if (!$this->is_available) {
             return false;
         }
 

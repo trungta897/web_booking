@@ -11,7 +11,7 @@ use Throwable;
 class LogService
 {
     /**
-     * Log payment events with specific context
+     * Log payment events with specific context.
      */
     public static function payment(string $message, array $context = [], string $level = 'info'): void
     {
@@ -25,7 +25,7 @@ class LogService
     }
 
     /**
-     * Log security events
+     * Log security events.
      */
     public static function security(string $message, array $context = [], string $level = 'warning'): void
     {
@@ -41,7 +41,7 @@ class LogService
     }
 
     /**
-     * Log booking events
+     * Log booking events.
      */
     public static function booking(string $message, array $context = [], string $level = 'info'): void
     {
@@ -55,7 +55,7 @@ class LogService
     }
 
     /**
-     * Log performance metrics
+     * Log performance metrics.
      */
     public static function performance(string $message, array $metrics = []): void
     {
@@ -73,7 +73,7 @@ class LogService
     }
 
     /**
-     * Log errors with full context
+     * Log errors with full context.
      */
     public static function error(string $message, Throwable $exception = null, array $context = []): void
     {
@@ -105,7 +105,7 @@ class LogService
     }
 
     /**
-     * Log API requests/responses
+     * Log API requests/responses.
      */
     public static function api(string $message, array $context = [], string $level = 'info'): void
     {
@@ -125,7 +125,7 @@ class LogService
     }
 
     /**
-     * Log user activities for audit trail
+     * Log user activities for audit trail.
      */
     public static function activity(string $action, array $context = []): void
     {
@@ -147,7 +147,7 @@ class LogService
     }
 
     /**
-     * Log database operations (slow queries, etc.)
+     * Log database operations (slow queries, etc.).
      */
     public static function database(string $message, array $context = [], string $level = 'info'): void
     {
@@ -162,7 +162,7 @@ class LogService
     }
 
     /**
-     * Critical errors that need immediate attention
+     * Critical errors that need immediate attention.
      */
     public static function critical(string $message, array $context = []): void
     {
@@ -190,7 +190,7 @@ class LogService
     }
 
     /**
-     * Log VNPay specific events
+     * Log VNPay specific events.
      */
     public static function vnpay(string $message, array $context = [], string $level = 'info'): void
     {
@@ -209,7 +209,7 @@ class LogService
     }
 
     /**
-     * Enrich context with common metadata
+     * Enrich context with common metadata.
      */
     private static function enrichContext(array $context, array $additionalContext): array
     {
@@ -222,7 +222,7 @@ class LogService
     }
 
     /**
-     * Log structured data for analytics
+     * Log structured data for analytics.
      */
     public static function analytics(string $event, array $properties = []): void
     {
@@ -239,7 +239,7 @@ class LogService
     }
 
     /**
-     * Log slow operations for performance monitoring
+     * Log slow operations for performance monitoring.
      */
     public static function slow(string $operation, float $duration, array $context = []): void
     {
@@ -253,7 +253,7 @@ class LogService
     }
 
     /**
-     * Create a log context from request
+     * Create a log context from request.
      */
     public static function requestContext(Request $request = null): array
     {

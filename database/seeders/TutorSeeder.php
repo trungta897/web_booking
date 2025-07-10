@@ -192,6 +192,6 @@ class TutorSeeder extends Seeder
             );
         }
 
-        $this->command->info('TutorSeeder: Processed tutor profiles for '.$tutorUsers->count().' users.');
+        $this->command->info('TutorSeeder: Processed tutor profiles for ' . $tutorUsers->count() . ' users.');
     }
 }

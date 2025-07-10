@@ -21,14 +21,14 @@ class TutorProfileController extends Controller
     }
 
     /**
-     * Display tutor profile
+     * Display tutor profile.
      */
     public function show(): View
     {
         $user = Auth::user();
         $tutor = $user->tutor;
 
-        if (! $tutor instanceof Tutor) {
+        if (!$tutor instanceof Tutor) {
             return view('tutors.profile.show', compact('tutor'));
         }
 
@@ -38,14 +38,14 @@ class TutorProfileController extends Controller
     }
 
     /**
-     * Show edit profile form
+     * Show edit profile form.
      */
     public function edit(): View|RedirectResponse
     {
         $user = Auth::user();
         $tutor = $user->tutor;
 
-        if (! $tutor instanceof Tutor) {
+        if (!$tutor instanceof Tutor) {
             return redirect()->route('profile.edit')
                 ->with('info', __('Please create your tutor profile first'));
         }
@@ -56,7 +56,7 @@ class TutorProfileController extends Controller
     }
 
     /**
-     * Show create profile form
+     * Show create profile form.
      */
     public function create(): View
     {
@@ -66,7 +66,7 @@ class TutorProfileController extends Controller
     }
 
     /**
-     * Store new tutor profile
+     * Store new tutor profile.
      */
     public function store(TutorProfileRequest $request): RedirectResponse
     {
@@ -75,7 +75,6 @@ class TutorProfileController extends Controller
 
             return redirect()->route('tutor.profile.show')
                 ->with('success', __('Tutor profile created successfully'));
-
         } catch (Exception $e) {
             return back()
                 ->withInput()
@@ -84,14 +83,14 @@ class TutorProfileController extends Controller
     }
 
     /**
-     * Update tutor profile
+     * Update tutor profile.
      */
     public function update(TutorProfileRequest $request): RedirectResponse
     {
         try {
             $tutor = Auth::user()->tutor()->first();
 
-            if (! $tutor) {
+            if (!$tutor) {
                 return redirect()->route('profile.edit')
                     ->with('error', __('Tutor profile not found'));
             }
@@ -100,7 +99,6 @@ class TutorProfileController extends Controller
 
             return redirect()->route('tutor.profile.show')
                 ->with('success', __('Profile updated successfully'));
-
         } catch (Exception $e) {
             return back()
                 ->withInput()
@@ -109,14 +107,14 @@ class TutorProfileController extends Controller
     }
 
     /**
-     * Delete tutor profile
+     * Delete tutor profile.
      */
     public function destroy(): RedirectResponse
     {
         try {
             $tutor = Auth::user()->tutor()->first();
 
-            if (! $tutor) {
+            if (!$tutor) {
                 return redirect()->route('tutor.dashboard')
                     ->with('error', __('No tutor profile found'));
             }
@@ -125,7 +123,6 @@ class TutorProfileController extends Controller
 
             return redirect()->route('tutor.dashboard')
                 ->with('success', __('Tutor profile deleted successfully'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

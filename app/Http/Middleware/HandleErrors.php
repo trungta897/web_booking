@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class HandleErrors
 {
@@ -21,13 +21,13 @@ class HandleErrors
                 'trace' => $e->getTraceAsString(),
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
-                'user_id' => Auth::check() ? Auth::id() : null
+                'user_id' => Auth::check() ? Auth::id() : null,
             ]);
 
             if ($request->expectsJson()) {
                 return response()->json([
                     'error' => 'An error occurred',
-                    'message' => config('app.debug') ? $e->getMessage() : 'Please try again later'
+                    'message' => config('app.debug') ? $e->getMessage() : 'Please try again later',
                 ], 500);
             }
 

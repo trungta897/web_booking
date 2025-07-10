@@ -43,12 +43,12 @@ class BookingCancelled extends Notification
             ? 'Student has cancelled the booking'
             : 'Tutor has cancelled the booking';
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject($subject)
             ->line('A booking has been cancelled.')
-            ->line('Subject: '.$this->booking->subject->name)
-            ->line('Date: '.$this->booking->start_time->format('d/m/Y H:i'))
-            ->line('Reason: '.translateReasonCode($this->booking->cancellation_reason))
+            ->line('Subject: ' . $this->booking->subject->name)
+            ->line('Date: ' . $this->booking->start_time->format('d/m/Y H:i'))
+            ->line('Reason: ' . translateReasonCode($this->booking->cancellation_reason))
             ->action('View Booking', route('bookings.show', $this->booking))
             ->line('Thank you for using our tutoring platform!');
     }

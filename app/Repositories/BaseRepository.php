@@ -21,7 +21,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Get a fresh query builder
+     * Get a fresh query builder.
      */
     protected function query(): Builder
     {
@@ -29,7 +29,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Reset the query builder
+     * Reset the query builder.
      */
     protected function resetQuery(): void
     {
@@ -37,7 +37,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Get all records
+     * Get all records.
      */
     public function all(): Collection
     {
@@ -45,7 +45,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Find a record by ID
+     * Find a record by ID.
      */
     public function findById(int $id): ?Model
     {
@@ -53,7 +53,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Find a record by ID or fail
+     * Find a record by ID or fail.
      */
     public function findByIdOrFail(int $id): Model
     {
@@ -61,7 +61,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Create a new record
+     * Create a new record.
      */
     public function create(array $data): Model
     {
@@ -69,7 +69,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Update a record
+     * Update a record.
      */
     public function update(int $id, array $data): bool
     {
@@ -79,7 +79,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Delete a record
+     * Delete a record.
      */
     public function delete(int $id): bool
     {
@@ -89,7 +89,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Get paginated records
+     * Get paginated records.
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator
     {
@@ -100,7 +100,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Get records with relationships
+     * Get records with relationships.
      */
     public function with(array $relations): self
     {
@@ -110,7 +110,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Get records where condition
+     * Get records where condition.
      */
     public function where(string $column, $operator = null, $value = null): self
     {
@@ -120,7 +120,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Order by column
+     * Order by column.
      */
     public function orderBy(string $column, string $direction = 'asc'): self
     {
@@ -130,7 +130,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Get the first record
+     * Get the first record.
      */
     public function first(): ?Model
     {
@@ -141,7 +141,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Get records count
+     * Get records count.
      */
     public function count(): int
     {
@@ -152,7 +152,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Find records by multiple IDs
+     * Find records by multiple IDs.
      */
     public function findMany(array $ids): Collection
     {
@@ -160,7 +160,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Find by field value
+     * Find by field value.
      */
     public function findBy(string $column, $value): Collection
     {
@@ -168,7 +168,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Find first by field value
+     * Find first by field value.
      */
     public function findFirstBy(string $field, $value): ?Model
     {
@@ -176,7 +176,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Check if record exists
+     * Check if record exists.
      */
     public function exists(string $column, $value): bool
     {
@@ -184,7 +184,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Get latest records
+     * Get latest records.
      */
     public function latest(string $column = 'created_at'): self
     {
@@ -194,7 +194,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Get oldest records
+     * Get oldest records.
      */
     public function oldest(string $column = 'created_at'): self
     {
@@ -206,7 +206,7 @@ abstract class BaseRepository implements RepositoryInterface
     // Helper methods for existing repositories
 
     /**
-     * Update a model instance
+     * Update a model instance.
      */
     public function updateModel(Model $model, array $data): bool
     {
@@ -214,7 +214,7 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Delete a model instance
+     * Delete a model instance.
      */
     public function deleteModel(Model $model): bool
     {

@@ -5,9 +5,9 @@ namespace App\Console\Commands;
 use App\Models\Booking;
 use App\Models\Transaction;
 use App\Notifications\PaymentRefunded;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class VnpayManualRefund extends Command
 {
@@ -36,15 +36,19 @@ class VnpayManualRefund extends Command
         switch ($action) {
             case 'list':
                 $this->listPendingRefunds();
+
                 break;
             case 'process':
                 $this->processRefund();
+
                 break;
             case 'complete':
                 $this->completeRefund();
+
                 break;
             default:
                 $this->error('Invalid action. Use: list, process, or complete');
+
                 return 1;
         }
 
@@ -52,7 +56,7 @@ class VnpayManualRefund extends Command
     }
 
     /**
-     * List all pending refund requests
+     * List all pending refund requests.
      */
     private function listPendingRefunds()
     {
@@ -67,6 +71,7 @@ class VnpayManualRefund extends Command
 
         if ($pendingRefunds->isEmpty()) {
             $this->info('Không có yêu cầu hoàn tiền nào đang chờ xử lý.');
+
             return;
         }
 
@@ -81,7 +86,7 @@ class VnpayManualRefund extends Command
                 number_format($refund->amount, 0, ',', '.'),
                 $refund->currency,
                 $refund->created_at->format('d/m/Y H:i'),
-                $refund->metadata['original_txn_ref'] ?? 'N/A'
+                $refund->metadata['original_txn_ref'] ?? 'N/A',
             ];
         }
 
@@ -91,7 +96,7 @@ class VnpayManualRefund extends Command
     }
 
     /**
-     * Start refund process - generate info for VNPay portal
+     * Start refund process - generate info for VNPay portal.
      */
     private function processRefund()
     {
@@ -99,12 +104,14 @@ class VnpayManualRefund extends Command
 
         if (!$bookingId) {
             $this->error('Vui lòng cung cấp booking ID: --booking=X');
+
             return;
         }
 
         $booking = Booking::find($bookingId);
         if (!$booking) {
             $this->error("Booking #{$bookingId} không tồn tại.");
+
             return;
         }
 
@@ -116,6 +123,7 @@ class VnpayManualRefund extends Command
 
         if (!$refundTransaction) {
             $this->error("Không tìm thấy yêu cầu hoàn tiền cho booking #{$bookingId}");
+
             return;
         }
 
@@ -130,7 +138,7 @@ class VnpayManualRefund extends Command
         $this->info("📋 Booking ID: #{$booking->id}");
         $this->info("👤 Học viên: {$booking->student->name}");
         $this->info("📧 Email: {$booking->student->email}");
-        $this->info("💰 Số tiền hoàn: " . number_format($refundTransaction->amount, 0, ',', '.') . " {$refundTransaction->currency}");
+        $this->info('💰 Số tiền hoàn: ' . number_format($refundTransaction->amount, 0, ',', '.') . " {$refundTransaction->currency}");
         $this->info("📅 Ngày yêu cầu: {$refundTransaction->created_at->format('d/m/Y H:i')}");
         $this->line('');
 
@@ -138,8 +146,8 @@ class VnpayManualRefund extends Command
             $this->info('--- THÔNG TIN GIAO DỊCH GỐC ---');
             $this->info("🏦 VNPay TxnRef: {$booking->vnpay_txn_ref}");
             $this->info("🔢 VNPay Transaction No: {$originalTransaction->gateway_transaction_id}");
-            $this->info("💳 Bank Code: " . ($originalTransaction->metadata['vnpay_bank_code'] ?? 'N/A'));
-            $this->info("🃏 Card Type: " . ($originalTransaction->metadata['vnpay_card_type'] ?? 'N/A'));
+            $this->info('💳 Bank Code: ' . ($originalTransaction->metadata['vnpay_bank_code'] ?? 'N/A'));
+            $this->info('🃏 Card Type: ' . ($originalTransaction->metadata['vnpay_card_type'] ?? 'N/A'));
             $this->info("📅 Thanh toán lúc: {$originalTransaction->processed_at->format('d/m/Y H:i:s')}");
         }
 
@@ -158,15 +166,15 @@ class VnpayManualRefund extends Command
             'status' => 'processing',
             'metadata' => array_merge($refundTransaction->metadata ?? [], [
                 'processing_started_at' => Carbon::now(),
-                'admin_notes' => 'Refund information generated for manual processing'
-            ])
+                'admin_notes' => 'Refund information generated for manual processing',
+            ]),
         ]);
 
         $this->info("\n✅ Đã cập nhật trạng thái thành 'processing'");
     }
 
     /**
-     * Complete refund after manual processing in VNPay portal
+     * Complete refund after manual processing in VNPay portal.
      */
     private function completeRefund()
     {
@@ -175,17 +183,20 @@ class VnpayManualRefund extends Command
 
         if (!$bookingId) {
             $this->error('Vui lòng cung cấp booking ID: --booking=X');
+
             return;
         }
 
         if (!$vnpayTxnId) {
             $this->error('Vui lòng cung cấp VNPay transaction ID: --txn=XXX');
+
             return;
         }
 
         $booking = Booking::find($bookingId);
         if (!$booking) {
             $this->error("Booking #{$bookingId} không tồn tại.");
+
             return;
         }
 
@@ -197,15 +208,17 @@ class VnpayManualRefund extends Command
 
         if (!$refundTransaction) {
             $this->error("Không tìm thấy yêu cầu hoàn tiền cho booking #{$bookingId}");
+
             return;
         }
 
         $this->info("Hoàn tất hoàn tiền cho booking #{$bookingId}");
-        $this->info("Số tiền: " . number_format($refundTransaction->amount, 0, ',', '.') . " {$refundTransaction->currency}");
+        $this->info('Số tiền: ' . number_format($refundTransaction->amount, 0, ',', '.') . " {$refundTransaction->currency}");
         $this->info("VNPay Transaction ID: {$vnpayTxnId}");
 
         if (!$this->confirm('Xác nhận hoàn tiền đã được xử lý thành công trên VNPay?')) {
             $this->info('Đã hủy.');
+
             return;
         }
 
@@ -217,13 +230,13 @@ class VnpayManualRefund extends Command
             'metadata' => array_merge($refundTransaction->metadata ?? [], [
                 'vnpay_refund_txn_id' => $vnpayTxnId,
                 'completed_at' => Carbon::now(),
-                'admin_completed' => true
-            ])
+                'admin_completed' => true,
+            ]),
         ]);
 
         // Update booking status
         $booking->update([
-            'payment_status' => 'refunded'
+            'payment_status' => 'refunded',
         ]);
 
         // Send notification to student
@@ -240,7 +253,7 @@ class VnpayManualRefund extends Command
             'refund_transaction_id' => $refundTransaction->id,
             'vnpay_txn_id' => $vnpayTxnId,
             'amount' => $refundTransaction->amount,
-            'admin_user' => 'CLI'
+            'admin_user' => 'CLI',
         ]);
 
         $this->info('✅ Hoàn tiền đã được hoàn tất thành công!');

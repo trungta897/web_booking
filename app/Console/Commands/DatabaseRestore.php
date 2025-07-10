@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Services\LogService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class DatabaseRestore extends Command
 {
@@ -36,6 +35,7 @@ class DatabaseRestore extends Command
 
             if (!$backupFile) {
                 $this->error('❌ No backup file specified or found');
+
                 return self::FAILURE;
             }
 
@@ -48,6 +48,7 @@ class DatabaseRestore extends Command
             // Confirm restore operation
             if (!$this->confirmRestore()) {
                 $this->info('🚫 Restore operation cancelled');
+
                 return self::SUCCESS;
             }
 
@@ -75,9 +76,8 @@ class DatabaseRestore extends Command
             ]);
 
             return self::SUCCESS;
-
         } catch (\Exception $e) {
-            $this->error("❌ Restore failed: " . $e->getMessage());
+            $this->error('❌ Restore failed: ' . $e->getMessage());
 
             LogService::error('Database restore failed', $e, [
                 'backup_file' => isset($backupFile) ? basename($backupFile) : 'unknown',
@@ -94,6 +94,7 @@ class DatabaseRestore extends Command
 
         if (!is_dir($backupDir)) {
             $this->warn('📁 No backup directory found');
+
             return self::SUCCESS;
         }
 
@@ -101,11 +102,12 @@ class DatabaseRestore extends Command
 
         if (empty($backups)) {
             $this->info('📁 No backup files found');
+
             return self::SUCCESS;
         }
 
         // Sort by modification time (newest first)
-        usort($backups, fn($a, $b) => filemtime($b) - filemtime($a));
+        usort($backups, fn ($a, $b) => filemtime($b) - filemtime($a));
 
         $tableData = [];
         foreach ($backups as $backup) {
@@ -165,7 +167,7 @@ class DatabaseRestore extends Command
         }
 
         // Get the most recent backup
-        usort($backups, fn($a, $b) => filemtime($b) - filemtime($a));
+        usort($backups, fn ($a, $b) => filemtime($b) - filemtime($a));
 
         return $backups[0];
     }
@@ -177,11 +179,12 @@ class DatabaseRestore extends Command
 
         if (empty($backups)) {
             $this->warn('📁 No backup files found');
+
             return null;
         }
 
         // Sort by modification time (newest first)
-        usort($backups, fn($a, $b) => filemtime($b) - filemtime($a));
+        usort($backups, fn ($a, $b) => filemtime($b) - filemtime($a));
 
         $choices = [];
         foreach ($backups as $index => $backup) {
@@ -261,6 +264,7 @@ class DatabaseRestore extends Command
             }
 
             $this->info('✅ Backup decompressed successfully');
+
             return $tempFile;
         }
 

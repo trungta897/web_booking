@@ -17,11 +17,11 @@ class NotificationService extends BaseService
 
     public function __construct()
     {
-        $this->notificationRepository = new NotificationRepository(new DatabaseNotification);
+        $this->notificationRepository = new NotificationRepository(new DatabaseNotification());
     }
 
     /**
-     * Get notifications for user with User object
+     * Get notifications for user with User object.
      */
     public function getUserNotifications(User $user, int $perPage = 15): LengthAwarePaginator
     {
@@ -29,7 +29,7 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Get unread notifications for user
+     * Get unread notifications for user.
      */
     public function getUnreadNotifications(?int $userId = null): Collection
     {
@@ -39,7 +39,7 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Count unread notifications for user with User object
+     * Count unread notifications for user with User object.
      */
     public function getUnreadCount(User $user): int
     {
@@ -47,11 +47,11 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Mark notification as read with DatabaseNotification object
+     * Mark notification as read with DatabaseNotification object.
      */
     public function markAsRead(DatabaseNotification $notification): bool
     {
-        if (! $notification->read_at) {
+        if (!$notification->read_at) {
             $notification->markAsRead();
 
             $this->logActivity('Notification marked as read', [
@@ -64,7 +64,7 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Mark all notifications as read with User object
+     * Mark all notifications as read with User object.
      */
     public function markAllAsRead(User $user): bool
     {
@@ -78,7 +78,7 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Delete notification with DatabaseNotification object
+     * Delete notification with DatabaseNotification object.
      */
     public function deleteNotification(DatabaseNotification $notification): bool
     {
@@ -95,7 +95,7 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Delete all notifications with User object
+     * Delete all notifications with User object.
      */
     public function deleteAllNotifications(User $user): bool
     {
@@ -111,7 +111,7 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Get notifications by type
+     * Get notifications by type.
      */
     public function getNotificationsByType(string $type, ?int $userId = null): Collection
     {
@@ -121,7 +121,7 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Get recent notifications for dashboard
+     * Get recent notifications for dashboard.
      */
     public function getRecentNotifications(?int $userId = null, int $limit = 10): Collection
     {
@@ -131,7 +131,7 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Get notification statistics
+     * Get notification statistics.
      */
     public function getNotificationStatistics(?int $userId = null): array
     {
@@ -148,13 +148,13 @@ class NotificationService extends BaseService
                 'total' => number_format($stats['total']),
                 'unread' => number_format($stats['unread']),
                 'read' => number_format($stats['read']),
-                'unread_percentage' => $stats['unread_percentage'].'%',
+                'unread_percentage' => $stats['unread_percentage'] . '%',
             ],
         ];
     }
 
     /**
-     * Get notification data for UI
+     * Get notification data for UI.
      */
     public function getNotificationForUI(string $notificationId, ?int $userId = null): array
     {
@@ -165,7 +165,7 @@ class NotificationService extends BaseService
             ->where('notifiable_type', User::class)
             ->first();
 
-        if (! $notification) {
+        if (!$notification) {
             throw new Exception(__('Notification not found or access denied'));
         }
 
@@ -177,7 +177,7 @@ class NotificationService extends BaseService
             'title' => $data['title'] ?? __('Notification'),
             'message' => $data['message'] ?? '',
             'action_url' => $data['action_url'] ?? null,
-            'is_read' => ! is_null($notification->read_at),
+            'is_read' => !is_null($notification->read_at),
             'created_at' => $notification->created_at,
             'time_ago' => $notification->created_at->diffForHumans(),
             'formatted_date' => $notification->created_at->format('d-m-Y H:i'),
@@ -185,7 +185,7 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Bulk operations on notifications
+     * Bulk operations on notifications.
      */
     public function bulkOperation(array $notificationIds, string $operation, ?int $userId = null): array
     {
@@ -204,6 +204,7 @@ class NotificationService extends BaseService
                             } else {
                                 $success = false;
                             }
+
                             break;
                         case 'delete':
                             $notification = DatabaseNotification::where('id', $notificationId)
@@ -213,6 +214,7 @@ class NotificationService extends BaseService
                             } else {
                                 $success = false;
                             }
+
                             break;
                         default:
                             throw new Exception(__('Invalid operation'));
@@ -239,7 +241,7 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Clean old notifications
+     * Clean old notifications.
      */
     public function cleanOldNotifications(?int $userId = null, int $daysOld = 30): int
     {
@@ -259,34 +261,7 @@ class NotificationService extends BaseService
     }
 
     /**
-     * Send custom notification to user
-     * TODO: Create CustomNotification class
-     */
-    public function sendCustomNotification(int $userId, string $title, string $message, ?string $actionUrl = null): bool
-    {
-        try {
-            // TODO: Implement custom notification when class is created
-            // $user = User::findOrFail($userId);
-            // $user->notify(new \App\Notifications\CustomNotification($title, $message, $actionUrl));
-
-            $this->logActivity('Custom notification sent', [
-                'user_id' => $userId,
-                'title' => $title,
-            ]);
-
-            return true;
-        } catch (Exception $e) {
-            $this->logError('Failed to send custom notification', $e, [
-                'user_id' => $userId,
-                'title' => $title,
-            ]);
-
-            return false;
-        }
-    }
-
-    /**
-     * Handle errors consistently
+     * Handle errors consistently.
      */
     public function handleError(Exception $e, string $context = ''): void
     {

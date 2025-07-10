@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 abstract class BaseService implements ServiceInterface
 {
     /**
-     * Execute a database transaction
+     * Execute a database transaction.
      */
     public function executeTransaction(callable $callback)
     {
@@ -24,21 +24,22 @@ abstract class BaseService implements ServiceInterface
             return $result;
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error(get_class($this).' error: '.$e->getMessage());
+            Log::error(get_class($this) . ' error: ' . $e->getMessage());
+
             throw $e;
         }
     }
 
     /**
-     * Log service activity
+     * Log service activity.
      */
     public function logActivity(string $action, array $data = []): void
     {
-        Log::info(get_class($this).': '.$action, $data);
+        Log::info(get_class($this) . ': ' . $action, $data);
     }
 
     /**
-     * Log service error
+     * Log service error.
      */
     protected function logError(string $message, ?Exception $e = null, array $context = []): void
     {
@@ -48,11 +49,11 @@ abstract class BaseService implements ServiceInterface
             'trace' => $e ? $e->getTraceAsString() : null,
         ]);
 
-        Log::error(get_class($this).' Error: '.$message, $errorContext);
+        Log::error(get_class($this) . ' Error: ' . $message, $errorContext);
     }
 
     /**
-     * Format currency for display - assumes amount is already in VND
+     * Format currency for display - assumes amount is already in VND.
      */
     public function formatCurrency(float $amount): string
     {
@@ -66,11 +67,12 @@ abstract class BaseService implements ServiceInterface
 
         // For English locale, convert VND to USD for display
         $usdAmount = $amount / 25000; // Convert VND to USD for display
+
         return '$' . number_format($usdAmount, 2);
     }
 
     /**
-     * Format date for display
+     * Format date for display.
      */
     public function formatDate(\DateTime $date): string
     {
@@ -78,16 +80,17 @@ abstract class BaseService implements ServiceInterface
     }
 
     /**
-     * Handle service errors
+     * Handle service errors.
      */
     public function handleError(Exception $e, string $context = ''): void
     {
         $this->logError($context ?: 'Service error occurred', $e);
+
         throw $e;
     }
 
     /**
-     * Format datetime for display
+     * Format datetime for display.
      */
     protected function formatDateTime(\DateTime $dateTime, string $format = 'd-m-Y H:i'): string
     {

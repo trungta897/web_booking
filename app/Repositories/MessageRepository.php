@@ -16,7 +16,7 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
     }
 
     /**
-     * Get conversations for user
+     * Get conversations for user.
      */
     public function getConversationsForUser(int $userId): Collection
     {
@@ -41,7 +41,7 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
     }
 
     /**
-     * Get messages between two users
+     * Get messages between two users.
      */
     public function getMessagesBetweenUsers(int $user1Id, int $user2Id, int $perPage = 20): LengthAwarePaginator
     {
@@ -60,7 +60,7 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
     }
 
     /**
-     * Get unread messages for user
+     * Get unread messages for user.
      */
     public function getUnreadMessagesForUser(int $userId): Collection
     {
@@ -73,7 +73,7 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
     }
 
     /**
-     * Count unread messages for user
+     * Count unread messages for user.
      */
     public function countUnreadMessagesForUser(int $userId): int
     {
@@ -84,7 +84,7 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
     }
 
     /**
-     * Mark messages as read
+     * Mark messages as read.
      */
     public function markMessagesAsRead(int $userId, int $fromUserId): void
     {
@@ -99,7 +99,7 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
     }
 
     /**
-     * Get latest message between users
+     * Get latest message between users.
      */
     public function getLatestMessageBetweenUsers(int $user1Id, int $user2Id): ?Message
     {
@@ -117,7 +117,7 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
     }
 
     /**
-     * Search messages by content
+     * Search messages by content.
      */
     public function searchMessages(int $userId, string $query): Collection
     {
@@ -126,14 +126,14 @@ class MessageRepository extends BaseRepository implements MessageRepositoryInter
                 $q->where('sender_id', $userId)
                     ->orWhere('receiver_id', $userId);
             })
-            ->where('content', 'like', '%'.$query.'%')
+            ->where('content', 'like', '%' . $query . '%')
             ->with(['sender', 'receiver'])
             ->orderBy('created_at', 'desc')
             ->get();
     }
 
     /**
-     * Get message statistics for user
+     * Get message statistics for user.
      */
     public function getMessageStatistics(int $userId): array
     {

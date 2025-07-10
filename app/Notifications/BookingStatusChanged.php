@@ -31,10 +31,10 @@ class BookingStatusChanged extends Notification implements ShouldQueue
         $tutorName = $this->booking->tutor->user->name;
         $studentName = $this->booking->student->name;
         $date = $this->booking->start_time->format('F d, Y');
-        $time = $this->booking->start_time->format('h:i A').' - '.$this->booking->end_time->format('h:i A');
+        $time = $this->booking->start_time->format('h:i A') . ' - ' . $this->booking->end_time->format('h:i A');
 
         if ($notifiable->id === $this->booking->student_id) {
-            return (new MailMessage)
+            return (new MailMessage())
                 ->subject("Booking {$status}: {$subject} with {$tutorName}")
                 ->greeting("Hello {$studentName}!")
                 ->line("Your booking for {$subject} with {$tutorName} has been {$this->booking->status}.")
@@ -49,7 +49,7 @@ class BookingStatusChanged extends Notification implements ShouldQueue
                         ->action('Find Another Tutor', route('tutors.index'));
                 });
         } else {
-            return (new MailMessage)
+            return (new MailMessage())
                 ->subject("New Booking Request: {$subject}")
                 ->greeting("Hello {$tutorName}!")
                 ->line("You have a new booking request from {$studentName} for {$subject}.")
@@ -66,7 +66,7 @@ class BookingStatusChanged extends Notification implements ShouldQueue
         $tutorName = $this->booking->tutor->user->name;
         $studentName = $this->booking->student->name;
         $date = $this->booking->start_time->format('F d, Y');
-        $time = $this->booking->start_time->format('h:i A').' - '.$this->booking->end_time->format('h:i A');
+        $time = $this->booking->start_time->format('h:i A') . ' - ' . $this->booking->end_time->format('h:i A');
 
         if ($notifiable->id === $this->booking->student_id) {
             $title = "Booking {$status}: {$subject}";

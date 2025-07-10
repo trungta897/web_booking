@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Tutor;
-use App\Models\Subject;
 use App\Models\Booking;
+use App\Models\Subject;
 use App\Models\Transaction;
-use App\Services\PaymentService;
+use App\Models\Tutor;
+use App\Models\User;
 use App\Notifications\PaymentRefunded;
+use App\Services\PaymentService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -19,10 +19,15 @@ class RefundSystemTest extends TestCase
     use RefreshDatabase;
 
     private User $student;
+
     private User $tutorUser;
+
     private Tutor $tutor;
+
     private Subject $subject;
+
     private Booking $booking;
+
     private PaymentService $paymentService;
 
     protected function setUp(): void

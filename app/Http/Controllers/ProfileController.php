@@ -20,7 +20,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Display the user's profile form
+     * Display the user's profile form.
      */
     public function edit(): View
     {
@@ -30,7 +30,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information
+     * Update the user's profile information.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -39,7 +39,6 @@ class ProfileController extends Controller
 
             return redirect()->route('profile.edit')
                 ->with('success', __('Profile updated successfully'));
-
         } catch (Exception $e) {
             return back()
                 ->withInput()
@@ -48,7 +47,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update user password
+     * Update user password.
      */
     public function updatePassword(Request $request): RedirectResponse
     {
@@ -61,14 +60,13 @@ class ProfileController extends Controller
             $this->userService->updatePassword(Auth::user(), $validated);
 
             return back()->with('success', __('Password updated successfully'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
     /**
-     * Delete the user's account
+     * Delete the user's account.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -80,14 +78,13 @@ class ProfileController extends Controller
             $this->userService->deleteAccount(Auth::user());
 
             return redirect('/')->with('success', __('Account deleted successfully'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
     /**
-     * Upload avatar
+     * Upload avatar.
      */
     public function uploadAvatar(Request $request): RedirectResponse
     {
@@ -99,14 +96,13 @@ class ProfileController extends Controller
             $this->userService->uploadAvatar(Auth::user(), $validated['avatar']);
 
             return back()->with('success', __('Avatar uploaded successfully'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
     /**
-     * Remove avatar
+     * Remove avatar.
      */
     public function removeAvatar(): RedirectResponse
     {
@@ -114,7 +110,6 @@ class ProfileController extends Controller
             $this->userService->removeAvatar(Auth::user());
 
             return back()->with('success', __('Avatar removed successfully'));
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

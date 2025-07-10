@@ -240,7 +240,7 @@ return [
         'step6' => 'Get transaction code',
         'step6_desc' => 'Copy refund transaction code from VNPay',
         'step7' => 'Complete',
-        'step7_desc' => 'Click "Complete" and enter transaction code'
+        'step7_desc' => 'Click "Complete" and enter transaction code',
     ],
 
     // Status badges

@@ -18,7 +18,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Get bookings for a user (student or tutor)
+     * Get bookings for a user (student or tutor).
      */
     public function getBookingsForUser(int $userId, string $role, array $filters = []): LengthAwarePaginator
     {
@@ -43,7 +43,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Check if student has pending booking with tutor
+     * Check if student has pending booking with tutor.
      */
     public function hasPendingBookingWithTutor(int $studentId, int $tutorId): bool
     {
@@ -54,7 +54,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Get bookings by status
+     * Get bookings by status.
      */
     public function getBookingsByStatus(string $status, int $perPage = 10): LengthAwarePaginator
     {
@@ -65,7 +65,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Get upcoming bookings for tutor
+     * Get upcoming bookings for tutor.
      */
     public function getUpcomingBookingsForTutor(int $tutorId): Collection
     {
@@ -78,7 +78,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Get completed bookings for student
+     * Get completed bookings for student.
      */
     public function getCompletedBookingsForStudent(int $studentId): Collection
     {
@@ -90,7 +90,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Get bookings within date range
+     * Get bookings within date range.
      */
     public function getBookingsInDateRange(Carbon $startDate, Carbon $endDate): Collection
     {
@@ -101,7 +101,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Get bookings for tutor in date range
+     * Get bookings for tutor in date range.
      */
     public function getTutorBookingsInDateRange(int $tutorId, Carbon $startDate, Carbon $endDate): Collection
     {
@@ -113,7 +113,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Calculate total earnings for tutor
+     * Calculate total earnings for tutor.
      */
     public function getTutorTotalEarnings(int $tutorId): float
     {
@@ -123,7 +123,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Get monthly earnings for tutor
+     * Get monthly earnings for tutor.
      */
     public function getTutorMonthlyEarnings(int $tutorId, int $year, int $month): float
     {
@@ -135,7 +135,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Get bookings that need review
+     * Get bookings that need review.
      */
     public function getBookingsNeedingReview(int $studentId): Collection
     {
@@ -148,7 +148,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Search bookings
+     * Search bookings.
      */
     public function searchBookings(array $filters): LengthAwarePaginator
     {
@@ -182,7 +182,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     }
 
     /**
-     * Get all bookings for a student
+     * Get all bookings for a student.
      */
     public function getStudentBookings(int $studentId): Collection
     {

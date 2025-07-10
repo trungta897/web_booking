@@ -44,23 +44,23 @@ class Booking extends Model
     ];
 
     // Add status constants
-    const STATUS_PENDING = 'pending';
+    public const STATUS_PENDING = 'pending';
 
-    const STATUS_ACCEPTED = 'accepted';
+    public const STATUS_ACCEPTED = 'accepted';
 
-    const STATUS_REJECTED = 'rejected';
+    public const STATUS_REJECTED = 'rejected';
 
-    const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_CANCELLED = 'cancelled';
 
-    const PAYMENT_STATUS_PENDING = 'pending';
+    public const PAYMENT_STATUS_PENDING = 'pending';
 
-    const PAYMENT_STATUS_PAID = 'paid';
+    public const PAYMENT_STATUS_PAID = 'paid';
 
-    const PAYMENT_STATUS_FAILED = 'failed';
+    public const PAYMENT_STATUS_FAILED = 'failed';
 
-    const PAYMENT_STATUS_REFUNDED = 'refunded';
+    public const PAYMENT_STATUS_REFUNDED = 'refunded';
 
-    const PAYMENT_STATUS_PARTIAL_REFUNDED = 'partial_refunded';
+    public const PAYMENT_STATUS_PARTIAL_REFUNDED = 'partial_refunded';
 
     // Add scopes for common queries
     public function scopePending($query)
@@ -115,7 +115,7 @@ class Booking extends Model
     }
 
     /**
-     * Check if booking is fully paid (comprehensive check)
+     * Check if booking is fully paid (comprehensive check).
      */
     public function isFullyPaid()
     {
@@ -138,7 +138,7 @@ class Booking extends Model
 
     public function canBeReviewed()
     {
-        return $this->isAccepted() && $this->end_time < now() && ! $this->review;
+        return $this->isAccepted() && $this->end_time < now() && !$this->review;
     }
 
     public function student()

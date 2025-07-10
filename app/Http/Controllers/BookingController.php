@@ -26,7 +26,7 @@ class BookingController extends Controller
     }
 
     /**
-     * Display user's bookings
+     * Display user's bookings.
      */
     public function index(): View
     {
@@ -37,7 +37,7 @@ class BookingController extends Controller
     }
 
     /**
-     * Show create booking form
+     * Show create booking form.
      */
     public function create(Tutor $tutor): View
     {
@@ -47,7 +47,7 @@ class BookingController extends Controller
     }
 
     /**
-     * Store new booking
+     * Store new booking.
      */
     public function store(BookingRequest $request, Tutor $tutor): RedirectResponse
     {
@@ -57,7 +57,6 @@ class BookingController extends Controller
             return redirect()->route('bookings.index')
                 ->with('success', __('booking.success.booking_requested'))
                 ->with('new_booking_id', $booking->id);
-
         } catch (Exception $e) {
             return back()
                 ->withInput()
@@ -66,7 +65,7 @@ class BookingController extends Controller
     }
 
     /**
-     * Display booking details
+     * Display booking details.
      */
     public function show(Booking $booking): View
     {
@@ -78,7 +77,7 @@ class BookingController extends Controller
     }
 
     /**
-     * Update booking status
+     * Update booking status.
      */
     public function update(Request $request, Booking $booking): RedirectResponse
     {
@@ -111,14 +110,13 @@ class BookingController extends Controller
                 : 'Booking has been rejected successfully';
 
             return back()->with('success', $message);
-
         } catch (Exception $e) {
             // Log lỗi để debug
             Log::error('Booking update error: ' . $e->getMessage(), [
                 'booking_id' => $booking->id,
                 'user_id' => Auth::id(),
                 'data' => $request->all(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return back()->withErrors(['error' => $e->getMessage()]);
@@ -126,7 +124,7 @@ class BookingController extends Controller
     }
 
     /**
-     * Cancel booking
+     * Cancel booking.
      */
     public function destroy(Booking $booking): RedirectResponse
     {
@@ -144,14 +142,13 @@ class BookingController extends Controller
                 return redirect()->route('tutor.dashboard')
                     ->with('success', __('booking.success.booking_cancelled'));
             }
-
         } catch (Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
     /**
-     * Display student profile for tutor
+     * Display student profile for tutor.
      */
     public function showStudentProfile(Booking $booking): View
     {
@@ -167,7 +164,7 @@ class BookingController extends Controller
     }
 
     /**
-     * Show payment page
+     * Show payment page.
      */
     public function payment(Booking $booking): View|RedirectResponse
     {
@@ -192,7 +189,7 @@ class BookingController extends Controller
     }
 
     /**
-     * Display transactions page
+     * Display transactions page.
      */
     public function transactions(): View
     {

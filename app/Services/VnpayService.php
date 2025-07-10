@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Booking;
 use App\Models\Transaction;
-use App\Services\LogService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -30,7 +29,7 @@ class VnpayService
     }
 
     /**
-     * Validate VNPay configuration
+     * Validate VNPay configuration.
      */
     private function validateConfiguration(): void
     {
@@ -59,19 +58,20 @@ class VnpayService
                 Log::warning('VNPay using localhost URL in development environment', [
                     'return_url' => $this->vnpReturnUrl,
                     'environment' => app()->environment(),
-                    'note' => 'Real VNPay callbacks will not work with localhost URLs'
+                    'note' => 'Real VNPay callbacks will not work with localhost URLs',
                 ]);
             }
         }
 
         if (!empty($errors)) {
             Log::error('VNPay configuration errors', ['errors' => $errors]);
+
             throw new \Exception('VNPay configuration error: ' . implode(', ', $errors));
         }
     }
 
     /**
-     * Tạo URL thanh toán VNPay
+     * Tạo URL thanh toán VNPay.
      */
     public function createPaymentUrl(Booking $booking, ?string $ipAddr = null): string
     {
@@ -96,7 +96,7 @@ class VnpayService
             ]);
         } else {
             // Tạo transaction reference mới
-            $txnRef = 'BOOKING_'.$booking->id.'_'.time();
+            $txnRef = 'BOOKING_' . $booking->id . '_' . time();
 
             // Tạo transaction record mới
             Transaction::create([
@@ -147,6 +147,7 @@ class VnpayService
                 'vnpay_amount' => $vnpayAmount,
                 'minimum_required' => 5000,
             ], 'error');
+
             throw new \Exception('Số tiền thanh toán quá nhỏ (tối thiểu 5,000 VND)');
         }
 
@@ -157,6 +158,7 @@ class VnpayService
                 'maximum_allowed' => 999999999,
                 'amount_in_billions' => round($vnpayAmount / 1000000000, 2),
             ], 'error');
+
             throw new \Exception('Số tiền thanh toán quá lớn (tối đa dưới 1 tỷ VND)');
         }
 
@@ -168,7 +170,7 @@ class VnpayService
             'vnp_Amount' => $vnpayAmount, // Amount in "xu" (VND * 100)
             'vnp_CurrCode' => 'VND',
             'vnp_TxnRef' => $txnRef,
-            'vnp_OrderInfo' => 'Thanh toan hoc phi - '.$booking->subject->name.' - '.$booking->tutor->user->name,
+            'vnp_OrderInfo' => 'Thanh toan hoc phi - ' . $booking->subject->name . ' - ' . $booking->tutor->user->name,
             'vnp_OrderType' => 'other',
             'vnp_Locale' => app()->getLocale() === 'vi' ? 'vn' : 'en',
             'vnp_ReturnUrl' => $this->vnpReturnUrl,
@@ -185,26 +187,26 @@ class VnpayService
 
         foreach ($vnpData as $key => $value) {
             if ($i == 1) {
-                $hashdata .= '&'.urlencode($key).'='.urlencode($value);
+                $hashdata .= '&' . urlencode($key) . '=' . urlencode($value);
             } else {
-                $hashdata .= urlencode($key).'='.urlencode($value);
+                $hashdata .= urlencode($key) . '=' . urlencode($value);
                 $i = 1;
             }
-            $query .= urlencode($key).'='.urlencode($value).'&';
+            $query .= urlencode($key) . '=' . urlencode($value) . '&';
         }
 
-        $vnpUrl = $this->vnpUrl.'?'.$query;
+        $vnpUrl = $this->vnpUrl . '?' . $query;
 
         if (isset($this->vnpHashSecret)) {
             $vnpSecureHash = hash_hmac('sha512', $hashdata, $this->vnpHashSecret);
-            $vnpUrl .= 'vnp_SecureHash='.$vnpSecureHash;
+            $vnpUrl .= 'vnp_SecureHash=' . $vnpSecureHash;
         }
 
         return $vnpUrl;
     }
 
     /**
-     * Xác thực IPN từ VNPay
+     * Xác thực IPN từ VNPay.
      */
     public function verifyIpn(array $vnpData): bool
     {
@@ -217,9 +219,9 @@ class VnpayService
 
         foreach ($vnpData as $key => $value) {
             if ($i == 1) {
-                $hashData .= '&'.urlencode($key).'='.urlencode($value);
+                $hashData .= '&' . urlencode($key) . '=' . urlencode($value);
             } else {
-                $hashData .= urlencode($key).'='.urlencode($value);
+                $hashData .= urlencode($key) . '=' . urlencode($value);
                 $i = 1;
             }
         }
@@ -230,7 +232,7 @@ class VnpayService
     }
 
     /**
-     * Validate IPN data from VNPay (alias for verifyIpn)
+     * Validate IPN data from VNPay (alias for verifyIpn).
      */
     public function validateIPN(array $ipnData): bool
     {
@@ -238,13 +240,13 @@ class VnpayService
     }
 
     /**
-     * Xử lý kết quả thanh toán từ VNPay
+     * Xử lý kết quả thanh toán từ VNPay.
      */
     public function handlePaymentResult(array $vnpData): array
     {
         try {
             // Verify security hash
-            if (! $this->verifyIpn($vnpData)) {
+            if (!$this->verifyIpn($vnpData)) {
                 LogService::vnpay('IPN verification failed', $vnpData, 'error');
 
                 return ['success' => false, 'message' => 'Invalid signature'];
@@ -257,8 +259,8 @@ class VnpayService
 
             // Tìm booking
             $booking = Booking::where('vnpay_txn_ref', $txnRef)->first();
-            if (! $booking) {
-                LogService::vnpay('Booking not found for txn_ref: '.$txnRef, ['txn_ref' => $txnRef], 'error');
+            if (!$booking) {
+                LogService::vnpay('Booking not found for txn_ref: ' . $txnRef, ['txn_ref' => $txnRef], 'error');
 
                 return ['success' => false, 'message' => 'Booking not found'];
             }
@@ -338,7 +340,7 @@ class VnpayService
                 ];
             }
         } catch (\Exception $e) {
-            LogService::vnpay('Payment processing error: '.$e->getMessage(), [
+            LogService::vnpay('Payment processing error: ' . $e->getMessage(), [
                 'vnp_data' => $vnpData,
                 'trace' => $e->getTraceAsString(),
             ], 'error');
@@ -351,7 +353,7 @@ class VnpayService
     }
 
     /**
-     * Chuyển đổi mã phản hồi VNPay thành thông báo
+     * Chuyển đổi mã phản hồi VNPay thành thông báo.
      */
     protected function getResponseMessage(string $responseCode): string
     {
@@ -375,7 +377,7 @@ class VnpayService
     }
 
     /**
-     * Tạo refund request (VNPay không hỗ trợ API refund tự động)
+     * Tạo refund request (VNPay không hỗ trợ API refund tự động).
      */
     public function createRefundRequest(Booking $booking, ?float $amount = null): Transaction
     {
@@ -385,7 +387,7 @@ class VnpayService
         $transaction = Transaction::create([
             'booking_id' => $booking->id,
             'user_id' => $booking->student_id,
-            'transaction_id' => 'REFUND_'.$booking->id.'_'.time(),
+            'transaction_id' => 'REFUND_' . $booking->id . '_' . time(),
             'payment_method' => Transaction::PAYMENT_METHOD_VNPAY,
             'type' => ($amount !== null && $amount < $booking->price) ? Transaction::TYPE_PARTIAL_REFUND : Transaction::TYPE_REFUND,
             'amount' => $refundAmount,
@@ -409,7 +411,7 @@ class VnpayService
     }
 
     /**
-     * Calculate VND amount from booking price
+     * Calculate VND amount from booking price.
      */
     private function calculateVndAmount(Booking $booking): float
     {
@@ -434,6 +436,7 @@ class VnpayService
                 'vnd_amount' => $vndAmount,
                 'exchange_rate' => 25000,
             ]);
+
             return $vndAmount;
         }
 
@@ -448,7 +451,7 @@ class VnpayService
     }
 
     /**
-     * Cleanup old pending transactions for a booking
+     * Cleanup old pending transactions for a booking.
      */
     private function cleanupOldPendingTransactions(Booking $booking): void
     {

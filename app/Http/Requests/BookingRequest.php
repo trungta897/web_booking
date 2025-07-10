@@ -50,7 +50,7 @@ class BookingRequest extends FormRequest
                 },
             ],
             'notes' => 'nullable|string|max:500',
-            'status' => 'sometimes|in:'.Booking::STATUS_ACCEPTED.','.Booking::STATUS_REJECTED.','.Booking::STATUS_CANCELLED,
+            'status' => 'sometimes|in:' . Booking::STATUS_ACCEPTED . ',' . Booking::STATUS_REJECTED . ',' . Booking::STATUS_CANCELLED,
             'meeting_link' => 'nullable|url|max:255',
             'rejection_reason' => 'nullable|string|max:100',
             'rejection_description' => 'nullable|string|max:500',
@@ -58,7 +58,7 @@ class BookingRequest extends FormRequest
     }
 
     /**
-     * Get custom attribute names
+     * Get custom attribute names.
      */
     public function attributes(): array
     {
@@ -75,7 +75,7 @@ class BookingRequest extends FormRequest
     }
 
     /**
-     * Get custom error messages
+     * Get custom error messages.
      */
     public function messages(): array
     {

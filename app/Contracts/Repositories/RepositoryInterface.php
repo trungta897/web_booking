@@ -9,82 +9,82 @@ use Illuminate\Pagination\LengthAwarePaginator;
 interface RepositoryInterface
 {
     /**
-     * Get all records
+     * Get all records.
      */
     public function all(): Collection;
 
     /**
-     * Find record by ID
+     * Find record by ID.
      */
     public function findById(int $id): ?Model;
 
     /**
-     * Create new record
+     * Create new record.
      */
     public function create(array $data): Model;
 
     /**
-     * Update record
+     * Update record.
      */
     public function update(int $id, array $data): bool;
 
     /**
-     * Delete record
+     * Delete record.
      */
     public function delete(int $id): bool;
 
     /**
-     * Get paginated results
+     * Get paginated results.
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator;
 
     /**
-     * Find records with relationships
+     * Find records with relationships.
      */
     public function with(array $relations): self;
 
     /**
-     * Add where condition
+     * Add where condition.
      */
     public function where(string $column, $operator = null, $value = null): self;
 
     /**
-     * Add order by condition
+     * Add order by condition.
      */
     public function orderBy(string $column, string $direction = 'asc'): self;
 
     /**
-     * Get first record
+     * Get first record.
      */
     public function first(): ?Model;
 
     /**
-     * Count records
+     * Count records.
      */
     public function count(): int;
 
     /**
-     * Find multiple records by IDs
+     * Find multiple records by IDs.
      */
     public function findMany(array $ids): Collection;
 
     /**
-     * Find by specific criteria
+     * Find by specific criteria.
      */
     public function findBy(string $column, $value): Collection;
 
     /**
-     * Check if record exists
+     * Check if record exists.
      */
     public function exists(string $column, $value): bool;
 
     /**
-     * Get latest records
+     * Get latest records.
      */
     public function latest(string $column = 'created_at'): self;
 
     /**
-     * Get oldest records
+     * Get oldest records.
      */
     public function oldest(string $column = 'created_at'): self;
 }

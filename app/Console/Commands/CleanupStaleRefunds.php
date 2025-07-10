@@ -2,13 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Transaction;
 use App\Models\Booking;
-use App\Notifications\PaymentRefunded;
+use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Carbon\Carbon;
 
 class CleanupStaleRefunds extends Command
 {
@@ -47,6 +45,7 @@ class CleanupStaleRefunds extends Command
 
         if ($staleRefunds->isEmpty() && $processingRefunds->isEmpty()) {
             $this->info('✅ No stale refunds found. Everything looks good!');
+
             return 0;
         }
 
@@ -59,6 +58,7 @@ class CleanupStaleRefunds extends Command
         if ($staleRefunds->isNotEmpty()) {
             if (!$force && !$this->confirm('Do you want to proceed with cleanup?')) {
                 $this->info('Cleanup cancelled.');
+
                 return 0;
             }
 
@@ -72,7 +72,7 @@ class CleanupStaleRefunds extends Command
     }
 
     /**
-     * Get refunds that have been pending for too long
+     * Get refunds that have been pending for too long.
      */
     private function getStaleRefunds()
     {
@@ -84,7 +84,7 @@ class CleanupStaleRefunds extends Command
     }
 
     /**
-     * Get refunds that are processing and might need reminders
+     * Get refunds that are processing and might need reminders.
      */
     private function getProcessingRefunds()
     {
@@ -96,7 +96,7 @@ class CleanupStaleRefunds extends Command
     }
 
     /**
-     * Display summary of what will be processed
+     * Display summary of what will be processed.
      */
     private function displaySummary($staleRefunds, $processingRefunds)
     {
@@ -107,21 +107,21 @@ class CleanupStaleRefunds extends Command
                     'Stale Pending',
                     $staleRefunds->count(),
                     'VND ' . number_format(abs($staleRefunds->sum('amount')), 0, ',', '.'),
-                    'Pending > 7 days (will be cancelled)'
+                    'Pending > 7 days (will be cancelled)',
                 ],
                 [
                     'Processing Long',
                     $processingRefunds->count(),
                     'VND ' . number_format(abs($processingRefunds->sum('amount')), 0, ',', '.'),
-                    'Processing > 24h (reminder eligible)'
-                ]
+                    'Processing > 24h (reminder eligible)',
+                ],
             ]
         );
         $this->newLine();
     }
 
     /**
-     * Send reminder notifications for processing refunds
+     * Send reminder notifications for processing refunds.
      */
     private function sendReminders($processingRefunds, $dryRun)
     {
@@ -130,6 +130,7 @@ class CleanupStaleRefunds extends Command
         foreach ($processingRefunds as $refund) {
             if ($dryRun) {
                 $this->line("  [DRY RUN] Would send reminder for refund #{$refund->id} (Booking #{$refund->booking_id})");
+
                 continue;
             }
 
@@ -141,7 +142,7 @@ class CleanupStaleRefunds extends Command
                     'amount' => $refund->amount,
                     'processing_since' => $refund->updated_at,
                     'student' => $refund->booking->student->name,
-                    'action_required' => 'Complete refund processing in VNPay portal'
+                    'action_required' => 'Complete refund processing in VNPay portal',
                 ]);
 
                 // Update metadata to track reminder sent
@@ -152,7 +153,6 @@ class CleanupStaleRefunds extends Command
                 $refund->update(['metadata' => $metadata]);
 
                 $this->line("  ✅ Reminder sent for refund #{$refund->id}");
-
             } catch (\Exception $e) {
                 $this->error("  ❌ Failed to send reminder for refund #{$refund->id}: {$e->getMessage()}");
             }
@@ -160,7 +160,7 @@ class CleanupStaleRefunds extends Command
     }
 
     /**
-     * Cleanup stale refunds by cancelling them
+     * Cleanup stale refunds by cancelling them.
      */
     private function cleanupStaleRefunds($staleRefunds, $dryRun)
     {
@@ -169,6 +169,7 @@ class CleanupStaleRefunds extends Command
         foreach ($staleRefunds as $refund) {
             if ($dryRun) {
                 $this->line("  [DRY RUN] Would cancel refund #{$refund->id} (Booking #{$refund->booking_id})");
+
                 continue;
             }
 
@@ -179,8 +180,8 @@ class CleanupStaleRefunds extends Command
                     'metadata' => array_merge($refund->metadata ?? [], [
                         'cancelled_reason' => 'Stale refund - auto cleanup',
                         'cancelled_at' => Carbon::now(),
-                        'auto_cancelled' => true
-                    ])
+                        'auto_cancelled' => true,
+                    ]),
                 ]);
 
                 // Reset booking payment status if this was the only refund
@@ -198,11 +199,10 @@ class CleanupStaleRefunds extends Command
                     'refund_id' => $refund->id,
                     'booking_id' => $refund->booking_id,
                     'amount' => $refund->amount,
-                    'pending_since' => $refund->created_at
+                    'pending_since' => $refund->created_at,
                 ]);
 
                 $this->line("  ✅ Cancelled stale refund #{$refund->id}");
-
             } catch (\Exception $e) {
                 $this->error("  ❌ Failed to cleanup refund #{$refund->id}: {$e->getMessage()}");
             }
@@ -210,7 +210,7 @@ class CleanupStaleRefunds extends Command
     }
 
     /**
-     * Show detailed list of refunds
+     * Show detailed list of refunds.
      */
     private function showRefundDetails($refunds, $title)
     {
@@ -229,7 +229,7 @@ class CleanupStaleRefunds extends Command
                 'VND ' . number_format(abs($refund->amount), 0, ',', '.'),
                 $refund->status,
                 $refund->created_at->format('d/m/Y H:i'),
-                $refund->created_at->diffForHumans()
+                $refund->created_at->diffForHumans(),
             ];
         }
 

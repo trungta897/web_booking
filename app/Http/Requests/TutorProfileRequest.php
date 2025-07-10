@@ -32,14 +32,14 @@ class TutorProfileRequest extends FormRequest
             'education.*.degree' => 'required_with:education|string|max:255',
             'education.*.institution' => 'required_with:education|string|max:255',
             'education.*.field_of_study' => 'nullable|string|max:255',
-            'education.*.start_year' => 'required_with:education|numeric|min:1900|max:'.date('Y'),
-            'education.*.end_year' => 'nullable|numeric|min:1900|max:'.(date('Y') + 10),
+            'education.*.start_year' => 'required_with:education|numeric|min:1900|max:' . date('Y'),
+            'education.*.end_year' => 'nullable|numeric|min:1900|max:' . (date('Y') + 10),
             'education.*.description' => 'nullable|string|max:500',
         ];
     }
 
     /**
-     * Get custom attribute names
+     * Get custom attribute names.
      */
     public function attributes(): array
     {
@@ -60,7 +60,7 @@ class TutorProfileRequest extends FormRequest
     }
 
     /**
-     * Get custom error messages
+     * Get custom error messages.
      */
     public function messages(): array
     {

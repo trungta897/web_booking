@@ -43,7 +43,7 @@ class AvailabilitySeeder extends Seeder
             $numDays = rand(2, min(4, count($days)));
             $availableDayKeys = array_rand($days, $numDays);
 
-            if (! is_array($availableDayKeys)) {
+            if (!is_array($availableDayKeys)) {
                 $availableDayKeys = [$availableDayKeys];
             }
 
@@ -76,6 +76,6 @@ class AvailabilitySeeder extends Seeder
                 }
             }
         }
-        $this->command->info("AvailabilitySeeder: Created a fixed 'tuesday' availability for all ".$tutors->count().' tutors.');
+        $this->command->info("AvailabilitySeeder: Created a fixed 'tuesday' availability for all " . $tutors->count() . ' tutors.');
     }
 }

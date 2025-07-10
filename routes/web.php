@@ -38,13 +38,12 @@ Route::middleware('guest')->group(function () {
 
 // Protected routes (require authentication)
 Route::middleware(['auth'])->group(function () {
-
     Route::get('/tutor/dashboard', [TutorController::class, 'dashboard'])
-        ->middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':tutor')
+        ->middleware(\App\Http\Middleware\RoleSwitchMiddleware::class . ':tutor')
         ->name('tutor.dashboard');
 
     Route::get('/student/dashboard', [StudentController::class, 'dashboard'])
-        ->middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':student')
+        ->middleware(\App\Http\Middleware\RoleSwitchMiddleware::class . ':student')
         ->name('student.dashboard');
 
     // Role switching routes
@@ -57,7 +56,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Tutor profile routes
-    Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':tutor')->group(function () {
+    Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class . ':tutor')->group(function () {
         Route::get('/tutor/profile', [TutorProfileController::class, 'show'])->name('tutor.profile.show');
         Route::get('/tutor/profile/edit', [TutorProfileController::class, 'edit'])->name('tutor.profile.edit');
         Route::put('/tutor/profile', [TutorProfileController::class, 'update'])->name('tutor.profile.update');
@@ -106,7 +105,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Tutor availability routes
     Route::get('/tutors/{tutor}/availability/{day}', [TutorController::class, 'checkAvailability'])->name('tutors.availability');
-    Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class.':tutor')->group(function () {
+    Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class . ':tutor')->group(function () {
         Route::get('/availability', [TutorController::class, 'availability'])->name('tutor.availability');
         Route::post('/availability', [TutorController::class, 'updateAvailability'])->name('tutor.availability.update');
         Route::get('/calendar/bookings/{date}', [TutorController::class, 'getBookingsForDate'])->name('tutor.calendar.bookings');
@@ -119,7 +118,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Admin routes - Moved to separate domain
-Route::domain(config('app.admin_domain'))->middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class.':admin', \App\Http\Middleware\SetLocale::class])->group(function () {
+Route::domain(config('app.admin_domain'))->middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class . ':admin', \App\Http\Middleware\SetLocale::class])->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/tutors', [AdminController::class, 'tutors'])->name('admin.tutors');
     Route::get('/students', [AdminController::class, 'students'])->name('admin.students');
@@ -142,7 +141,7 @@ Route::domain(config('app.admin_domain'))->middleware(['auth', \App\Http\Middlew
 });
 
 // Fallback for backward compatibility - these will be redirected by middleware
-Route::middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class.':admin', \App\Http\Middleware\SetLocale::class])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class . ':admin', \App\Http\Middleware\SetLocale::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
     // Tutors
@@ -270,12 +269,12 @@ Route::middleware(['auth'])->get('/debug-payment-validation/{booking}', function
                 'is_student' => $isStudent,
                 'is_tutor' => $isTutor,
                 'is_admin' => $isAdmin,
-                'error' => $hasAccess ? null : 'No access to this booking'
+                'error' => $hasAccess ? null : 'No access to this booking',
             ];
         } catch (\Exception $e) {
             $validationResults['booking_access'] = [
                 'passed' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ];
         }
 
@@ -286,12 +285,12 @@ Route::middleware(['auth'])->get('/debug-payment-validation/{booking}', function
                 'passed' => $canPay,
                 'booking_student_id' => $booking->student_id,
                 'current_user_id' => $user->id,
-                'error' => $canPay ? null : 'Only student who made booking can pay'
+                'error' => $canPay ? null : 'Only student who made booking can pay',
             ];
         } catch (\Exception $e) {
             $validationResults['payment_permission'] = [
                 'passed' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ];
         }
 
@@ -303,7 +302,7 @@ Route::middleware(['auth'])->get('/debug-payment-validation/{booking}', function
         $statusValidations['not_cancelled'] = [
             'passed' => !$isCancelled,
             'booking_status' => $booking->status,
-            'error' => $isCancelled ? 'Booking is cancelled' : null
+            'error' => $isCancelled ? 'Booking is cancelled' : null,
         ];
 
         // Check accepted
@@ -311,7 +310,7 @@ Route::middleware(['auth'])->get('/debug-payment-validation/{booking}', function
         $statusValidations['is_accepted'] = [
             'passed' => $isAccepted,
             'booking_status' => $booking->status,
-            'error' => !$isAccepted ? 'Booking is not accepted by tutor' : null
+            'error' => !$isAccepted ? 'Booking is not accepted by tutor' : null,
         ];
 
         // Check if fully paid
@@ -328,7 +327,7 @@ Route::middleware(['auth'])->get('/debug-payment-validation/{booking}', function
             'payment_status' => $booking->payment_status,
             'payment_status_is_paid' => $paymentStatusIsPaid,
             'has_completed_transactions' => $hasCompletedTransactions,
-            'error' => $isFullyPaid ? 'Booking is already fully paid' : null
+            'error' => $isFullyPaid ? 'Booking is already fully paid' : null,
         ];
 
         // Check active transactions - UPDATED: Không block dựa trên pending transaction nữa
@@ -342,7 +341,7 @@ Route::middleware(['auth'])->get('/debug-payment-validation/{booking}', function
             'passed' => true, // Luôn pass - không block dựa trên pending transaction
             'has_active_transaction' => $hasActiveTransaction,
             'note' => 'Pending transaction check disabled - allows immediate retry',
-            'error' => null
+            'error' => null,
         ];
 
         $validationResults['booking_status_validation'] = $statusValidations;
@@ -356,7 +355,7 @@ Route::middleware(['auth'])->get('/debug-payment-validation/{booking}', function
                                $statusValidations['no_active_transactions']['passed'];
 
         // Get all transactions details
-        $transactions = $booking->transactions()->get()->map(function($transaction) {
+        $transactions = $booking->transactions()->get()->map(function ($transaction) {
             return [
                 'id' => $transaction->id,
                 'type' => $transaction->type,
@@ -387,7 +386,6 @@ Route::middleware(['auth'])->get('/debug-payment-validation/{booking}', function
             'transactions_count' => $transactions->count(),
             'debug_timestamp' => now()->toISOString(),
         ]);
-
     } catch (\Exception $e) {
         return response()->json([
             'error' => $e->getMessage(),
@@ -425,7 +423,7 @@ Route::middleware(['auth'])->post('/reset-booking-payment/{booking}', function (
 
             $transaction->update([
                 'status' => 'failed',
-                'metadata' => $metadata
+                'metadata' => $metadata,
             ]);
 
             $resetActions[] = "Transaction #{$transaction->id} marked as failed";
@@ -471,7 +469,6 @@ Route::middleware(['auth'])->post('/reset-booking-payment/{booking}', function (
             ],
             'message' => 'Booking payment reset successfully. You can now try payment again.',
         ]);
-
     } catch (\Exception $e) {
         return response()->json([
             'success' => false,
@@ -480,8 +477,6 @@ Route::middleware(['auth'])->post('/reset-booking-payment/{booking}', function (
         ], 500);
     }
 })->name('reset.booking.payment');
-
-
 
 // Rate limited routes
 Route::middleware('throttle:60,1')->group(function () {
@@ -493,16 +488,4 @@ Route::middleware('throttle:60,1')->group(function () {
 // VNPay Result page (can accept query parameters from redirects)
 Route::middleware(['auth'])->get('/vnpay-result', [PaymentController::class, 'showVnpayResult'])->name('vnpay.result');
 
-
-
-
-
-
-
-
-
-require __DIR__.'/auth.php';
-
-
-
-
+require __DIR__ . '/auth.php';

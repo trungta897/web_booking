@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\Booking;
 use App\Models\Transaction;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class CleanupPendingTransactions extends Command
 {
@@ -48,6 +47,7 @@ class CleanupPendingTransactions extends Command
 
         if ($paidBookingsWithPendingTx->isEmpty()) {
             $this->info('No paid bookings with pending transactions found. Database is clean.');
+
             return 0;
         }
 

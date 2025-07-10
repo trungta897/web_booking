@@ -1,0 +1,7 @@
+
+In FixerFactory.php line 190:
+                                                                              
+  Rule contains conflicting fixers:                                           
+  - "blank_lines_before_namespace" with "single_blank_line_before_namespace"  
+                                                                              
+

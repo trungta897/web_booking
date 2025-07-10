@@ -16,13 +16,13 @@ class MessageService extends BaseService
 {
     protected MessageRepository $messageRepository;
 
-    public function __construct()
+    public function __construct(MessageRepository $messageRepository)
     {
-        $this->messageRepository = new MessageRepository(new Message);
+        $this->messageRepository = $messageRepository;
     }
 
     /**
-     * Get conversations for current user
+     * Get conversations for current user.
      */
     public function getUserConversations(User $user): EloquentCollection
     {
@@ -30,7 +30,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Get messages between users
+     * Get messages between users.
      */
     public function getMessagesBetweenUsers(int $otherUserId, ?int $currentUserId = null, int $perPage = 20): LengthAwarePaginator
     {
@@ -43,7 +43,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Send message with User objects and validated data
+     * Send message with User objects and validated data.
      */
     public function sendMessage(User $sender, array $data): Message
     {
@@ -75,7 +75,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Mark messages as read
+     * Mark messages as read.
      */
     public function markMessagesAsRead(int $receiverId, int $senderId): bool
     {
@@ -90,7 +90,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Get unread messages for user
+     * Get unread messages for user.
      */
     public function getUnreadMessages(?int $userId = null): EloquentCollection
     {
@@ -100,7 +100,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Count unread messages for user
+     * Count unread messages for user.
      */
     public function getUnreadCount(?int $userId = null): int
     {
@@ -110,7 +110,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Delete message by Message object and User
+     * Delete message by Message object and User.
      */
     public function deleteMessage(Message $message, User $user): bool
     {
@@ -134,21 +134,21 @@ class MessageService extends BaseService
     }
 
     /**
-     * Search messages for user
+     * Search messages for user.
      */
     public function searchMessages(string $query, ?int $userId = null): EloquentCollection
     {
         $userId = $userId ?? Auth::id();
 
         if (empty(trim($query))) {
-            return new EloquentCollection;
+            return new EloquentCollection();
         }
 
         return $this->messageRepository->searchMessages($userId, $query);
     }
 
     /**
-     * Get conversation with user
+     * Get conversation with user.
      */
     public function getConversationWith(int $otherUserId, ?int $currentUserId = null): array
     {
@@ -167,7 +167,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Get message statistics for user
+     * Get message statistics for user.
      */
     public function getMessageStatistics(?int $userId = null): array
     {
@@ -191,7 +191,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Check if user can message another user
+     * Check if user can message another user.
      */
     public function canUserMessage(int $senderId, int $receiverId): bool
     {
@@ -203,7 +203,7 @@ class MessageService extends BaseService
         $sender = User::find($senderId);
         $receiver = User::find($receiverId);
 
-        if (! $sender || ! $receiver) {
+        if (!$sender || !$receiver) {
             return false;
         }
 
@@ -216,7 +216,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Get conversation preview for dashboard
+     * Get conversation preview for dashboard.
      */
     public function getConversationPreviews(?int $userId = null, int $limit = 5): SupportCollection
     {
@@ -238,7 +238,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Bulk mark messages as read
+     * Bulk mark messages as read.
      */
     public function bulkMarkAsRead(array $messageIds, ?int $userId = null): int
     {
@@ -265,7 +265,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Get conversation between user and another user
+     * Get conversation between user and another user.
      */
     public function getConversation(User $user, User $otherUser): array
     {
@@ -282,7 +282,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Mark specific message as read
+     * Mark specific message as read.
      */
     public function markAsRead(Message $message, User $user): bool
     {
@@ -291,7 +291,7 @@ class MessageService extends BaseService
             throw new Exception(__('You can only mark your own messages as read'));
         }
 
-        if (! $message->read_at) {
+        if (!$message->read_at) {
             $message->update(['read_at' => now()]);
 
             $this->logActivity('Message marked as read', [
@@ -304,7 +304,7 @@ class MessageService extends BaseService
     }
 
     /**
-     * Handle errors consistently
+     * Handle errors consistently.
      */
     public function handleError(Exception $e, string $context = ''): void
     {

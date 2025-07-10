@@ -26,7 +26,7 @@ class GzipMiddleware
     }
 
     /**
-     * Determine if the response should be compressed
+     * Determine if the response should be compressed.
      */
     private function shouldCompress(Request $request, Response $response): bool
     {
@@ -51,7 +51,7 @@ class GzipMiddleware
             'application/json',
             'text/xml',
             'application/xml',
-            'text/plain'
+            'text/plain',
         ];
 
         foreach ($compressibleTypes as $type) {
@@ -64,7 +64,7 @@ class GzipMiddleware
     }
 
     /**
-     * Compress the response content
+     * Compress the response content.
      */
     private function compressResponse(Response $response): void
     {

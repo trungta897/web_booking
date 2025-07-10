@@ -22,7 +22,7 @@ class SubjectController extends Controller
     }
 
     /**
-     * Display list of subjects
+     * Display list of subjects.
      */
     public function index(Request $request): View
     {
@@ -31,12 +31,11 @@ class SubjectController extends Controller
             $subjects = $this->subjectService->getSubjectsWithTutorCount();
 
             // Apply search if provided
-            if (! empty($filters['search'])) {
+            if (!empty($filters['search'])) {
                 $subjects = $this->subjectService->searchSubjects($filters['search']);
             }
 
             return view('subjects.index', compact('subjects'));
-
         } catch (Exception $e) {
             return view('subjects.index', [
                 'subjects' => collect(),
@@ -46,7 +45,7 @@ class SubjectController extends Controller
     }
 
     /**
-     * Display tutors for specific subject
+     * Display tutors for specific subject.
      */
     public function listTutorsForSubject(Subject $subject, Request $request): View
     {
@@ -55,7 +54,6 @@ class SubjectController extends Controller
             $tutorData = $this->tutorService->getTutorsForSubject($subject, $filters);
 
             return view('subjects.tutors', $tutorData);
-
         } catch (Exception $e) {
             return view('subjects.tutors', [
                 'subject' => $subject,
@@ -66,7 +64,7 @@ class SubjectController extends Controller
     }
 
     /**
-     * Get subjects data for AJAX
+     * Get subjects data for AJAX.
      */
     public function getSubjects(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -75,7 +73,7 @@ class SubjectController extends Controller
             $subjects = $this->subjectService->getAllActiveSubjects();
 
             // Filter by search if provided
-            if (! empty($search)) {
+            if (!empty($search)) {
                 $subjects = $subjects->filter(function ($subject) use ($search) {
                     return stripos($subject->name, $search) !== false ||
                            stripos($subject->description, $search) !== false;
@@ -86,7 +84,6 @@ class SubjectController extends Controller
                 'success' => true,
                 'subjects' => $subjects->values(),
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,

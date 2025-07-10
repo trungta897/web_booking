@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Subject;
 use App\Models\User;
 use App\Services\AdminService;
+use App\Traits\HandlesControllerErrors;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ use Illuminate\View\View;
 
 class AdminController extends Controller
 {
+    use HandlesControllerErrors;
+
     protected AdminService $adminService;
 
     public function __construct(AdminService $adminService)
@@ -22,7 +25,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Display the admin dashboard
+     * Display the admin dashboard.
      */
     public function dashboard(): View
     {
@@ -39,7 +42,7 @@ class AdminController extends Controller
                 'recentBookings' => $recentBookings,
             ]);
         } catch (Exception $e) {
-            return view('admin.dashboard', [
+            return $this->handleWebException($e, 'admin.dashboard', [
                 'totalStudents' => 0,
                 'totalTutors' => 0,
                 'totalAdmins' => 0,
@@ -49,13 +52,12 @@ class AdminController extends Controller
                 'popularSubjects' => collect(),
                 'topTutors' => collect(),
                 'recentUsers' => collect(),
-                'error' => 'Failed to load dashboard data: ' . $e->getMessage(),
-            ]);
+            ], 'Failed to load dashboard data');
         }
     }
 
     /**
-     * Display list of tutors
+     * Display list of tutors.
      */
     public function tutors(Request $request): View
     {
@@ -66,7 +68,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Display tutor details
+     * Display tutor details.
      */
     public function showTutor(User $user): View
     {
@@ -80,7 +82,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Toggle tutor suspension status
+     * Toggle tutor suspension status.
      */
     public function suspendTutor(User $user): RedirectResponse
     {
@@ -98,7 +100,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Display list of students
+     * Display list of students.
      */
     public function students(Request $request): View
     {
@@ -109,7 +111,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Display student details
+     * Display student details.
      */
     public function showStudent(User $user): View
     {
@@ -123,7 +125,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Toggle student suspension status
+     * Toggle student suspension status.
      */
     public function suspendStudent(User $user): RedirectResponse
     {
@@ -141,7 +143,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Display list of bookings
+     * Display list of bookings.
      */
     public function bookings(Request $request): View
     {
@@ -152,7 +154,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Display booking details
+     * Display booking details.
      */
     public function showBooking(Booking $booking): View
     {
@@ -162,7 +164,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Display list of subjects
+     * Display list of subjects.
      */
     public function subjects(Request $request): View
     {
@@ -173,7 +175,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Show create subject form
+     * Show create subject form.
      */
     public function createSubject(): View
     {
@@ -181,7 +183,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Store new subject
+     * Store new subject.
      */
     public function storeSubject(SubjectRequest $request): RedirectResponse
     {
@@ -195,7 +197,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Show subject details
+     * Show subject details.
      */
     public function showSubject(Subject $subject): View
     {
@@ -205,7 +207,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Show edit subject form
+     * Show edit subject form.
      */
     public function editSubject(Subject $subject): View
     {
@@ -213,7 +215,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Update subject
+     * Update subject.
      */
     public function updateSubject(SubjectRequest $request, Subject $subject): RedirectResponse
     {
@@ -227,7 +229,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Show delete confirmation
+     * Show delete confirmation.
      */
     public function confirmDeleteSubject(Subject $subject): View
     {
@@ -237,7 +239,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Delete subject
+     * Delete subject.
      */
     public function destroySubject(Subject $subject): RedirectResponse
     {
@@ -251,7 +253,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Display reports
+     * Display reports.
      */
     public function reports(): View
     {
@@ -261,7 +263,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Display reviews
+     * Display reviews.
      */
     public function reviews(Request $request): View
     {

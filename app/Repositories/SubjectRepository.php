@@ -14,7 +14,7 @@ class SubjectRepository extends BaseRepository implements SubjectRepositoryInter
     }
 
     /**
-     * Get all active subjects
+     * Get all active subjects.
      */
     public function getActiveSubjects(): Collection
     {
@@ -24,7 +24,7 @@ class SubjectRepository extends BaseRepository implements SubjectRepositoryInter
     }
 
     /**
-     * Get subjects with tutor count
+     * Get subjects with tutor count.
      */
     public function getSubjectsWithTutorCount(): Collection
     {
@@ -35,7 +35,7 @@ class SubjectRepository extends BaseRepository implements SubjectRepositoryInter
     }
 
     /**
-     * Get popular subjects
+     * Get popular subjects.
      */
     public function getPopularSubjects(int $limit = 10): Collection
     {
@@ -48,18 +48,18 @@ class SubjectRepository extends BaseRepository implements SubjectRepositoryInter
     }
 
     /**
-     * Search subjects by name
+     * Search subjects by name.
      */
     public function searchByName(string $name): Collection
     {
-        return $this->query()->where('name', 'like', '%'.$name.'%')
+        return $this->query()->where('name', 'like', '%' . $name . '%')
             ->active()
             ->orderBy('name')
             ->get();
     }
 
     /**
-     * Get subjects with their tutors
+     * Get subjects with their tutors.
      */
     public function getSubjectsWithTutors(): Collection
     {
@@ -72,7 +72,7 @@ class SubjectRepository extends BaseRepository implements SubjectRepositoryInter
     }
 
     /**
-     * Get general subject statistics
+     * Get general subject statistics.
      */
     public function getSubjectStatistics(): array
     {
@@ -87,13 +87,13 @@ class SubjectRepository extends BaseRepository implements SubjectRepositoryInter
     }
 
     /**
-     * Get specific subject statistics
+     * Get specific subject statistics.
      */
     public function getSpecificSubjectStatistics(int $subjectId): array
     {
         $subject = $this->findById($subjectId);
 
-        if (! $subject) {
+        if (!$subject) {
             return [];
         }
 

@@ -31,7 +31,7 @@ class BookingStatusUpdated extends Notification implements ShouldQueue
         $date = $this->booking->start_time->format('F j, Y');
         $time = $this->booking->start_time->format('g:i A');
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject("Booking {$status}")
             ->line("Your booking for {$subject} on {$date} at {$time} has been {$this->booking->status}.")
             ->action('View Booking', route('bookings.show', $this->booking))

@@ -32,35 +32,35 @@ class Transaction extends Model
     ];
 
     // Constants
-    const PAYMENT_METHOD_STRIPE = 'stripe';
+    public const PAYMENT_METHOD_STRIPE = 'stripe';
 
-    const PAYMENT_METHOD_VNPAY = 'vnpay';
+    public const PAYMENT_METHOD_VNPAY = 'vnpay';
 
-    const PAYMENT_METHOD_PAYPAL = 'paypal';
+    public const PAYMENT_METHOD_PAYPAL = 'paypal';
 
-    const PAYMENT_METHOD_MOMO = 'momo';
+    public const PAYMENT_METHOD_MOMO = 'momo';
 
-    const PAYMENT_METHOD_ZALOPAY = 'zalopay';
+    public const PAYMENT_METHOD_ZALOPAY = 'zalopay';
 
-    const PAYMENT_METHOD_BANK_TRANSFER = 'bank_transfer';
+    public const PAYMENT_METHOD_BANK_TRANSFER = 'bank_transfer';
 
-    const TYPE_PAYMENT = 'payment';
+    public const TYPE_PAYMENT = 'payment';
 
-    const TYPE_REFUND = 'refund';
+    public const TYPE_REFUND = 'refund';
 
-    const TYPE_PARTIAL_REFUND = 'partial_refund';
+    public const TYPE_PARTIAL_REFUND = 'partial_refund';
 
-    const STATUS_PENDING = 'pending';
+    public const STATUS_PENDING = 'pending';
 
-    const STATUS_PROCESSING = 'processing';
+    public const STATUS_PROCESSING = 'processing';
 
-    const STATUS_COMPLETED = 'completed';
+    public const STATUS_COMPLETED = 'completed';
 
-    const STATUS_FAILED = 'failed';
+    public const STATUS_FAILED = 'failed';
 
-    const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_CANCELLED = 'cancelled';
 
-    const STATUS_REFUNDED = 'refunded';
+    public const STATUS_REFUNDED = 'refunded';
 
     // Relationships
     public function booking()

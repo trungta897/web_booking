@@ -68,7 +68,7 @@ class DatabaseBackup extends Command
             $fileSize = $this->formatBytes(filesize($backupPath));
             $duration = round(microtime(true) - $startTime, 2);
 
-            $this->info("✅ Backup created successfully!");
+            $this->info('✅ Backup created successfully!');
             $this->table(['Property', 'Value'], [
                 ['Type', ucfirst($backupType)],
                 ['Filename', $filename],
@@ -98,9 +98,8 @@ class DatabaseBackup extends Command
             ]);
 
             return Command::SUCCESS;
-
         } catch (\Exception $e) {
-            $this->error("❌ Backup failed: " . $e->getMessage());
+            $this->error('❌ Backup failed: ' . $e->getMessage());
 
             LogService::error('Database backup failed', $e, [
                 'backup_type' => $backupType ?? 'unknown',
@@ -227,6 +226,7 @@ class DatabaseBackup extends Command
 
         if ($returnCode !== 0) {
             $this->error('Command failed: ' . implode("\n", $output));
+
             return false;
         }
 
@@ -247,9 +247,11 @@ class DatabaseBackup extends Command
         if ($returnCode === 0) {
             unlink($backupPath); // Remove original uncompressed file
             $this->info('✅ Backup compressed successfully');
+
             return $compressedPath;
         } else {
             $this->warn('⚠️  Compression failed, keeping uncompressed backup');
+
             return $backupPath;
         }
     }
@@ -271,7 +273,6 @@ class DatabaseBackup extends Command
                 'cloud_path' => $cloudPath,
                 'filename' => $filename,
             ]);
-
         } catch (\Exception $e) {
             $this->warn('⚠️  Cloud upload failed: ' . $e->getMessage());
 

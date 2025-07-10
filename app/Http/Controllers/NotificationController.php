@@ -19,7 +19,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * Display notifications list
+     * Display notifications list.
      */
     public function index(): View
     {
@@ -29,7 +29,7 @@ class NotificationController extends Controller
     }
 
     /**
-     * Display specific notification
+     * Display specific notification.
      */
     public function show(DatabaseNotification $notification): View|RedirectResponse
     {
@@ -39,14 +39,13 @@ class NotificationController extends Controller
             $this->notificationService->markAsRead($notification);
 
             return view('notifications.show', compact('notification'));
-
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
     /**
-     * Mark notification as read
+     * Mark notification as read.
      */
     public function markAsRead(DatabaseNotification $notification): RedirectResponse
     {
@@ -56,14 +55,13 @@ class NotificationController extends Controller
             $this->notificationService->markAsRead($notification);
 
             return redirect()->back()->with('success', __('Notification marked as read'));
-
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
     /**
-     * Mark all notifications as read
+     * Mark all notifications as read.
      */
     public function markAllAsRead(): RedirectResponse
     {
@@ -71,14 +69,13 @@ class NotificationController extends Controller
             $this->notificationService->markAllAsRead(Auth::user());
 
             return redirect()->back()->with('success', __('All notifications marked as read'));
-
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
     /**
-     * Delete notification
+     * Delete notification.
      */
     public function destroy(DatabaseNotification $notification): RedirectResponse
     {
@@ -88,14 +85,13 @@ class NotificationController extends Controller
             $this->notificationService->deleteNotification($notification);
 
             return redirect()->back()->with('success', __('Notification deleted'));
-
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
     /**
-     * Delete all notifications
+     * Delete all notifications.
      */
     public function destroyAll(): RedirectResponse
     {
@@ -103,14 +99,13 @@ class NotificationController extends Controller
             $this->notificationService->deleteAllNotifications(Auth::user());
 
             return redirect()->back()->with('success', __('All notifications deleted'));
-
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
     /**
-     * Get unread notification count (for AJAX)
+     * Get unread notification count (for AJAX).
      */
     public function getUnreadCount(): \Illuminate\Http\JsonResponse
     {
@@ -118,14 +113,13 @@ class NotificationController extends Controller
             $count = $this->notificationService->getUnreadCount(Auth::user());
 
             return response()->json(['count' => $count]);
-
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
 
     /**
-     * Authorize notification access
+     * Authorize notification access.
      */
     protected function authorizeNotification(DatabaseNotification $notification): void
     {

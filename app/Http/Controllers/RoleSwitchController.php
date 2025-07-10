@@ -11,19 +11,19 @@ use Illuminate\Support\Facades\Log;
 class RoleSwitchController extends Controller
 {
     /**
-     * Valid roles that can be switched to
+     * Valid roles that can be switched to.
      */
     protected const VALID_ROLES = ['admin', 'tutor', 'student'];
 
     /**
-     * Session keys for role switching
+     * Session keys for role switching.
      */
     protected const SESSION_ORIGINAL_ROLE = 'original_role';
 
     protected const SESSION_CURRENT_ROLE = 'current_role';
 
     /**
-     * Switch user to a different role
+     * Switch user to a different role.
      */
     public function switchToRole(Request $request, string $role): RedirectResponse
     {
@@ -50,14 +50,13 @@ class RoleSwitchController extends Controller
             Log::info("Admin user {$user->id} switched to role: {$role}");
 
             return redirect()->route($redirectRoute)->with('success', $message);
-
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
     /**
-     * Switch back to original role
+     * Switch back to original role.
      */
     public function switchBack(Request $request): RedirectResponse
     {
@@ -79,14 +78,13 @@ class RoleSwitchController extends Controller
 
             return redirect()->route($redirectRoute)
                 ->with('success', __('common.returned_to_original_role'));
-
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
     /**
-     * Get current role status for user
+     * Get current role status for user.
      */
     public function getCurrentRole(Request $request): \Illuminate\Http\JsonResponse
     {
@@ -101,14 +99,13 @@ class RoleSwitchController extends Controller
                 'current_role' => $currentRole,
                 'is_switching' => $request->session()->has(self::SESSION_CURRENT_ROLE),
             ]);
-
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
 
     /**
-     * Validate admin access for role switching
+     * Validate admin access for role switching.
      */
     protected function validateAdminAccess($user, string $requestedRole): void
     {
@@ -118,30 +115,32 @@ class RoleSwitchController extends Controller
                 'user_role' => $user->role,
                 'requested_role' => $requestedRole,
             ]);
+
             throw new Exception(__('common.access_denied'));
         }
     }
 
     /**
-     * Validate requested role
+     * Validate requested role.
      */
     protected function validateRole(string $role): void
     {
-        if (! in_array($role, self::VALID_ROLES)) {
+        if (!in_array($role, self::VALID_ROLES)) {
             Log::warning('Invalid role switch attempt', [
                 'requested_role' => $role,
                 'valid_roles' => self::VALID_ROLES,
             ]);
+
             throw new Exception(__('common.invalid_role'));
         }
     }
 
     /**
-     * Validate switch back conditions
+     * Validate switch back conditions.
      */
     protected function validateSwitchBack(Request $request, $user): void
     {
-        if (! $request->session()->has(self::SESSION_CURRENT_ROLE)) {
+        if (!$request->session()->has(self::SESSION_CURRENT_ROLE)) {
             throw new Exception(__('common.not_switching_roles'));
         }
 
@@ -150,23 +149,24 @@ class RoleSwitchController extends Controller
                 'user_id' => $user->id,
                 'user_role' => $user->role,
             ]);
+
             throw new Exception(__('common.access_denied'));
         }
     }
 
     /**
-     * Set role switching session data
+     * Set role switching session data.
      */
     protected function setRoleSwitchSession(Request $request, string $originalRole, string $newRole): void
     {
-        if (! $request->session()->has(self::SESSION_ORIGINAL_ROLE)) {
+        if (!$request->session()->has(self::SESSION_ORIGINAL_ROLE)) {
             $request->session()->put(self::SESSION_ORIGINAL_ROLE, $originalRole);
         }
         $request->session()->put(self::SESSION_CURRENT_ROLE, $newRole);
     }
 
     /**
-     * Clear role switching session data
+     * Clear role switching session data.
      */
     protected function clearRoleSwitchSession(Request $request): void
     {
@@ -174,7 +174,7 @@ class RoleSwitchController extends Controller
     }
 
     /**
-     * Clear role switch and redirect to admin dashboard
+     * Clear role switch and redirect to admin dashboard.
      */
     protected function clearRoleSwitch(Request $request): RedirectResponse
     {
@@ -187,7 +187,7 @@ class RoleSwitchController extends Controller
     }
 
     /**
-     * Get redirect route based on role
+     * Get redirect route based on role.
      */
     protected function getRedirectRoute(string $role): string
     {

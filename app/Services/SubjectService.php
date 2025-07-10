@@ -5,23 +5,27 @@ namespace App\Services;
 use App\Models\Subject;
 use App\Repositories\SubjectRepository;
 use App\Repositories\TutorRepository;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Cache;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 
 class SubjectService extends BaseService
 {
     protected SubjectRepository $subjectRepository;
+
     protected TutorRepository $tutorRepository;
 
-    public function __construct()
-    {
-        $this->subjectRepository = new SubjectRepository(new Subject());
-        $this->tutorRepository = new TutorRepository(new \App\Models\Tutor());
+    public function __construct(
+        SubjectRepository $subjectRepository,
+        TutorRepository $tutorRepository
+    ) {
+        $this->subjectRepository = $subjectRepository;
+        $this->tutorRepository = $tutorRepository;
     }
 
     /**
-     * Get all active subjects with caching
+     * Get all active subjects with caching.
      */
     public function getAllActiveSubjects(): Collection
     {
@@ -31,7 +35,7 @@ class SubjectService extends BaseService
     }
 
     /**
-     * Get subjects with tutor count
+     * Get subjects with tutor count.
      */
     public function getSubjectsWithTutorCount(): Collection
     {
@@ -40,12 +44,10 @@ class SubjectService extends BaseService
         });
     }
 
-
-
     /**
-     * Get tutors for a specific subject
+     * Get tutors for a specific subject.
      */
-    public function getTutorsForSubject(int $subjectId, array $filters = []): \Illuminate\Pagination\LengthAwarePaginator
+    public function getTutorsForSubject(int $subjectId, array $filters = []): LengthAwarePaginator
     {
         $subject = $this->subjectRepository->findById($subjectId);
 
@@ -59,10 +61,8 @@ class SubjectService extends BaseService
         return $this->tutorRepository->getTutorsWithFilters($filters);
     }
 
-
-
     /**
-     * Get subject with statistics
+     * Get subject with statistics.
      */
     public function getSubjectWithStats(int $subjectId): array
     {
@@ -78,12 +78,12 @@ class SubjectService extends BaseService
             'subject' => $subject,
             'statistics' => $stats,
             'formatted_average_price' => $this->formatCurrency($stats['average_price'] ?? 0),
-            'formatted_average_rating' => number_format($stats['average_rating'] ?? 0, 1)
+            'formatted_average_rating' => number_format($stats['average_rating'] ?? 0, 1),
         ];
     }
 
     /**
-     * Create new subject
+     * Create new subject.
      */
     public function createSubject(array $data): Subject
     {
@@ -100,7 +100,7 @@ class SubjectService extends BaseService
 
             $this->logActivity('Subject created', [
                 'subject_id' => $subject->id,
-                'name' => $subject->name
+                'name' => $subject->name,
             ]);
 
             return $subject;
@@ -108,7 +108,7 @@ class SubjectService extends BaseService
     }
 
     /**
-     * Update subject
+     * Update subject.
      */
     public function updateSubject(int $subjectId, array $data): Subject
     {
@@ -122,7 +122,7 @@ class SubjectService extends BaseService
 
             $this->logActivity('Subject updated', [
                 'subject_id' => $subject->id,
-                'name' => $subject->name
+                'name' => $subject->name,
             ]);
 
             return $subject->fresh();
@@ -130,7 +130,7 @@ class SubjectService extends BaseService
     }
 
     /**
-     * Delete subject
+     * Delete subject.
      */
     public function deleteSubject(int $subjectId): bool
     {
@@ -150,7 +150,7 @@ class SubjectService extends BaseService
 
                 $this->logActivity('Subject deleted', [
                     'subject_id' => $subject->id,
-                    'name' => $subject->name
+                    'name' => $subject->name,
                 ]);
             }
 
@@ -159,7 +159,7 @@ class SubjectService extends BaseService
     }
 
     /**
-     * Toggle subject status
+     * Toggle subject status.
      */
     public function toggleSubjectStatus(int $subjectId): Subject
     {
@@ -175,7 +175,7 @@ class SubjectService extends BaseService
 
             $this->logActivity('Subject status toggled', [
                 'subject_id' => $subject->id,
-                'new_status' => $newStatus ? 'active' : 'inactive'
+                'new_status' => $newStatus ? 'active' : 'inactive',
             ]);
 
             return $subject->fresh();
@@ -183,7 +183,7 @@ class SubjectService extends BaseService
     }
 
     /**
-     * Get subject analytics
+     * Get subject analytics.
      */
     public function getSubjectAnalytics(): array
     {
@@ -199,7 +199,7 @@ class SubjectService extends BaseService
     }
 
     /**
-     * Clear subject-related caches
+     * Clear subject-related caches.
      */
     protected function clearSubjectCaches(): void
     {
@@ -211,9 +211,9 @@ class SubjectService extends BaseService
     }
 
     /**
-     * Get subjects with filters for listing
+     * Get subjects with filters for listing.
      */
-    public function getSubjectsWithFilters(array $filters = []): \Illuminate\Pagination\LengthAwarePaginator
+    public function getSubjectsWithFilters(array $filters = []): LengthAwarePaginator
     {
         $query = Subject::withCount('tutors');
 
@@ -230,9 +230,11 @@ class SubjectService extends BaseService
         switch ($sort) {
             case 'tutors_count':
                 $query->orderBy('tutors_count', $order);
+
                 break;
             case 'created_at':
                 $query->orderBy('created_at', $order);
+
                 break;
             default:
                 $query->orderBy('name', $order);
@@ -242,7 +244,7 @@ class SubjectService extends BaseService
     }
 
     /**
-     * Search subjects for AJAX
+     * Search subjects for AJAX.
      */
     public function searchSubjects(string $search): Collection
     {
@@ -251,7 +253,7 @@ class SubjectService extends BaseService
         }
 
         return Subject::where('is_active', true)
-            ->where(function($query) use ($search) {
+            ->where(function ($query) use ($search) {
                 $query->where('name', 'like', '%' . $search . '%')
                       ->orWhere('description', 'like', '%' . $search . '%');
             })
@@ -260,7 +262,7 @@ class SubjectService extends BaseService
     }
 
     /**
-     * Get popular subjects for landing page
+     * Get popular subjects for landing page.
      */
     public function getPopularSubjects(int $limit = 8): Collection
     {

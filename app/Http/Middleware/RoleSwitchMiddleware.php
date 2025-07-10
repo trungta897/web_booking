@@ -18,7 +18,7 @@ class RoleSwitchMiddleware
     public function handle(Request $request, Closure $next, string $role)
     {
         // Check if the user is authenticated
-        if (! Auth::check()) {
+        if (!Auth::check()) {
             return redirect()->route('login');
         }
 

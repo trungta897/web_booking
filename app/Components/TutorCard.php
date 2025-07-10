@@ -25,7 +25,7 @@ class TutorCard
     }
 
     /**
-     * Get tutor card data
+     * Get tutor card data.
      */
     public function getData(): array
     {
@@ -40,14 +40,14 @@ class TutorCard
     }
 
     /**
-     * Get formatted tutor data
+     * Get formatted tutor data.
      */
     protected function getFormattedData(): array
     {
         return [
             'name' => $this->tutor->user->name,
-            'hourly_rate' => number_format($this->tutor->hourly_rate, 2).' USD/hour',
-            'experience' => $this->tutor->experience_years.' years experience',
+            'hourly_rate' => number_format($this->tutor->hourly_rate, 2) . ' USD/hour',
+            'experience' => $this->tutor->experience_years . ' years experience',
             'location' => $this->tutor->user->address ?? 'Not specified',
             'bio' => $this->tutor->bio ? \Illuminate\Support\Str::limit($this->tutor->bio, 150) : 'No bio available',
             'avatar' => $this->tutor->user->avatar ?? '/images/default-avatar.png',
@@ -55,7 +55,7 @@ class TutorCard
     }
 
     /**
-     * Get rating information
+     * Get rating information.
      */
     protected function getRatingInfo(): array
     {
@@ -67,13 +67,13 @@ class TutorCard
             'reviews_count' => $reviewsCount,
             'stars' => $this->generateStars($averageRating),
             'rating_text' => $averageRating > 0 ?
-                number_format($averageRating, 1).' ('.$reviewsCount.' reviews)' :
+                number_format($averageRating, 1) . ' (' . $reviewsCount . ' reviews)' :
                 'No reviews yet',
         ];
     }
 
     /**
-     * Get tutor subjects
+     * Get tutor subjects.
      */
     protected function getSubjects(): array
     {
@@ -87,11 +87,11 @@ class TutorCard
     }
 
     /**
-     * Get available actions
+     * Get available actions.
      */
     protected function getAvailableActions(): array
     {
-        if (! $this->options['show_actions']) {
+        if (!$this->options['show_actions']) {
             return [];
         }
 
@@ -143,7 +143,7 @@ class TutorCard
     }
 
     /**
-     * Generate star rating HTML
+     * Generate star rating HTML.
      */
     protected function generateStars(float $rating): array
     {
@@ -171,7 +171,7 @@ class TutorCard
     }
 
     /**
-     * Check if tutor is available today
+     * Check if tutor is available today.
      */
     public function isAvailableToday(): bool
     {
@@ -184,7 +184,7 @@ class TutorCard
     }
 
     /**
-     * Get tutor's next available slot
+     * Get tutor's next available slot.
      */
     public function getNextAvailableSlot(): ?string
     {
@@ -200,7 +200,7 @@ class TutorCard
             ->first();
 
         if ($todaySlot) {
-            return 'Today at '.$todaySlot->start_time;
+            return 'Today at ' . $todaySlot->start_time;
         }
 
         // Check next 7 days
@@ -215,7 +215,7 @@ class TutorCard
                 ->first();
 
             if ($slot) {
-                return $date->format('M j').' at '.$slot->start_time;
+                return $date->format('M j') . ' at ' . $slot->start_time;
             }
         }
 
@@ -223,7 +223,7 @@ class TutorCard
     }
 
     /**
-     * Get tutor specializations
+     * Get tutor specializations.
      */
     public function getSpecializations(): array
     {
@@ -231,7 +231,7 @@ class TutorCard
     }
 
     /**
-     * Render tutor card HTML
+     * Render tutor card HTML.
      */
     public function render(): string
     {
@@ -242,7 +242,7 @@ class TutorCard
     }
 
     /**
-     * Get tutor badge based on rating and experience
+     * Get tutor badge based on rating and experience.
      */
     public function getBadge(): ?array
     {

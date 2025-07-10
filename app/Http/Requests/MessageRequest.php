@@ -21,13 +21,13 @@ class MessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'receiver_id' => 'required|exists:users,id|different:'.Auth::id(),
+            'receiver_id' => 'required|exists:users,id|different:' . Auth::id(),
             'message' => 'required|string|max:1000|min:1',
         ];
     }
 
     /**
-     * Get custom attribute names
+     * Get custom attribute names.
      */
     public function attributes(): array
     {
@@ -38,7 +38,7 @@ class MessageRequest extends FormRequest
     }
 
     /**
-     * Get custom error messages
+     * Get custom error messages.
      */
     public function messages(): array
     {

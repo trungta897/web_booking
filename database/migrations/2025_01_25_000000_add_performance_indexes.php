@@ -4,15 +4,15 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
-     * Check if an index exists on a table
+     * Check if an index exists on a table.
      */
     private function hasIndex(string $table, string $index): bool
     {
         try {
             $exists = Schema::getConnection()->select("SHOW INDEX FROM `{$table}` WHERE Key_name = ?", [$index]);
+
             return !empty($exists);
         } catch (\Exception $e) {
             return false;

@@ -1,15 +1,14 @@
 <?php
 
+use App\Models\Education;
+use App\Models\Tutor;
+use App\Models\TutorProfile;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
-use App\Models\Education;
-use App\Models\TutorProfile;
-use App\Models\Tutor;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
@@ -18,7 +17,7 @@ return new class extends Migration
         // Ensure tutor_id column exists (it should from a previous migration)
         if (!Schema::hasColumn('education', 'tutor_id')) {
             // This is a fallback, ideally the previous migration (2025_05_15_164829) should have run.
-             Schema::table('education', function (Blueprint $table) {
+            Schema::table('education', function (Blueprint $table) {
                 $table->foreignId('tutor_id')->nullable()->after('tutor_profile_id')->constrained('tutors')->onDelete('cascade');
             });
         }
@@ -39,8 +38,8 @@ return new class extends Migration
                     // Or, throw an exception: throw new \Exception("Tutor not found for user_id: " . $tutorProfile->user_id . " related to education ID: " . $record->id);
                 }
             } else {
-                 // Log or handle cases where TutorProfile not found for tutor_profile_id
-                 // throw new \Exception("TutorProfile not found for ID: " . $record->tutor_profile_id . " related to education ID: " . $record->id);
+                // Log or handle cases where TutorProfile not found for tutor_profile_id
+                // throw new \Exception("TutorProfile not found for ID: " . $record->tutor_profile_id . " related to education ID: " . $record->id);
             }
         }
 
@@ -56,15 +55,15 @@ return new class extends Migration
             // Note: SQLite does not support MODIFY COLUMN to add NOT NULL directly if there was existing data easily.
             // For MySQL/PostgreSQL:
             if (DB::getDriverName() !== 'sqlite') {
-                 DB::statement('ALTER TABLE education MODIFY tutor_id BIGINT UNSIGNED NOT NULL');
+                DB::statement('ALTER TABLE education MODIFY tutor_id BIGINT UNSIGNED NOT NULL');
             } else {
                 // For SQLite, this is more complex. Typically involves creating a new table.
                 // For simplicity in this auto-generated migration, we might skip making it non-nullable for SQLite
                 // or accept that new records will enforce it via model validation.
                 // Alternatively, make it non-nullable only if there are NO records in the table at all.
                 if (Education::count() === Education::whereNotNull('tutor_id')->count()) {
-                     // A more robust SQLite way would be to recreate the table, but that's too complex for here.
-                     // We'll rely on application logic / future migrations if strict non-nullability is needed on existing SQLite DBs.
+                    // A more robust SQLite way would be to recreate the table, but that's too complex for here.
+                    // We'll rely on application logic / future migrations if strict non-nullability is needed on existing SQLite DBs.
                 }
             }
         } else {
@@ -119,7 +118,7 @@ return new class extends Migration
 
             // If tutor_id was made non-nullable, make it nullable again
             if (DB::getDriverName() !== 'sqlite') {
-                 // Assuming original was BIGINT UNSIGNED NULLABLE. Adjust if not.
+                // Assuming original was BIGINT UNSIGNED NULLABLE. Adjust if not.
                 DB::statement('ALTER TABLE education MODIFY tutor_id BIGINT UNSIGNED NULL');
             }
             // For SQLite, if it was made non-nullable through table recreation, this is complex to revert.

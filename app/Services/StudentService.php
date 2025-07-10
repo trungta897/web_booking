@@ -16,11 +16,11 @@ class StudentService extends BaseService
 
     public function __construct()
     {
-        $this->bookingRepository = new BookingRepository(new Booking);
+        $this->bookingRepository = new BookingRepository(new Booking());
     }
 
     /**
-     * Get dashboard data for student
+     * Get dashboard data for student.
      */
     public function getDashboardData(User $student): array
     {
@@ -77,7 +77,7 @@ class StudentService extends BaseService
     }
 
     /**
-     * Get student statistics
+     * Get student statistics.
      */
     public function getStudentStatistics(User $student): array
     {
@@ -117,7 +117,7 @@ class StudentService extends BaseService
     }
 
     /**
-     * Get upcoming sessions
+     * Get upcoming sessions.
      */
     public function getUpcomingSessions(User $student): Collection
     {
@@ -131,7 +131,7 @@ class StudentService extends BaseService
     }
 
     /**
-     * Get completed sessions
+     * Get completed sessions.
      */
     public function getCompletedSessions(User $student, int $limit = 10): Collection
     {
@@ -144,7 +144,7 @@ class StudentService extends BaseService
     }
 
     /**
-     * Get student reviews
+     * Get student reviews.
      */
     public function getStudentReviews(User $student, int $limit = 5): Collection
     {
@@ -156,7 +156,7 @@ class StudentService extends BaseService
     }
 
     /**
-     * Get learning progress
+     * Get learning progress.
      */
     public function getLearningProgress(User $student): array
     {
@@ -183,7 +183,7 @@ class StudentService extends BaseService
     }
 
     /**
-     * Calculate total hours from bookings
+     * Calculate total hours from bookings.
      */
     protected function calculateTotalHours($bookings): float
     {

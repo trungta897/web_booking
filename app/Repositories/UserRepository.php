@@ -15,7 +15,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Find user by email
+     * Find user by email.
      */
     public function findByEmail(string $email): ?User
     {
@@ -23,7 +23,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Get users by role
+     * Get users by role.
      */
     public function getUsersByRole(string $role): Collection
     {
@@ -33,7 +33,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Get active users
+     * Get active users.
      */
     public function getActiveUsers(): Collection
     {
@@ -43,7 +43,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Get students with bookings
+     * Get students with bookings.
      */
     public function getStudentsWithBookings(): Collection
     {
@@ -54,7 +54,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Get tutors with profiles
+     * Get tutors with profiles.
      */
     public function getTutorsWithProfiles(): Collection
     {
@@ -65,26 +65,26 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Search users by name or email
+     * Search users by name or email.
      */
     public function searchUsers(string $query, int $perPage = 15): LengthAwarePaginator
     {
         return $this->query()->where(function ($q) use ($query) {
-            $q->where('name', 'like', '%'.$query.'%')
-                ->orWhere('email', 'like', '%'.$query.'%');
+            $q->where('name', 'like', '%' . $query . '%')
+                ->orWhere('email', 'like', '%' . $query . '%');
         })
             ->latest()
             ->paginate($perPage);
     }
 
     /**
-     * Get user's favorite tutors
+     * Get user's favorite tutors.
      */
     public function getUserFavoriteTutors(int $userId): Collection
     {
         $user = $this->findById($userId);
 
-        if (! $user) {
+        if (!$user) {
             return collect();
         }
 
@@ -96,13 +96,13 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Toggle favorite tutor for user
+     * Toggle favorite tutor for user.
      */
     public function toggleFavoriteTutor(int $userId, int $tutorId): bool
     {
         $user = $this->findById($userId);
 
-        if (! $user) {
+        if (!$user) {
             return false;
         }
 
@@ -118,7 +118,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Get users registered in date range
+     * Get users registered in date range.
      */
     public function getUsersInDateRange(\DateTime $startDate, \DateTime $endDate): Collection
     {
@@ -128,13 +128,13 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Get user statistics
+     * Get user statistics.
      */
     public function getUserStatistics(int $userId): array
     {
         $user = $this->findById($userId);
 
-        if (! $user) {
+        if (!$user) {
             return [];
         }
 
@@ -165,7 +165,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Get general user statistics (for admin use)
+     * Get general user statistics (for admin use).
      */
     public function getGeneralUserStatistics(): array
     {
@@ -180,13 +180,13 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Update user profile
+     * Update user profile.
      */
     public function updateProfile(int $userId, array $data): bool
     {
         $user = $this->findById($userId);
 
-        if (! $user) {
+        if (!$user) {
             return false;
         }
 
@@ -194,13 +194,13 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Deactivate user account
+     * Deactivate user account.
      */
     public function deactivateUser(int $userId): bool
     {
         $user = $this->findById($userId);
 
-        if (! $user) {
+        if (!$user) {
             return false;
         }
 
@@ -208,13 +208,13 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Activate user account
+     * Activate user account.
      */
     public function activateUser(int $userId): bool
     {
         $user = $this->findById($userId);
 
-        if (! $user) {
+        if (!$user) {
             return false;
         }
 

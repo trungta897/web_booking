@@ -21,11 +21,11 @@ class BookingService extends BaseService
 
     public function __construct()
     {
-        $this->bookingRepository = new BookingRepository(new Booking);
+        $this->bookingRepository = new BookingRepository(new Booking());
     }
 
     /**
-     * Get user bookings with filters
+     * Get user bookings with filters.
      */
     public function getUserBookings(User $user, array $filters = []): LengthAwarePaginator
     {
@@ -39,7 +39,7 @@ class BookingService extends BaseService
     }
 
     /**
-     * Get create booking form data
+     * Get create booking form data.
      */
     public function getCreateBookingData(Tutor $tutor): array
     {
@@ -78,7 +78,7 @@ class BookingService extends BaseService
     }
 
     /**
-     * Create booking with validation
+     * Create booking with validation.
      */
     public function createBooking(array $data, Tutor $tutor, User $student): Booking
     {
@@ -122,7 +122,7 @@ class BookingService extends BaseService
                 'notes' => $data['notes'] ?? null,
                 'price' => $price,
                 'currency' => 'VND', // Always save as VND
-                'status' => Booking::STATUS_PENDING
+                'status' => Booking::STATUS_PENDING,
             ]);
             $booking->save();
 
@@ -140,7 +140,7 @@ class BookingService extends BaseService
     }
 
     /**
-     * Get booking details with related data
+     * Get booking details with related data.
      */
     public function getBookingDetails(Booking $booking): Booking
     {
@@ -148,18 +148,18 @@ class BookingService extends BaseService
     }
 
     /**
-     * Update booking status with validation
+     * Update booking status with validation.
      */
     public function updateBookingStatus(Booking $booking, array $data): bool
     {
         return $this->executeTransaction(function () use ($booking, $data) {
             // Additional validation for status changes
             if (isset($data['status'])) {
-                if ($data['status'] === Booking::STATUS_ACCEPTED && ! $booking->isPending()) {
+                if ($data['status'] === Booking::STATUS_ACCEPTED && !$booking->isPending()) {
                     throw new Exception('Only pending bookings can be accepted.');
                 }
 
-                if ($data['status'] === Booking::STATUS_CANCELLED && ! $booking->canBeCancelled()) {
+                if ($data['status'] === Booking::STATUS_CANCELLED && !$booking->canBeCancelled()) {
                     throw new Exception('This booking cannot be cancelled.');
                 }
             }
@@ -185,12 +185,12 @@ class BookingService extends BaseService
     }
 
     /**
-     * Cancel booking with notification
+     * Cancel booking with notification.
      */
     public function cancelBooking(Booking $booking, User $user): bool
     {
         return $this->executeTransaction(function () use ($booking, $user) {
-            if (! $booking->canBeCancelled()) {
+            if (!$booking->canBeCancelled()) {
                 throw new Exception('This booking cannot be cancelled.');
             }
 
@@ -224,7 +224,7 @@ class BookingService extends BaseService
     }
 
     /**
-     * Get student profile data for tutor
+     * Get student profile data for tutor.
      */
     public function getStudentProfileData(Booking $booking): array
     {
@@ -255,7 +255,7 @@ class BookingService extends BaseService
     }
 
     /**
-     * Get user transactions
+     * Get user transactions.
      */
     public function getUserTransactions(User $user): LengthAwarePaginator
     {
@@ -270,7 +270,7 @@ class BookingService extends BaseService
     }
 
     /**
-     * Get upcoming bookings for tutor
+     * Get upcoming bookings for tutor.
      */
     public function getUpcomingBookingsForTutor(int $tutorId): Collection
     {
@@ -283,7 +283,7 @@ class BookingService extends BaseService
     }
 
     /**
-     * Get tutor earnings data
+     * Get tutor earnings data.
      */
     public function getTutorEarnings(int $tutorId, ?int $year = null, ?int $month = null): array
     {
@@ -309,7 +309,7 @@ class BookingService extends BaseService
     }
 
     /**
-     * Get bookings needing review
+     * Get bookings needing review.
      */
     public function getBookingsNeedingReview(int $studentId): Collection
     {
@@ -322,7 +322,7 @@ class BookingService extends BaseService
     }
 
     /**
-     * Validate booking constraints
+     * Validate booking constraints.
      */
     public function validateBookingConstraints(array $data): void
     {
@@ -350,7 +350,7 @@ class BookingService extends BaseService
     }
 
     /**
-     * Calculate booking price
+     * Calculate booking price.
      */
     protected function calculateBookingPrice(Tutor $tutor, string $startTime, string $endTime): float
     {
@@ -375,21 +375,21 @@ class BookingService extends BaseService
     }
 
     /**
-     * Validate status change
+     * Validate status change.
      */
     protected function validateStatusChange(Booking $booking, string $newStatus): void
     {
-        if ($newStatus === 'accepted' && ! $booking->isPending()) {
+        if ($newStatus === 'accepted' && !$booking->isPending()) {
             throw new Exception('Only pending bookings can be accepted');
         }
 
-        if ($newStatus === 'cancelled' && ! $booking->canBeCancelled()) {
+        if ($newStatus === 'cancelled' && !$booking->canBeCancelled()) {
             throw new Exception('This booking cannot be cancelled');
         }
     }
 
     /**
-     * Send status change notification
+     * Send status change notification.
      */
     protected function sendStatusChangeNotification(Booking $booking, string $oldStatus, string $newStatus): void
     {

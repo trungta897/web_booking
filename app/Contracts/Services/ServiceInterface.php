@@ -7,27 +7,27 @@ use Exception;
 interface ServiceInterface
 {
     /**
-     * Execute operation within transaction
+     * Execute operation within transaction.
      */
     public function executeTransaction(callable $callback);
 
     /**
-     * Log activity
+     * Log activity.
      */
     public function logActivity(string $action, array $data = []): void;
 
     /**
-     * Format currency for display
+     * Format currency for display.
      */
     public function formatCurrency(float $amount): string;
 
     /**
-     * Format date for display
+     * Format date for display.
      */
     public function formatDate(\DateTime $date): string;
 
     /**
-     * Handle service errors
+     * Handle service errors.
      */
     public function handleError(Exception $e, string $context = ''): void;
 }

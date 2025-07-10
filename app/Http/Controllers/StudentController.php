@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Services\BookingService;
 use App\Services\StudentService;
+use App\Traits\HandlesControllerErrors;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class StudentController extends Controller
 {
+    use HandlesControllerErrors;
+
     protected StudentService $studentService;
 
     protected BookingService $bookingService;
@@ -21,7 +24,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Display student dashboard
+     * Display student dashboard.
      */
     public function dashboard(): View
     {
@@ -30,9 +33,8 @@ class StudentController extends Controller
             $dashboardData = $this->studentService->getDashboardData($user);
 
             return view('students.dashboard', $dashboardData);
-
         } catch (Exception $e) {
-            return view('students.dashboard', [
+            return $this->handleWebException($e, 'students.dashboard', [
                 'totalBookings' => 0,
                 'completedBookings' => 0,
                 'pendingBookings' => 0,
@@ -42,13 +44,12 @@ class StudentController extends Controller
                 'upcomingSessions' => collect(),
                 'completedSessions' => collect(),
                 'reviews' => collect(),
-                'error' => $e->getMessage(),
-            ]);
+            ], 'Failed to load student dashboard');
         }
     }
 
     /**
-     * Get dashboard stats (AJAX)
+     * Get dashboard stats (AJAX).
      */
     public function getDashboardStats(): \Illuminate\Http\JsonResponse
     {
@@ -60,17 +61,13 @@ class StudentController extends Controller
                 'success' => true,
                 'stats' => $stats,
             ]);
-
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 400);
+            return $this->handleJsonException($e, 'Failed to load dashboard stats');
         }
     }
 
     /**
-     * Get upcoming sessions
+     * Get upcoming sessions.
      */
     public function getUpcomingSessions(): \Illuminate\Http\JsonResponse
     {
@@ -82,7 +79,6 @@ class StudentController extends Controller
                 'success' => true,
                 'sessions' => $sessions,
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
