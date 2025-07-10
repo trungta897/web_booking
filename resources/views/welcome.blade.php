@@ -576,17 +576,17 @@
                             <ul class="space-y-2">
                                 <li><a href="{{ route('home') }}" class="footer-link text-gray-300">{{ __('common.home') }}</a></li>
                                 <li><a href="{{ route('tutors.index') }}" class="footer-link text-gray-300">{{ __('common.find_tutors') }}</a></li>
-                                <li><a href="{{ route('register') }}?role=tutor" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Trở Thành Gia Sư' : 'Become a Tutor' }}</a></li>
-                                <li><a href="#contact-us" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Liên Hệ' : 'Contact Us' }}</a></li>
+                                                        <li><a href="{{ route('register') }}?role=tutor" class="footer-link text-gray-300">{{ __('common.become_a_tutor') }}</a></li>
+                        <li><a href="#contact-us" class="footer-link text-gray-300">{{ __('common.contact_us') }}</a></li>
                             </ul>
                         </div>
                         <div>
                             <h3 class="text-lg font-semibold text-white mb-4">{{ __('welcome.footer.subjects_section') }}</h3>
                             <ul class="space-y-2">
-                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Mathematics']) }}" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Toán Học' : 'Mathematics' }}</a></li>
-                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Science']) }}" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Khoa Học' : 'Science' }}</a></li>
-                                <li><a href="{{ route('tutors.index', ['subject_name' => 'Languages']) }}" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Ngôn Ngữ' : 'Languages' }}</a></li>
-                                <li><a href="{{ route('tutors.index') }}" class="footer-link text-gray-300">{{ app()->getLocale() == 'vi' ? 'Thêm Môn Học' : 'More Subjects' }}</a></li>
+                                                        <li><a href="{{ route('tutors.index', ['subject_name' => 'Mathematics']) }}" class="footer-link text-gray-300">{{ __('common.mathematics') }}</a></li>
+                        <li><a href="{{ route('tutors.index', ['subject_name' => 'Science']) }}" class="footer-link text-gray-300">{{ __('common.science') }}</a></li>
+                        <li><a href="{{ route('tutors.index', ['subject_name' => 'Languages']) }}" class="footer-link text-gray-300">{{ __('common.languages') }}</a></li>
+                        <li><a href="{{ route('tutors.index') }}" class="footer-link text-gray-300">{{ __('common.more_subjects') }}</a></li>
                             </ul>
                         </div>
                         <div>

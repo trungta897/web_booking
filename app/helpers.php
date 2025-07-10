@@ -72,18 +72,28 @@ if (! function_exists('formatCurrency')) {
             $locale = config('app.locale', 'vi');
         }
 
-        // If Vietnamese locale and currency is USD, convert to VND
-        if ($locale === 'vi' && $currency === 'USD') {
-            $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
-            return number_format($vndAmount, 0, ',', '.') . ' VND';
+        // Smart detection: If amount > 1000, it's likely already VND
+        // This prevents double conversion when database stores VND but code passes 'USD'
+        if ($amount > 1000) {
+            // Amount is already VND
+            if ($locale === 'vi') {
+                return number_format($amount, 0, ',', '.') . ' VND';
+            } else {
+                // Convert VND to USD for English display
+                $usdAmount = $amount / 25000;
+                return '$' . number_format($usdAmount, 2);
+            }
+        } else {
+            // Amount is in USD (small amounts)
+            if ($locale === 'vi') {
+                // Convert USD to VND for Vietnamese display
+                $vndAmount = $amount * 25000;
+                return number_format($vndAmount, 0, ',', '.') . ' VND';
+            } else {
+                // Display USD as-is for English
+                return '$' . number_format($amount, 2);
+            }
         }
-
-        // For other cases, format normally
-        if ($currency === 'VND') {
-            return number_format($amount, 0, ',', '.') . ' VND';
-        }
-
-        return '$' . number_format($amount, 2);
     }
 }
 
@@ -158,6 +168,7 @@ if (! function_exists('formatBookingAmount')) {
 if (! function_exists('formatHourlyRate')) {
     /**
      * Format hourly rate with proper currency and unit based on locale
+     * Smart detection: if amount > 1000, assume it's already VND
      */
         function formatHourlyRate(float $amount, string $currency = 'USD'): string
     {
@@ -176,16 +187,27 @@ if (! function_exists('formatHourlyRate')) {
             $locale = config('app.locale', 'vi');
         }
 
-        if ($locale === 'vi') {
-            // Vietnamese: convert USD to VND and show as "VND/giờ"
-            if ($currency === 'USD') {
+        // Smart detection: If amount > 1000, it's likely already VND
+        // This prevents double conversion (VND -> USD conversion -> VND again)
+        if ($amount > 1000) {
+            // Amount is already VND
+            if ($locale === 'vi') {
+                return number_format($amount, 0, ',', '.') . ' VND/giờ';
+            } else {
+                // Convert VND to USD for English display
+                $usdAmount = $amount / 25000;
+                return '$' . number_format($usdAmount, 2) . '/hr';
+            }
+        } else {
+            // Amount is in USD
+            if ($locale === 'vi') {
+                // Convert USD to VND for Vietnamese display
                 $vndAmount = $amount * 25000;
                 return number_format($vndAmount, 0, ',', '.') . ' VND/giờ';
+            } else {
+                // Display USD as-is for English
+                return '$' . number_format($amount, 2) . '/hr';
             }
-            return number_format($amount, 0, ',', '.') . ' VND/giờ';
-        } else {
-            // English: show as "$/hr"
-            return '$' . number_format($amount, 2) . '/hr';
         }
     }
 }
@@ -341,5 +363,71 @@ if (! function_exists('getBookingUrgency')) {
         }
 
         return 'low';
+    }
+}
+
+if (!function_exists('formatCurrency')) {
+    function formatCurrency($amount, $currency = 'VND')
+    {
+        // Smart detection: if amount > 1000, treat as VND (don't convert)
+        // if amount <= 1000, treat as USD (convert to VND)
+        if ($amount > 1000) {
+            // Already in VND, just format
+            return number_format($amount, 0, ',', '.') . ' VND';
+        } else {
+            // Convert USD to VND
+            $vndAmount = $amount * 25000;
+            return number_format($vndAmount, 0, ',', '.') . ' VND';
+        }
+    }
+}
+
+if (!function_exists('formatHourlyRate')) {
+    function formatHourlyRate($rate)
+    {
+        // Smart detection: if rate > 1000, treat as VND (don't convert)
+        // if rate <= 1000, treat as USD (convert to VND)
+        if ($rate > 1000) {
+            // Already in VND, just format
+            return number_format($rate, 0, ',', '.') . ' VND/giờ';
+        } else {
+            // Convert USD to VND
+            $vndRate = $rate * 25000;
+            return number_format($vndRate, 0, ',', '.') . ' VND/giờ';
+        }
+    }
+}
+
+if (!function_exists('translateReasonCode')) {
+    /**
+     * Translate reason codes (cancellation_reason, rejection_reason) to human readable text
+     */
+    function translateReasonCode($reasonCode, $type = 'common')
+    {
+        if (empty($reasonCode)) {
+            return __('notifications.no_reason_provided');
+        }
+
+        // Map of reason codes to translation keys
+        $reasonMap = [
+            'schedule_conflict' => 'common.schedule_conflict',
+            'financial_reason' => 'common.financial_reason',
+            'personal_reason' => 'common.personal_reason',
+            'found_another_tutor' => 'common.found_another_tutor',
+            'not_qualified' => 'common.not_qualified',
+            'overbooked' => 'common.overbooked',
+            'inappropriate_request' => 'common.inappropriate_request',
+            'tutor_unavailable' => 'booking.reason_tutor_unavailable',
+            'emergency' => 'booking.reason_emergency',
+            'technical_issues' => 'booking.reason_technical_issues',
+            'other' => 'common.other'
+        ];
+
+        if (isset($reasonMap[$reasonCode])) {
+            return __($reasonMap[$reasonCode]);
+        }
+
+        // If no mapping found, try to capitalize and return as fallback
+        return ucfirst(str_replace('_', ' ', $reasonCode));
     }
 }

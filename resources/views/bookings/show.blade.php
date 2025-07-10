@@ -100,7 +100,7 @@
                         @if($booking->rejection_reason && $booking->status === 'rejected')
                             <div class="md:col-span-2">
                                 <h4 class="text-sm font-medium text-gray-500">{{ __('common.rejection_reason') }}</h4>
-                                <p class="mt-2 text-sm text-red-600">{{ $booking->rejection_reason }}</p>
+                                <p class="mt-2 text-sm text-red-600">{{ translateReasonCode($booking->rejection_reason) }}</p>
                                 @if($booking->rejection_description)
                                     <p class="mt-1 text-sm text-gray-600">{{ $booking->rejection_description }}</p>
                                 @endif
@@ -110,7 +110,7 @@
                         @if($booking->cancellation_reason && $booking->status === 'cancelled')
                             <div class="md:col-span-2">
                                 <h4 class="text-sm font-medium text-gray-500">{{ __('common.cancellation_reason') }}</h4>
-                                <p class="mt-2 text-sm text-red-600">{{ $booking->cancellation_reason }}</p>
+                                <p class="mt-2 text-sm text-red-600">{{ translateReasonCode($booking->cancellation_reason) }}</p>
                                 @if($booking->cancellation_description)
                                     <p class="mt-1 text-sm text-gray-600">{{ $booking->cancellation_description }}</p>
                                 @endif

@@ -53,9 +53,9 @@
                                 <label for="rating" class="block text-xs font-medium text-gray-700">{{ __('tutors.min_rating') }}</label>
                                 <select name="rating" id="rating" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     <option value="">{{ __('tutors.any_rating') }}</option>
-                                    <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4+ Stars</option>
-                                    <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3+ Stars</option>
-                                    <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2+ Stars</option>
+                                                <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>4+ {{ __('common.stars') }}</option>
+            <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>3+ {{ __('common.stars') }}</option>
+                                                                          <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>2+ {{ __('common.stars') }}</option>
                                 </select>
                             </div>
                             <div>

@@ -48,7 +48,7 @@ class BookingCancelled extends Notification
             ->line('A booking has been cancelled.')
             ->line('Subject: '.$this->booking->subject->name)
             ->line('Date: '.$this->booking->start_time->format('d/m/Y H:i'))
-            ->line('Reason: '.($this->booking->cancellation_reason ?? 'No reason provided'))
+            ->line('Reason: '.translateReasonCode($this->booking->cancellation_reason))
             ->action('View Booking', route('bookings.show', $this->booking))
             ->line('Thank you for using our tutoring platform!');
     }
@@ -69,7 +69,7 @@ class BookingCancelled extends Notification
             'message' => __('notifications.booking_cancelled_message', [
                 'subject' => $this->booking->subject->name,
                 'date' => $this->booking->start_time->format('d/m/Y H:i'),
-                'reason' => $this->booking->cancellation_reason ?? __('notifications.no_reason_provided'),
+                'reason' => translateReasonCode($this->booking->cancellation_reason),
             ]),
             'action_url' => route('bookings.show', $this->booking),
         ];

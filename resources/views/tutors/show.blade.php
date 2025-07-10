@@ -81,7 +81,7 @@
                                     <div class="border-l-4 border-indigo-500 pl-4">
                                         <h3 class="font-medium text-gray-900">{{ $education->degree }} in {{ $education->field_of_study }}</h3>
                                         <p class="text-gray-600">{{ $education->institution }}</p>
-                                        <p class="text-sm text-gray-500">{{ $education->start_year }} - {{ $education->end_year ?? 'Present' }}</p>
+                                        <p class="text-sm text-gray-500">{{ $education->start_year }} - {{ $education->end_year ?? __('common.present') }}</p>
                                     </div>
                                 @endforeach
                             @else
@@ -199,7 +199,7 @@
 
                                             <div>
                                                 <label for="comment" class="block text-sm font-medium text-gray-700">Comment</label>
-                                                <textarea id="comment" name="comment" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Share your experience with this tutor">{{ old('comment') }}</textarea>
+                                                <textarea id="comment" name="comment" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="{{ __('common.experience_with_tutor') }}">{{ old('comment') }}</textarea>
                                                 @error('comment')
                                                     <p class="mt-1 text-sm text-red-600">{{ $errors->first('comment') }}</p>
                                                 @enderror
@@ -254,10 +254,10 @@
                 const text = document.getElementById('favoriteText');
                 if (data.is_favorite) {
                     btn.classList.add('bg-red-50', 'border-red-300', 'text-red-700');
-                    text.textContent = 'Remove from Favorites';
+                    text.textContent = '{{ __('common.remove_from_favorites') }}';
                 } else {
                     btn.classList.remove('bg-red-50', 'border-red-300', 'text-red-700');
-                    text.textContent = 'Add to Favorites';
+                    text.textContent = '{{ __('common.add_to_favorites') }}';
                 }
             });
         }
@@ -274,7 +274,7 @@
                             element.textContent = data.slots.join(', ');
                             element.classList.add('text-green-600');
                         } else {
-                            element.textContent = 'Unavailable';
+                                                            element.textContent = '{{ __('common.unavailable') }}';
                             element.classList.add('text-red-600');
                         }
                     });
