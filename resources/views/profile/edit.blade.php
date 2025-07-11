@@ -1,18 +1,19 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Profile
+            {{ __('common.profile') }}
         </h2>
     </x-slot>
 
     <div class="py-12" x-data="{ showEditForm: false }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-            <!-- Flash success message -->
+            <!-- Flash success message - chỉ hiển thị một lần -->
             @if (session('success'))
                 <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
                     {{ session('success') }}
                 </div>
+                @php session()->forget('success'); @endphp
             @endif
 
             <!-- Combined Profile and Education Read-Only View -->
@@ -33,7 +34,7 @@
                                 @include('tutors.profile.partials.update-tutor-profile-form', ['subjects' => $subjects, 'tutor' => $tutor])
                              @endif
                             <div class="flex items-center gap-4 mt-6">
-                                <x-primary-button>{{ __('common.save_changes') }}</x-primary-button>
+                                <x-primary-button>{{ __('profile.save_changes') }}</x-primary-button>
                             </div>
                         </form>
                     </div>
@@ -64,6 +65,7 @@
             </div>
         </div>
     </div>
-    <!-- Image Modal and scripts -->
+
+        <!-- Image Modal and scripts -->
     @include('profile.partials.image-modal-and-scripts')
 </x-app-layout>

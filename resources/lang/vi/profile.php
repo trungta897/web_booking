@@ -12,4 +12,5 @@ return [
     'file_type' => 'Loại tệp',
     'preview' => 'Xem trước',
     'certificate_details' => 'Chi tiết bằng cấp',
+    'save_changes' => 'Lưu thay đổi',
 ];

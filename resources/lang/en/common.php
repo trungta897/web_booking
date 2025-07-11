@@ -194,6 +194,23 @@ return [
     'rejected' => 'Rejected',
     'cancelled' => 'Cancelled',
 
+    // Profile form translations
+    'Update Password' => 'Update Password',
+    'Ensure your account is using a long, random password to stay secure.' => 'Ensure your account is using a long, random password to stay secure.',
+    'Current Password' => 'Current Password',
+    'New Password' => 'New Password',
+    'Confirm Password' => 'Confirm Password',
+    'Save' => 'Save',
+    'Saved.' => 'Saved.',
+    'Delete Account' => 'Delete Account',
+    'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.',
+    'Are you sure you want to delete your account?' => 'Are you sure you want to delete your account?',
+    'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.' => 'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
+    'Password' => 'Password',
+    'Cancel' => 'Cancel',
+    'each' => 'each',
+    'image' => 'Image',
+
     // Additional hardcoded texts found
     'available_for_bookings' => 'Available for bookings',
     'not_available' => 'Not available',

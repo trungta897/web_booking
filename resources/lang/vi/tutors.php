@@ -62,6 +62,12 @@ return [
 
     // Missing translations for profile page
     'education_and_certificates' => 'Học vấn và chứng chỉ',
+    'certificate_images' => 'Hình ảnh chứng chỉ',
+    'current_images' => 'Hình ảnh hiện tại',
+    'add_more_images' => 'Thêm hình ảnh mới',
+    'select_multiple_images' => 'Chọn nhiều hình ảnh',
+    'new_images_preview' => 'Xem trước hình ảnh mới',
+    'no_images_uploaded' => 'Chưa có hình ảnh nào',
     'no_education_records_yet' => 'Chưa có thông tin học vấn nào',
     'add_education' => 'Thêm học vấn',
     'save_education' => 'Lưu thông tin học vấn',

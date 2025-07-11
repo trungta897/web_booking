@@ -88,12 +88,22 @@
                                                 @endif
                                             </div>
 
-                                            @if($education->image)
+                                            <!-- Display education images from images array -->
+                                            @if($education->hasImages())
                                                 <div class="ml-4 flex-shrink-0">
-                                                    <img src="{{ asset('uploads/education/' . $education->image) }}"
-                                                         alt="Certificate for {{ $education->degree }}"
-                                                         class="h-20 w-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
-                                                         onclick="showCertificateModal('{{ asset('uploads/education/' . $education->image) }}', '{{ $education->degree }}', '{{ $education->institution }}')" />
+                                                    <div class="grid grid-cols-2 gap-1 max-w-[100px]">
+                                                        @foreach($education->getAllImages() as $index => $imageName)
+                                                            @if($index < 4) {{-- Show max 4 images --}}
+                                                                <img src="{{ asset('uploads/education/' . $imageName) }}"
+                                                                     alt="Certificate {{ $index + 1 }} for {{ $education->degree }}"
+                                                                     class="h-10 w-10 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                                                     onclick="showCertificateModal('{{ asset('uploads/education/' . $imageName) }}', '{{ $education->degree }}', '{{ $education->institution }}')" />
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                    @if(count($education->getAllImages()) > 4)
+                                                        <p class="text-xs text-gray-500 mt-1 text-center">+{{ count($education->getAllImages()) - 4 }} more</p>
+                                                    @endif
                                                     <p class="text-xs text-gray-500 mt-1 text-center">{{ __('Click to view') }}</p>
                                                 </div>
                                             @endif

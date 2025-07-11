@@ -59,6 +59,12 @@ return [
 
     // Missing translations for profile page
     'education_and_certificates' => 'Education and Certificates',
+    'certificate_images' => 'Certificate Images',
+    'current_images' => 'Current Images',
+    'add_more_images' => 'Add More Images',
+    'select_multiple_images' => 'Select Multiple Images',
+    'new_images_preview' => 'New Images Preview',
+    'no_images_uploaded' => 'No images uploaded',
     'no_education_records_yet' => 'No education records yet',
     'add_education' => 'Add Education',
     'save_education' => 'Save Education',

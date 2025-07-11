@@ -2,13 +2,13 @@
     <div class="flex justify-between items-start mb-6">
         <!-- Titles and Edit Button -->
         <div>
-            <h3 class="text-lg font-medium text-gray-900">Profile Information</h3>
+            <h3 class="text-lg font-medium text-gray-900">{{ __('profile.profile_information') }}</h3>
             <p class="mt-1 text-sm text-gray-600">
-                View or edit your profile details
+                {{ __('profile.view_or_edit_your_profile_details') }}
             </p>
         </div>
         <button @click="showEditForm = !showEditForm" class="ml-4 flex-shrink-0 inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-            <span x-text="showEditForm ? 'Cancel' : 'Edit Profile'"></span>
+            <span x-text="showEditForm ? '{{ __('common.cancel') }}' : '{{ __('profile.edit_profile') }}'"></span>
         </button>
     </div>
 
@@ -55,7 +55,7 @@
         </div>
     </div>
 
-    <!-- Education Section -->
+        <!-- Education Section -->
     @if ($tutor)
     <div class="mt-6 pt-6 border-t border-gray-200">
         <h4 class="text-md font-medium text-gray-900 mb-4">{{ __('tutors.education_and_certificates') }}</h4>
@@ -67,23 +67,47 @@
         @if ($educationRecords->isNotEmpty())
             <ul class="space-y-4">
                 @foreach ($educationRecords as $education)
-                    <li class="p-4 bg-gray-50 rounded-lg flex items-start gap-4">
-                        @if($education->image && file_exists(public_path('uploads/education/' . $education->image)))
-                             <a href="{{ asset('uploads/education/' . $education->image) }}" target="_blank" class="flex-shrink-0">
-                                <img src="{{ asset('uploads/education/' . $education->image) }}" alt="Certificate" class="h-16 w-16 object-cover rounded-md border hover:opacity-80 transition-opacity">
-                            </a>
+                    <li class="p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-start gap-4 mb-3">
+                            <div class="flex-grow">
+                                <p class="font-semibold text-gray-800">{{ $education->degree }}</p>
+                                <p class="text-sm text-gray-600">{{ $education->institution }}</p>
+                                <p class="text-sm text-gray-500">{{ $education->year }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Images Gallery -->
+                        @if($education->hasImages())
+                            <div class="mt-3">
+                                <p class="text-xs text-gray-500 mb-2">{{ __('tutors.certificate_images') }}:</p>
+                                <div class="grid grid-cols-4 gap-2">
+                                    @foreach($education->getAllImages() as $index => $imageName)
+                                        @if(file_exists(public_path('uploads/education/' . $imageName)))
+                                            <div class="relative group">
+                                                <img src="{{ asset('uploads/education/' . $imageName) }}"
+                                                     alt="Certificate {{ $index + 1 }}"
+                                                     class="h-20 w-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                                     onclick="openImageModal('{{ asset('uploads/education/' . $imageName) }}', '{{ $education->degree }} - {{ __('common.image') }} {{ $index + 1 }}')" />
+                                                <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded pointer-events-none">
+                                                    <svg class="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
                         @else
-                             <div class="flex-shrink-0 h-16 w-16 bg-gray-200 rounded-md flex items-center justify-center">
-                                <svg class="h-8 w-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                </svg>
+                            <div class="mt-3 flex items-center justify-center h-20 bg-gray-100 rounded border-2 border-dashed border-gray-300">
+                                <div class="text-center">
+                                    <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <p class="text-xs text-gray-500 mt-1">{{ __('tutors.no_images_uploaded') }}</p>
+                                </div>
                             </div>
                         @endif
-                        <div class="flex-grow">
-                            <p class="font-semibold text-gray-800">{{ $education->degree }}</p>
-                            <p class="text-sm text-gray-600">{{ $education->institution }}</p>
-                            <p class="text-sm text-gray-500">{{ $education->year }}</p>
-                        </div>
                     </li>
                 @endforeach
             </ul>

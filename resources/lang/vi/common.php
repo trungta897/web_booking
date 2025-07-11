@@ -198,6 +198,23 @@ return [
     'accepted' => 'Đã chấp nhận',
     'rejected' => 'Đã từ chối',
     'cancelled' => 'Đã hủy',
+
+    // Profile form translations
+    'Update Password' => 'Cập Nhật Mật Khẩu',
+    'Ensure your account is using a long, random password to stay secure.' => 'Đảm bảo tài khoản của bạn sử dụng mật khẩu dài và ngẫu nhiên để bảo mật.',
+    'Current Password' => 'Mật Khẩu Hiện Tại',
+    'New Password' => 'Mật Khẩu Mới',
+    'Confirm Password' => 'Xác Nhận Mật Khẩu',
+    'Save' => 'Lưu',
+    'Saved.' => 'Đã lưu.',
+    'Delete Account' => 'Xóa Tài Khoản',
+    'Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.' => 'Khi tài khoản của bạn bị xóa, tất cả tài nguyên và dữ liệu sẽ bị xóa vĩnh viễn. Trước khi xóa tài khoản, vui lòng tải xuống bất kỳ dữ liệu hoặc thông tin nào bạn muốn giữ lại.',
+    'Are you sure you want to delete your account?' => 'Bạn có chắc chắn muốn xóa tài khoản của mình không?',
+    'Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.' => 'Khi tài khoản của bạn bị xóa, tất cả tài nguyên và dữ liệu sẽ bị xóa vĩnh viễn. Vui lòng nhập mật khẩu để xác nhận bạn muốn xóa vĩnh viễn tài khoản của mình.',
+    'Password' => 'Mật Khẩu',
+    'Cancel' => 'Hủy',
+    'each' => 'mỗi',
+    'image' => 'Hình ảnh',
     'paid' => 'Đã thanh toán',
 
     // Profile form

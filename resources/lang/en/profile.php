@@ -12,4 +12,5 @@ return [
     'file_type' => 'File type',
     'preview' => 'Preview',
     'certificate_details' => 'Certificate Details',
+    'save_changes' => 'Save Changes',
 ];

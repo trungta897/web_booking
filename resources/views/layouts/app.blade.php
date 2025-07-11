@@ -47,8 +47,8 @@
                 </div>
             @endif
 
-            <!-- Flash Messages -->
-            @if(session('success'))
+            <!-- Flash Messages - chỉ hiển thị nếu không phải trang profile -->
+            @if(session('success') && !request()->routeIs('profile.edit'))
                 <div class="bg-green-100 border-l-4 border-green-500 p-4 mb-4 mx-auto max-w-7xl mt-4">
                     <div class="flex">
                         <div class="flex-shrink-0">

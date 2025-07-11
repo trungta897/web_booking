@@ -155,60 +155,178 @@ class UserService extends BaseService
     }
 
     /**
-     * [NEW LOGIC] Deletes all existing education records and recreates them from the form submission.
-     * This is a simpler, more robust approach to prevent sync issues.
+     * Update tutor education records using smart update/create logic.
+     * This preserves existing images when no new image is uploaded.
      */
     public function updateTutorEducation($tutor, array $educationData): void
     {
-        Log::info('Starting new education update logic (delete and recreate)', [
+        Log::info('Starting smart education update logic', [
             'tutor_id' => $tutor->id,
-            'incoming_data_count' => count($educationData)
+            'incoming_data_count' => count($educationData),
+            'incoming_data_keys' => array_keys($educationData),
+            'incoming_data_structure' => array_map(function($item) {
+                return [
+                    'id' => $item['id'] ?? 'no_id',
+                    'degree' => $item['degree'] ?? 'no_degree',
+                    'has_new_images' => isset($item['new_images']),
+                    'new_images_count' => isset($item['new_images']) ? count($item['new_images']) : 0,
+                    'new_images_types' => isset($item['new_images']) ? array_map('get_class', $item['new_images']) : []
+                ];
+            }, $educationData)
         ]);
 
-        // Step 1: Delete all existing education records for this tutor.
-        $existingEducations = $tutor->education()->get();
-        foreach ($existingEducations as $edu) {
-            $this->deleteEducationImage($edu->image); // Delete associated image file
-            $edu->delete();
-        }
+        $existingEducations = $tutor->education()->get()->keyBy('id');
+        $processedIds = [];
 
-        Log::info('Deleted all old education records.', [
-            'tutor_id' => $tutor->id,
-            'deleted_count' => $existingEducations->count()
-        ]);
-
-        // Step 2: Recreate education records from the submitted data.
+        // Process each education entry from the form
         foreach ($educationData as $index => $eduData) {
-            // All entries are treated as new.
-            $imageName = null;
-            if (isset($eduData['image']) && $eduData['image'] instanceof UploadedFile) {
-                try {
-                    $imageName = $this->handleEducationImageUpload($eduData['image']);
-                    Log::info('Successfully uploaded new education image.', ['filename' => $imageName]);
-                } catch (\Exception $e) {
-                    Log::error('Education image upload failed.', [
-                        'tutor_id' => $tutor->id,
-                        'error' => $e->getMessage()
-                    ]);
-                    // Continue without the image if upload fails
-                }
-            }
+            $educationId = $eduData['id'] ?? null;
 
-            try {
-                $newEducation = $tutor->education()->create([
+            Log::info('Processing education entry', [
+                'index' => $index,
+                'education_id' => $educationId,
+                'degree' => $eduData['degree'] ?? 'no_degree',
+                'has_new_images' => isset($eduData['new_images']),
+                'new_images_count' => isset($eduData['new_images']) ? count($eduData['new_images']) : 0
+            ]);
+
+            if ($educationId && $existingEducations->has($educationId)) {
+                // Update existing education record
+                $education = $existingEducations->get($educationId);
+                $updateData = [
                     'degree' => $eduData['degree'],
                     'institution' => $eduData['institution'],
                     'year' => $eduData['year'] ?? null,
-                    'image' => $imageName,
-                ]);
-                Log::info('Created new education record.', ['id' => $newEducation->id, 'degree' => $newEducation->degree]);
-            } catch (\Exception $e) {
-                Log::error('Failed to create education record in database.', [
-                    'tutor_id' => $tutor->id,
+                ];
+
+                // Handle multiple image uploads for existing record
+                if (isset($eduData['new_images']) && is_array($eduData['new_images'])) {
+                    Log::info('Processing new images for existing education', [
+                        'education_id' => $educationId,
+                        'new_images_count' => count($eduData['new_images']),
+                        'new_images_details' => array_map(function($img) {
+                            return [
+                                'type' => get_class($img),
+                                'is_uploaded_file' => $img instanceof UploadedFile,
+                                'original_name' => $img instanceof UploadedFile ? $img->getClientOriginalName() : 'not_uploaded_file',
+                                'size' => $img instanceof UploadedFile ? $img->getSize() : 'not_uploaded_file'
+                            ];
+                        }, $eduData['new_images'])
+                    ]);
+
+                    try {
+                        $newImageFilenames = [];
+                        foreach ($eduData['new_images'] as $imageFile) {
+                            if ($imageFile instanceof UploadedFile) {
+                                $filename = $this->handleEducationImageUpload($imageFile);
+                                $newImageFilenames[] = $filename;
+                            }
+                        }
+
+                        if (!empty($newImageFilenames)) {
+                            // Get existing images array
+                            $existingImages = $education->images ?? [];
+
+                            // Merge with new images
+                            $allImages = array_merge($existingImages, $newImageFilenames);
+                            $updateData['images'] = $allImages;
+
+                            Log::info('Added new images to existing education record.', [
+                                'education_id' => $educationId,
+                                'new_images_count' => count($newImageFilenames),
+                                'existing_images_count' => count($existingImages),
+                                'total_images_count' => count($allImages),
+                                'new_filenames' => $newImageFilenames,
+                                'all_filenames' => $allImages
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Multiple image upload failed for existing record.', [
+                            'education_id' => $educationId,
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
+                }
+
+                $education->update($updateData);
+                $processedIds[] = $educationId;
+
+                Log::info('Updated existing education record.', [
+                    'education_id' => $educationId,
                     'degree' => $eduData['degree'],
-                    'error' => $e->getMessage()
+                    'final_images' => $education->fresh()->images
                 ]);
+            } else {
+                // Create new education record
+                $createData = [
+                    'degree' => $eduData['degree'],
+                    'institution' => $eduData['institution'],
+                    'year' => $eduData['year'] ?? null,
+                ];
+
+                Log::info('Creating new education record', [
+                    'index' => $index,
+                    'degree' => $eduData['degree'],
+                    'has_new_images' => isset($eduData['new_images'])
+                ]);
+
+                // Handle multiple image uploads for new record
+                if (isset($eduData['new_images']) && is_array($eduData['new_images'])) {
+                    try {
+                        $imageFilenames = [];
+                        foreach ($eduData['new_images'] as $imageFile) {
+                            if ($imageFile instanceof UploadedFile) {
+                                $filename = $this->handleEducationImageUpload($imageFile);
+                                $imageFilenames[] = $filename;
+                            }
+                        }
+
+                        if (!empty($imageFilenames)) {
+                            $createData['images'] = $imageFilenames;
+                            Log::info('Uploaded multiple images for new education record.', [
+                                'images_count' => count($imageFilenames),
+                                'filenames' => $imageFilenames
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Multiple image upload failed for new record.', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
+                }
+
+                try {
+                    $newEducation = $tutor->education()->create($createData);
+                    Log::info('Created new education record.', [
+                        'id' => $newEducation->id,
+                        'degree' => $newEducation->degree,
+                        'final_images' => $newEducation->images
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to create education record.', [
+                        'tutor_id' => $tutor->id,
+                        'degree' => $eduData['degree'],
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                }
             }
+        }
+
+        // Delete education records that were not included in the form submission
+        $toDelete = $existingEducations->whereNotIn('id', $processedIds);
+        foreach ($toDelete as $education) {
+            // Delete multiple images
+            if ($education->images && is_array($education->images)) {
+                foreach ($education->images as $imageName) {
+                    $this->deleteEducationImage($imageName);
+                }
+            }
+
+            $education->delete();
+            Log::info('Deleted orphaned education record.', ['education_id' => $education->id]);
         }
 
         Log::info('Education update completed.', [

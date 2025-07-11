@@ -6,52 +6,85 @@
     @endphp
 
     @if($educationRecords->isNotEmpty())
-        @foreach($educationRecords as $index => $education)
+        @foreach($educationRecords as $education)
+            @php $educationId = $education->id; @endphp
             <div class="education-entry mb-4 p-4 border rounded-lg bg-gray-50">
-                {{-- <input type="hidden" name="education[{{ $index }}][id]" value="{{ $education->id }}"> --}}
+                <input type="hidden" name="education[{{ $educationId }}][id]" value="{{ $education->id }}">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div>
-                        <x-input-label for="degree_{{ $index }}" :value="__('common.degree')" />
+                        <x-input-label for="degree_{{ $educationId }}" :value="__('common.degree')" />
                         @php
-                            $degreeValue = old('education.'.$index.'.degree', $education->degree);
+                            $degreeValue = old('education.'.$educationId.'.degree', $education->degree);
                             if (is_array($degreeValue)) { $degreeValue = $education->degree ?? ''; }
                         @endphp
-                        <x-text-input :id="'degree_'.$index" name="education[{{ $index }}][degree]" type="text" class="mt-1 block w-full" :value="$degreeValue" required/>
-                        <x-input-error class="mt-2" :messages="$errors->get('education.'.$index.'.degree')" />
+                        <x-text-input :id="'degree_'.$educationId" name="education[{{ $educationId }}][degree]" type="text" class="mt-1 block w-full" :value="$degreeValue" required/>
+                        <x-input-error class="mt-2" :messages="$errors->get('education.'.$educationId.'.degree')" />
                     </div>
                     <div>
-                        <x-input-label for="institution_{{ $index }}" :value="__('common.institution')" />
+                        <x-input-label for="institution_{{ $educationId }}" :value="__('common.institution')" />
                         @php
-                            $institutionValue = old('education.'.$index.'.institution', $education->institution);
+                            $institutionValue = old('education.'.$educationId.'.institution', $education->institution);
                             if (is_array($institutionValue)) { $institutionValue = $education->institution ?? ''; }
                         @endphp
-                        <x-text-input :id="'institution_'.$index" name="education[{{ $index }}][institution]" type="text" class="mt-1 block w-full" :value="$institutionValue" required/>
-                        <x-input-error class="mt-2" :messages="$errors->get('education.'.$index.'.institution')" />
+                        <x-text-input :id="'institution_'.$educationId" name="education[{{ $educationId }}][institution]" type="text" class="mt-1 block w-full" :value="$institutionValue" required/>
+                        <x-input-error class="mt-2" :messages="$errors->get('education.'.$educationId.'.institution')" />
                     </div>
                     <div>
-                        <x-input-label for="year_{{ $index }}" :value="__('common.year')" />
+                        <x-input-label for="year_{{ $educationId }}" :value="__('common.year')" />
                         @php
-                            $yearValue = old('education.'.$index.'.year', $education->year);
+                            $yearValue = old('education.'.$educationId.'.year', $education->year);
                             if (is_array($yearValue)) { $yearValue = $education->year ?? ''; }
                         @endphp
-                        <x-text-input :id="'year_'.$index" name="education[{{ $index }}][year]" type="text" class="mt-1 block w-full" :value="$yearValue" />
-                        <x-input-error class="mt-2" :messages="$errors->get('education.'.$index.'.year')" />
+                        <x-text-input :id="'year_'.$educationId" name="education[{{ $educationId }}][year]" type="text" class="mt-1 block w-full" :value="$yearValue" />
+                        <x-input-error class="mt-2" :messages="$errors->get('education.'.$educationId.'.year')" />
                     </div>
                 </div>
                 <div class="mt-4">
-                    <x-input-label for="education_image_{{ $index }}" :value="__('tutors.certificate_image')" />
-                    @if ($education->image)
-                        <div class="mt-1">
-                            <img src="{{ asset('uploads/education/' . $education->image) }}" class="h-16 w-auto rounded">
-                            <p class="text-xs text-gray-500 mt-1">{{ __('tutors.current_image_info') }}</p>
+                    <x-input-label for="education_images_{{ $educationId }}" :value="__('tutors.certificate_images')" />
+
+                    <!-- Display existing images -->
+                    @if ($education->hasImages())
+                        <div class="mt-2 mb-3">
+                            <p class="text-xs text-gray-500 mb-2">{{ __('tutors.current_images') }}:</p>
+                            <div class="grid grid-cols-3 gap-2">
+                                @foreach($education->getAllImages() as $index => $imageName)
+                                    <div class="relative group">
+                                        <img src="{{ asset('uploads/education/' . $imageName) }}"
+                                             class="h-20 w-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                             onclick="openImageModal('{{ asset('uploads/education/' . $imageName) }}', '{{ $education->degree }} - Image {{ $index + 1 }}')" />
+                                        <button type="button"
+                                                class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity remove-image-btn"
+                                                data-education-id="{{ $educationId }}"
+                                                data-image-name="{{ $imageName }}"
+                                                title="Remove image">×</button>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     @endif
-                    <input type="file" name="education[{{ $index }}][image]" id="education_image_{{ $index }}" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 image-input" data-preview="preview_{{ $index }}" accept="image/*">
-                    <div id="preview_{{ $index }}" class="mt-2" style="display: none;">
-                        <p class="text-sm font-medium text-gray-700 mb-2">{{ __('profile.preview') }}:</p>
-                        <img src="" alt="Certificate Preview" class="h-20 w-20 object-cover rounded border-2 border-indigo-300">
+
+                    <!-- Upload new images -->
+                    <div class="mt-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('tutors.add_more_images') }}</label>
+                        <input type="file"
+                               name="education[{{ $educationId }}][new_images][]"
+                               id="education_images_{{ $educationId }}"
+                               class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 multiple-image-input"
+                               data-preview="preview_{{ $educationId }}"
+                               accept="image/*"
+                               multiple>
+                        <p class="mt-1 text-xs text-gray-500">{{ __('tutors.select_multiple_images') }} ({{ __('profile.max_size') }}: 5MB {{ __('common.each') }})</p>
                     </div>
-                    <x-input-error class="mt-2" :messages="$errors->get('education.'.$index.'.image')" />
+
+                    <!-- Preview new images -->
+                    <div id="preview_{{ $educationId }}" class="mt-3" style="display: none;">
+                        <p class="text-sm font-medium text-gray-700 mb-2">{{ __('tutors.new_images_preview') }}:</p>
+                        <div class="grid grid-cols-3 gap-2" id="preview_grid_{{ $educationId }}">
+                            <!-- Preview images will be inserted here -->
+                        </div>
+                    </div>
+
+                    <x-input-error class="mt-2" :messages="$errors->get('education.'.$educationId.'.new_images')" />
                 </div>
                 <div class="mt-3 flex justify-end">
                     <button type="button" class="text-red-600 hover:text-red-800 text-sm font-medium remove-education">{{ __('common.remove') }}</button>
@@ -70,30 +103,48 @@ document.addEventListener('DOMContentLoaded', function() {
         const addEducationBtn = document.getElementById('add-education');
         let educationCount = {{ $educationRecords->count() }};
 
-        const handleImagePreview = (input) => {
+        const handleMultipleImagePreview = (input) => {
             const previewId = input.dataset.preview;
             const previewDiv = document.getElementById(previewId);
-            if (!previewDiv) return;
+            const previewGrid = document.getElementById('preview_grid_' + previewId.split('_')[1]);
 
-            const previewImg = previewDiv.querySelector('img');
-            const file = input.files[0];
+            if (!previewDiv || !previewGrid) return;
 
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    previewImg.src = e.target.result;
-                    previewDiv.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
+            const files = Array.from(input.files);
+
+            if (files.length > 0) {
+                previewGrid.innerHTML = ''; // Clear previous previews
+
+                files.forEach((file, index) => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const imgContainer = document.createElement('div');
+                            imgContainer.className = 'relative';
+                            imgContainer.innerHTML = `
+                                <img src="${e.target.result}"
+                                     alt="Preview ${index + 1}"
+                                     class="h-20 w-20 object-cover rounded border-2 border-green-300">
+                                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b">
+                                    New ${index + 1}
+                                </div>
+                            `;
+                            previewGrid.appendChild(imgContainer);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                previewDiv.style.display = 'block';
             } else {
                 previewDiv.style.display = 'none';
             }
         };
 
         const bindImagePreview = (container) => {
-            container.querySelectorAll('.image-input').forEach(input => {
-                input.removeEventListener('change', () => handleImagePreview(input)); // Avoid double binding
-                input.addEventListener('change', () => handleImagePreview(input));
+            container.querySelectorAll('.multiple-image-input').forEach(input => {
+                input.removeEventListener('change', () => handleMultipleImagePreview(input)); // Avoid double binding
+                input.addEventListener('change', () => handleMultipleImagePreview(input));
             });
         };
 
@@ -119,12 +170,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
                 <div class="mt-4">
-                    <label for="education_image_${newIndex}" class="block text-sm font-medium text-gray-700">{{ __("tutors.certificate_image") }} ({{ __('common.optional') }})</label>
-                    <input id="education_image_${newIndex}" name="education[${newIndex}][image]" type="file" class="image-input mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept="image/*" data-preview="preview_${newIndex}">
-                    <p class="mt-1 text-sm text-gray-500">{{ __('profile.max_size') }}: 5MB</p>
-                    <div id="preview_${newIndex}" class="mt-2" style="display: none;">
-                        <p class="text-sm font-medium text-gray-700 mb-2">{{ __('profile.preview') }}:</p>
-                        <img src="" alt="Certificate Preview" class="h-20 w-20 object-cover rounded border-2 border-indigo-300">
+                    <label for="education_images_${newIndex}" class="block text-sm font-medium text-gray-700">{{ __("tutors.certificate_images") }} ({{ __('common.optional') }})</label>
+                    <input id="education_images_${newIndex}" name="education[${newIndex}][new_images][]" type="file" class="multiple-image-input mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept="image/*" data-preview="preview_${newIndex}" multiple>
+                    <p class="mt-1 text-xs text-gray-500">{{ __('tutors.select_multiple_images') }} ({{ __('profile.max_size') }}: 5MB {{ __('common.each') }})</p>
+                    <div id="preview_${newIndex}" class="mt-3" style="display: none;">
+                        <p class="text-sm font-medium text-gray-700 mb-2">{{ __('tutors.new_images_preview') }}:</p>
+                        <div class="grid grid-cols-3 gap-2" id="preview_grid_${newIndex}">
+                            <!-- Preview images will be inserted here -->
+                        </div>
                     </div>
                 </div>
                 <div class="mt-3 flex justify-end">

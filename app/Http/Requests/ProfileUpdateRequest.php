@@ -38,6 +38,15 @@ class ProfileUpdateRequest extends FormRequest
             $rules['bio'] = ['nullable', 'string', 'max:1000'];
             $rules['subjects'] = ['nullable', 'array'];
             $rules['subjects.*'] = ['integer', 'exists:subjects,id'];
+
+            // Education validation
+            $rules['education'] = ['nullable', 'array'];
+            $rules['education.*.id'] = ['nullable', 'integer', 'exists:education,id'];
+            $rules['education.*.degree'] = ['required', 'string', 'max:255'];
+            $rules['education.*.institution'] = ['required', 'string', 'max:255'];
+            $rules['education.*.year'] = ['nullable', 'string', 'max:50'];
+            $rules['education.*.new_images'] = ['nullable', 'array'];
+            $rules['education.*.new_images.*'] = ['image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120']; // 5MB per image
         }
 
         return $rules;

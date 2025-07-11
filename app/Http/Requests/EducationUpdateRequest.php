@@ -24,10 +24,12 @@ class EducationUpdateRequest extends FormRequest
     {
         return [
             'education' => ['nullable', 'array'],
+            'education.*.id' => ['nullable', 'integer', 'exists:education,id'],
             'education.*.degree' => ['required', 'string', 'max:255'],
             'education.*.institution' => ['required', 'string', 'max:255'],
             'education.*.year' => ['nullable', 'string', 'max:50'],
-            'education.*.image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'], // 5MB
+            'education.*.new_images' => ['nullable', 'array'],
+            'education.*.new_images.*' => ['image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'], // 5MB per image
         ];
     }
 }
