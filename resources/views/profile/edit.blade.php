@@ -1,64 +1,69 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
+            Profile
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-data="{ showEditForm: false }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
-                        @csrf
-                        @method('patch')
 
-                        <div>
-                            <x-input-label for="name" :value="__('Name')" />
-                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
-                            <x-input-error class="mt-2" :messages="$errors->get('name')" />
-                        </div>
-
-                        <div class="mt-4">
-                            <x-input-label for="email" :value="__('Email')" />
-                            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-                            <x-input-error class="mt-2" :messages="$errors->get('email')" />
-                        </div>
-
-                        <div class="mt-4">
-                            <x-input-label for="phone_number" :value="__('Phone Number')" />
-                            <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" :value="old('phone_number', $user->phone_number)" autocomplete="tel" />
-                            <x-input-error class="mt-2" :messages="$errors->get('phone_number')" />
-                        </div>
-
-                        <div class="mt-4">
-                            <x-input-label for="address" :value="__('Address')" />
-                            <x-text-input id="address" name="address" type="text" class="mt-1 block w-full" :value="old('address', $user->address)" autocomplete="street-address" />
-                            <x-input-error class="mt-2" :messages="$errors->get('address')" />
-                        </div>
-
-                        <div class="mt-4">
-                            <x-input-label for="avatar" :value="__('Avatar')" />
-                            <input id="avatar" name="avatar" type="file" class="mt-1 block w-full" accept="image/*" />
-                            <x-input-error class="mt-2" :messages="$errors->get('avatar')" />
-                        </div>
-
-                        <div class="flex items-center gap-4 mt-4">
-                            <x-primary-button>{{ __('Save') }}</x-primary-button>
-                        </div>
-                    </form>
+            <!-- Flash success message -->
+            @if (session('success'))
+                <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+                    {{ session('success') }}
                 </div>
+            @endif
+
+            <!-- Combined Profile and Education Read-Only View -->
+            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                @include('profile.partials.view-profile-information', ['user' => $user, 'tutor' => $tutor])
             </div>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    <form method="post" action="{{ route('profile.destroy') }}">
-                        @csrf
-                        @method('delete')
-                        <x-danger-button>{{ __('Delete Account') }}</x-danger-button>
-                    </form>
+            <!-- Edit Profile Forms Container -->
+            <div x-show="showEditForm" x-collapse>
+                <div class="space-y-6">
+                    <!-- Form 1: Update Profile -->
+                    <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                        <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+                            @csrf
+                            @method('patch')
+                            @include('profile.partials.update-profile-information-form')
+                             @if ($tutor)
+                                @include('tutors.profile.partials.update-tutor-profile-form', ['subjects' => $subjects, 'tutor' => $tutor])
+                             @endif
+                            <div class="flex items-center gap-4 mt-6">
+                                <x-primary-button>{{ __('common.save_changes') }}</x-primary-button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Form 2: Update Education -->
+                    @if ($tutor)
+                        <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                             <form method="post" action="{{ route('profile.update-education') }}" enctype="multipart/form-data">
+                                @csrf
+                                @include('tutors.profile.partials.update-education-form', ['tutor' => $tutor])
+                                <div class="flex items-center gap-4 mt-6">
+                                    <x-primary-button>{{ __('tutors.save_education') }}</x-primary-button>
+                                </div>
+                            </form>
+                        </div>
+                    @endif
+
+                    <!-- Form 3: Update Password -->
+                     <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                        @include('profile.partials.update-password-form')
+                    </div>
+
+                    <!-- Form 4: Delete Account -->
+                    <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                        @include('profile.partials.delete-user-form')
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <!-- Image Modal and scripts -->
+    @include('profile.partials.image-modal-and-scripts')
 </x-app-layout>

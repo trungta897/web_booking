@@ -31,10 +31,7 @@ class TutorProfileRequest extends FormRequest
             'education' => 'sometimes|array',
             'education.*.degree' => 'required_with:education|string|max:255',
             'education.*.institution' => 'required_with:education|string|max:255',
-            'education.*.field_of_study' => 'nullable|string|max:255',
-            'education.*.start_year' => 'required_with:education|numeric|min:1900|max:' . date('Y'),
-            'education.*.end_year' => 'nullable|numeric|min:1900|max:' . (date('Y') + 10),
-            'education.*.description' => 'nullable|string|max:500',
+            'education.*.year' => 'nullable|string|max:50',
         ];
     }
 

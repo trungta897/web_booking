@@ -30,13 +30,21 @@
 
                             <div>
                                 <x-input-label for="name" :value="__('Name')" />
-                                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $admin->name)" required autofocus autocomplete="name" />
+                                @php
+                                    $nameValue = old('name', $admin->name);
+                                    if (is_array($nameValue)) { $nameValue = $admin->name ?? ''; }
+                                @endphp
+                                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="$nameValue" required autofocus autocomplete="name" />
                                 <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             </div>
 
                             <div>
                                 <x-input-label for="email" :value="__('Email')" />
-                                <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $admin->email)" required autocomplete="username" />
+                                @php
+                                    $emailValue = old('email', $admin->email);
+                                    if (is_array($emailValue)) { $emailValue = $admin->email ?? ''; }
+                                @endphp
+                                <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="$emailValue" required autocomplete="username" />
                                 <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
                                 @if ($admin instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $admin->hasVerifiedEmail())

@@ -331,10 +331,34 @@
     </div>
 
     @push('scripts')
+    <!-- Include Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
         let selectedPaymentMethod = null;
+        let stripe = null;
+        let cardElement = null;
+        let elements = null;
 
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Stripe
+            if (typeof Stripe !== 'undefined') {
+                stripe = Stripe('{{ config("services.stripe.key") }}');
+                elements = stripe.elements();
+
+                // Create card element
+                cardElement = elements.create('card', {
+                    style: {
+                        base: {
+                            fontSize: '16px',
+                            color: '#424770',
+                            '::placeholder': {
+                                color: '#aab7c4',
+                            },
+                        },
+                    },
+                });
+            }
+
             // Elements
             const paymentMethodCards = document.querySelectorAll('.payment-method-card');
             const paymentButton = document.getElementById('payment-button');
@@ -373,11 +397,31 @@
                         this.classList.add('border-blue-500', 'bg-blue-50');
                         vnpayForm.classList.remove('hidden');
                         buttonText.textContent = 'Thanh toán với VNPay';
+
+                        // Unmount Stripe card element if mounted
+                        if (cardElement && cardElement._mounted) {
+                            cardElement.unmount();
+                        }
                     } else if (method === 'stripe') {
                         this.classList.remove('border-gray-200');
                         this.classList.add('border-purple-500', 'bg-purple-50');
                         stripeForm.classList.remove('hidden');
                         buttonText.textContent = 'Thanh toán với Stripe';
+
+                        // Mount Stripe card element
+                        if (cardElement && !cardElement._mounted) {
+                            cardElement.mount('#card-element');
+
+                            // Listen for real-time validation errors from the card Element
+                            cardElement.on('change', function(event) {
+                                const displayError = document.getElementById('card-errors');
+                                if (event.error) {
+                                    displayError.textContent = event.error.message;
+                                } else {
+                                    displayError.textContent = '';
+                                }
+                            });
+                        }
                     }
 
                     // Enable payment button
@@ -490,9 +534,88 @@
             }
 
             function processStripePayment() {
-                // TODO: Implement Stripe payment processing
-                showError('Stripe payment chưa được triển khai');
+                // Check if Stripe and card element are ready
+                if (!stripe || !cardElement) {
+                    showError('Stripe chưa được khởi tạo. Vui lòng thử lại sau.');
+                    resetPaymentButton();
+                    return;
+                }
+
+                fetch(`/web_booking/public/bookings/{{ $booking->id }}/payment-intent`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        payment_method: 'stripe'
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // Handle different error status codes
+                        if (response.status === 403) {
+                            throw new Error('Bạn không có quyền thanh toán cho booking này.');
+                        } else if (response.status === 422) {
+                            throw new Error('Booking này không thể thanh toán (đã thanh toán hoặc chưa được chấp nhận).');
+                        } else if (response.status === 404) {
+                            throw new Error('Booking không tồn tại hoặc đã bị xóa. Vui lòng kiểm tra lại.');
+                        }
+
+                        // If response is not ok, try to get error message
+                        return response.json().then(data => {
+                            throw new Error(data.error || `Lỗi server: ${response.status}`);
+                        }).catch(() => {
+                            if (response.status === 500) {
+                                throw new Error('Lỗi server nội bộ. Vui lòng thử lại sau.');
+                            } else {
+                                throw new Error(`Lỗi kết nối server: ${response.status}`);
+                            }
+                        });
+                    }
+
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.clientSecret) {
+                        // Confirm the payment with Stripe using the mounted card element
+                        return stripe.confirmCardPayment(data.clientSecret, {
+                            payment_method: {
+                                card: cardElement,
+                                billing_details: {
+                                    name: '{{ auth()->user()->name ?? "" }}',
+                                    email: '{{ auth()->user()->email ?? "" }}'
+                                }
+                            }
+                        });
+                    } else {
+                        throw new Error(data.error || 'Có lỗi xảy ra khi tạo Stripe payment intent');
+                    }
+                })
+                .then(result => {
+                    if (result.error) {
+                        // Show error from Stripe (e.g., card declined)
+                        throw new Error(result.error.message);
+                    } else {
+                        // Payment succeeded, redirect to confirmation
+                        window.location.href = `/web_booking/public/bookings/{{ $booking->id }}/payment/confirm`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Stripe payment error:', error);
+
+                    // Handle different error types
+                    let errorMessage = 'Có lỗi xảy ra khi kết nối đến Stripe';
+
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        errorMessage = 'Không thể kết nối đến server. Vui lòng thử lại.';
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+
+                    showError(errorMessage);
                 resetPaymentButton();
+                });
             }
 
             function showError(message) {

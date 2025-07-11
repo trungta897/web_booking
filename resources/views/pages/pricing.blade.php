@@ -68,15 +68,27 @@
 
             <!-- Buttons Row -->
             <div class="flex flex-col sm:flex-row justify-around items-center gap-4 mb-16 mt-8">
-                <a href="{{ route('tutors.index', ['price_range' => '0-25']) }}" class="w-full sm:w-auto btn-primary text-center px-6 py-3 no-underline">
-                    {{ __('pricing.plans.basic.title') }}
-                </a>
-                <a href="{{ route('tutors.index', ['price_range' => '25-40']) }}" class="w-full sm:w-auto btn-primary text-center px-6 py-3 no-underline border-2 border-primary-700 ring-2 ring-offset-2 ring-primary-700">
-                    {{ __('pricing.plans.standard.title') }}
-                </a>
-                <a href="{{ route('tutors.index', ['price_range' => '40-']) }}" class="w-full sm:w-auto btn-primary text-center px-6 py-3 no-underline">
-                    {{ __('pricing.plans.premium.title') }}
-                </a>
+                @if(app()->getLocale() === 'vi')
+                    <a href="{{ route('tutors.index', ['price_range' => '3-4']) }}" class="w-full sm:w-auto btn-primary text-center px-6 py-3 no-underline">
+                        CƠ BẢN: 80.000-100.000₫/GIỜ
+                    </a>
+                    <a href="{{ route('tutors.index', ['price_range' => '4-8']) }}" class="w-full sm:w-auto btn-primary text-center px-6 py-3 no-underline border-2 border-primary-700 ring-2 ring-offset-2 ring-primary-700">
+                        TRUNG BÌNH: 110.000-200.000₫/GIỜ
+                    </a>
+                    <a href="{{ route('tutors.index', ['price_range' => '8-12']) }}" class="w-full sm:w-auto btn-primary text-center px-6 py-3 no-underline">
+                        CAO CẤP: 210.000-300.000₫/GIỜ
+                    </a>
+                @else
+                    <a href="{{ route('tutors.index', ['price_range' => '3-4']) }}" class="w-full sm:w-auto btn-primary text-center px-6 py-3 no-underline">
+                        {{ __('pricing.plans.basic.title') }}
+                    </a>
+                    <a href="{{ route('tutors.index', ['price_range' => '4-8']) }}" class="w-full sm:w-auto btn-primary text-center px-6 py-3 no-underline border-2 border-primary-700 ring-2 ring-offset-2 ring-primary-700">
+                        {{ __('pricing.plans.standard.title') }}
+                    </a>
+                    <a href="{{ route('tutors.index', ['price_range' => '8-12']) }}" class="w-full sm:w-auto btn-primary text-center px-6 py-3 no-underline">
+                        {{ __('pricing.plans.premium.title') }}
+                    </a>
+                @endif
             </div>
 
             <!-- FAQ Section -->

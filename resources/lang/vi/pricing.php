@@ -3,10 +3,11 @@
 return [
     'title' => 'Bảng Giá Đơn Giản, Minh Bạch',
     'subtitle' => 'Chọn gói phù hợp nhất với bạn',
+    'hourly_rate' => 'Giá theo giờ',
 
     'plans' => [
         'basic' => [
-            'title' => 'Cơ Bản: Lên đến 625.000₫/giờ',
+            'title' => 'Cơ Bản: 80.000-100.000₫/giờ',
             'features' => [
                 'Dạy kèm 1:1',
                 'Các môn học cơ bản',
@@ -14,7 +15,7 @@ return [
             ],
         ],
         'standard' => [
-            'title' => 'Tiêu Chuẩn: 625.000₫-1.000.000₫/giờ',
+            'title' => 'Trung Bình: 110.000-200.000₫/giờ',
             'features' => [
                 'Dạy kèm 1:1',
                 'Tất cả môn học',
@@ -23,7 +24,7 @@ return [
             ],
         ],
         'premium' => [
-            'title' => 'Cao Cấp: 1.000.000₫+/giờ',
+            'title' => 'Cao Cấp: 210.000-300.000₫/giờ',
             'features' => [
                 'Dạy kèm 1:1',
                 'Tất cả môn học',

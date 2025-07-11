@@ -440,3 +440,40 @@ if (!function_exists('translateReasonCode')) {
         return ucfirst(str_replace('_', ' ', $reasonCode));
     }
 }
+
+if (!function_exists('safeOld')) {
+    /**
+     * Safely get old input value, ensuring it returns a string for form fields.
+     * Prevents htmlspecialchars() errors when arrays are passed to string fields.
+     */
+    function safeOld($key, $default = '')
+    {
+        $value = old($key, $default);
+
+        // If value is an array, return empty string or default
+        if (is_array($value)) {
+            return is_string($default) ? $default : '';
+        }
+
+        // Ensure we return a string
+        return (string) $value;
+    }
+}
+
+if (!function_exists('safeOldArray')) {
+    /**
+     * Safely get old input value for array fields.
+     * Ensures we always return an array.
+     */
+    function safeOldArray($key, $default = [])
+    {
+        $value = old($key, $default);
+
+        // If value is not an array, return default array
+        if (!is_array($value)) {
+            return is_array($default) ? $default : [];
+        }
+
+        return $value;
+    }
+}

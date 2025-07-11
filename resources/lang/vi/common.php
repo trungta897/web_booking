@@ -7,6 +7,7 @@ return [
     'home' => 'Trang chủ',
     'dashboard' => 'Bảng điều khiển',
     'profile' => 'Hồ sơ',
+    'Profile' => 'Hồ sơ',
     'logout' => 'Đăng xuất',
     'login' => 'Đăng nhập',
     'register' => 'Đăng ký',
@@ -198,6 +199,30 @@ return [
     'rejected' => 'Đã từ chối',
     'cancelled' => 'Đã hủy',
     'paid' => 'Đã thanh toán',
+
+    // Profile form
+    'degree' => 'Bằng cấp',
+    'institution' => 'Trường/Cơ sở',
+    'year' => 'Năm',
+    'name' => 'Tên',
+    'email' => 'Email',
+    'avatar' => 'Ảnh đại diện',
+    'remove' => 'Xóa',
+    'save_changes' => 'Lưu thay đổi',
+    'delete_account' => 'Xóa tài khoản',
+
+    // Profile page translations
+    'Tutor Profile Information' => 'Thông Tin Hồ Sơ Gia Sư',
+    'Years of Experience' => 'Số Năm Kinh Nghiệm',
+    'Total Subjects' => 'Tổng Số Môn Học',
+    'Education Records' => 'Hồ Sơ Học Vấn',
+    'Bio' => 'Tiểu sử',
+    'Current Subjects' => 'Môn Học Hiện Tại',
+    'Education Background' => 'Trình Độ Học Vấn',
+    'Edit Profile Information' => 'Chỉnh Sửa Thông Tin Hồ Sơ',
+    'Tutor Information' => 'Thông Tin Gia Sư',
+    'years' => 'năm',
+    'Hold Ctrl/Cmd to select multiple subjects' => 'Giữ Ctrl/Cmd để chọn nhiều môn học',
     'partial_refunded' => 'Hoàn tiền một phần',
     'refunded' => 'Đã hoàn tiền',
 
@@ -215,6 +240,14 @@ return [
     'no_bookings_on_this_date' => 'Không có lịch học nào trong ngày này',
     'has_classes' => 'Có lớp học',
     'confirmed' => 'Đã xác nhận',
+    'add_education' => 'Thêm Bằng Cấp/Chứng Chỉ',
+    'e.g., Bachelor of Science' => 'vd: Cử nhân Khoa học',
+    'e.g., Stanford University' => 'vd: Đại học Stanford',
+    'Certificate Image (Optional)' => 'Hình Ảnh Bằng Cấp (Tùy Chọn)',
+    'Upload diploma/certificate image for verification' => 'Tải lên hình ảnh bằng cấp để xác thực',
+    'Current certificate image' => 'Hình ảnh bằng cấp hiện tại',
+    'Certificate/Diploma Image' => 'Hình Ảnh Bằng Cấp/Chứng Chỉ',
+    'Click to view' => 'Nhấp để xem',
 
     // Days of week
     'sunday' => 'CN',

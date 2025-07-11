@@ -19,6 +19,8 @@ class Education extends Model
         'start_year',
         'end_year',
         'description',
+        'year',
+        'image',
     ];
 
     protected $casts = [

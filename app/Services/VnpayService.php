@@ -283,6 +283,17 @@ class VnpayService
                     ]),
                 ]);
 
+                // Auto-apply commission calculation
+                try {
+                    $payoutService = app(PayoutService::class);
+                    $payoutService->applyCommissionToBooking($booking);
+                } catch (\Exception $e) {
+                    LogService::vnpay('Commission calculation failed', [
+                        'booking_id' => $booking->id,
+                        'error' => $e->getMessage(),
+                    ], 'warning');
+                }
+
                 if ($transaction) {
                     $transaction->update([
                         'status' => Transaction::STATUS_COMPLETED,

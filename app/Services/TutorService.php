@@ -10,6 +10,7 @@ use App\Repositories\TutorRepository;
 use App\Repositories\UserRepository;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class TutorService extends BaseService implements TutorServiceInterface

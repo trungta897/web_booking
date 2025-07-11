@@ -32,6 +32,12 @@ class Booking extends Model
         'rejection_description',
         'cancellation_reason',
         'cancellation_description',
+        // Commission fields
+        'platform_fee_percentage',
+        'platform_fee_amount',
+        'tutor_earnings',
+        'commission_calculated_at',
+        'payout_id',
     ];
 
     protected $casts = [
@@ -41,6 +47,11 @@ class Booking extends Model
         'exchange_rate' => 'decimal:4',
         'original_amount' => 'decimal:2',
         'payment_metadata' => 'array',
+        // Commission fields
+        'platform_fee_percentage' => 'decimal:2',
+        'platform_fee_amount' => 'decimal:2',
+        'tutor_earnings' => 'decimal:2',
+        'commission_calculated_at' => 'datetime',
     ];
 
     // Add status constants
@@ -225,6 +236,47 @@ class Booking extends Model
         ];
 
         return $methods[$this->payment_method] ?? $this->payment_method;
+    }
+
+    // Commission relationships
+    public function payout()
+    {
+        return $this->belongsTo(TutorPayout::class, 'payout_id');
+    }
+
+    public function payoutItem()
+    {
+        return $this->hasOne(PayoutItem::class, 'booking_id');
+    }
+
+    // Commission helper methods
+    public function hasCommissionCalculated(): bool
+    {
+        return !is_null($this->commission_calculated_at);
+    }
+
+    public function isIncludedInPayout(): bool
+    {
+        return !is_null($this->payout_id);
+    }
+
+    public function getFormattedPlatformFeeAttribute(): string
+    {
+        return number_format($this->platform_fee_amount ?? 0, 0, ',', '.') . ' VND';
+    }
+
+    public function getFormattedTutorEarningsAttribute(): string
+    {
+        return number_format($this->tutor_earnings ?? 0, 0, ',', '.') . ' VND';
+    }
+
+    // Scope for unpaid earnings (eligible for payout)
+    public function scopeEligibleForPayout($query)
+    {
+        return $query->where('payment_status', self::PAYMENT_STATUS_PAID)
+                    ->where('status', 'completed')
+                    ->whereNull('payout_id')
+                    ->whereNotNull('commission_calculated_at');
     }
 
     public function setPriceAttribute($value)

@@ -88,6 +88,17 @@ class PaymentService extends BaseService implements PaymentServiceInterface
                 'payment_at' => now(),
             ]);
 
+            // Auto-apply commission calculation
+            try {
+                $payoutService = app(PayoutService::class);
+                $payoutService->applyCommissionToBooking($booking);
+            } catch (Exception $e) {
+                $this->logActivity('Commission calculation failed for Stripe payment', [
+                    'booking_id' => $booking->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             // Create transaction record - This should be handled by a dedicated Stripe transaction handler if needed
             // For now, we assume the webhook is the source of truth and creates the transaction.
             // $this->createTransactionRecord($booking, 'stripe', 'paid');

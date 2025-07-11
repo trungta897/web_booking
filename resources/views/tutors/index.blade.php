@@ -29,15 +29,13 @@
                                 <select name="price_range" id="price_range" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     <option value="">{{ __('tutors.any_price') }}</option>
                                     @if(app()->getLocale() === 'vi')
-                                        <option value="0-25" {{ request('price_range') == '0-25' ? 'selected' : '' }}>0 - 625.000₫/giờ</option>
-                                        <option value="26-50" {{ request('price_range') == '26-50' ? 'selected' : '' }}>650.000 - 1.250.000₫/giờ</option>
-                                        <option value="51-100" {{ request('price_range') == '51-100' ? 'selected' : '' }}>1.275.000 - 2.500.000₫/giờ</option>
-                                        <option value="101+" {{ request('price_range') == '101+' ? 'selected' : '' }}>2.525.000₫+/giờ</option>
+                                        <option value="3-4" {{ request('price_range') == '3-4' ? 'selected' : '' }}>80.000 - 100.000₫/giờ</option>
+                                        <option value="4-8" {{ request('price_range') == '4-8' ? 'selected' : '' }}>110.000 - 200.000₫/giờ</option>
+                                        <option value="8-12" {{ request('price_range') == '8-12' ? 'selected' : '' }}>210.000 - 300.000₫/giờ</option>
                                     @else
-                                        <option value="0-25" {{ request('price_range') == '0-25' ? 'selected' : '' }}>$0 - $25/hr</option>
-                                        <option value="26-50" {{ request('price_range') == '26-50' ? 'selected' : '' }}>$26 - $50/hr</option>
-                                        <option value="51-100" {{ request('price_range') == '51-100' ? 'selected' : '' }}>$51 - $100/hr</option>
-                                        <option value="101+" {{ request('price_range') == '101+' ? 'selected' : '' }}>$101+/hr</option>
+                                        <option value="3-4" {{ request('price_range') == '3-4' ? 'selected' : '' }}>$3 - $4/hr</option>
+                                        <option value="4-8" {{ request('price_range') == '4-8' ? 'selected' : '' }}>$4 - $8/hr</option>
+                                        <option value="8-12" {{ request('price_range') == '8-12' ? 'selected' : '' }}>$8 - $12/hr</option>
                                     @endif
                                 </select>
                             </div>
@@ -114,7 +112,7 @@
                         <div class="card-hover p-6 rounded-lg shadow-lg flex flex-col">
                             <div class="flex items-center mb-4">
                                 <div class="flex-shrink-0">
-                                    <img class="h-16 w-16 rounded-full" src="{{ $tutor->user->avatar ? asset('storage/' . $tutor->user->avatar) : asset('images/default-avatar.png') }}" alt="{{ $tutor->user->name }}">
+                                    <img class="h-16 w-16 rounded-full" src="{{ $tutor->user->avatar ? asset('uploads/avatars/' . $tutor->user->avatar) : asset('images/default-avatar.png') }}" alt="{{ $tutor->user->name }}">
                                 </div>
                                 <div class="ml-4">
                                     <h3 class="text-lg font-semibold text-gray-900">{{ $tutor->user->name }}</h3>

@@ -28,7 +28,7 @@
                     <!-- Profile Header -->
                     <div class="flex items-start space-x-6 mb-8">
                         <div class="flex-shrink-0">
-                            <img class="h-32 w-32 rounded-full" src="{{ $tutor->user->avatar ? asset('storage/' . $tutor->user->avatar) : asset('images/default-avatar.png') }}" alt="{{ $tutor->user->name }}">
+                            <img class="h-32 w-32 rounded-full" src="{{ $tutor->user->avatar ? asset('uploads/avatars/' . $tutor->user->avatar) : asset('images/default-avatar.png') }}" alt="{{ $tutor->user->name }}">
                         </div>
                         <div class="flex-1">
                             <div class="flex items-center justify-between">
@@ -78,10 +78,26 @@
                         <div class="space-y-4">
                             @if($tutor->education && count($tutor->education) > 0)
                                 @foreach($tutor->education as $education)
-                                    <div class="border-l-4 border-indigo-500 pl-4">
-                                        <h3 class="font-medium text-gray-900">{{ $education->degree }} in {{ $education->field_of_study }}</h3>
-                                        <p class="text-gray-600">{{ $education->institution }}</p>
-                                        <p class="text-sm text-gray-500">{{ $education->start_year }} - {{ $education->end_year ?? __('common.present') }}</p>
+                                    <div class="border-l-4 border-indigo-500 pl-4 bg-gray-50 p-4 rounded">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <h3 class="font-medium text-gray-900">{{ $education->degree }}</h3>
+                                                <p class="text-gray-600">{{ $education->institution }}</p>
+                                                @if($education->year)
+                                                    <p class="text-sm text-gray-500">{{ $education->year }}</p>
+                                                @endif
+                                            </div>
+
+                                            @if($education->image)
+                                                <div class="ml-4 flex-shrink-0">
+                                                    <img src="{{ asset('uploads/education/' . $education->image) }}"
+                                                         alt="Certificate for {{ $education->degree }}"
+                                                         class="h-20 w-20 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
+                                                         onclick="showCertificateModal('{{ asset('uploads/education/' . $education->image) }}', '{{ $education->degree }}', '{{ $education->institution }}')" />
+                                                    <p class="text-xs text-gray-500 mt-1 text-center">{{ __('Click to view') }}</p>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
                                 @endforeach
                             @else
@@ -113,7 +129,7 @@
                                 <div class="border-b border-gray-200 pb-6 last:border-0 last:pb-0">
                                     <div class="flex items-center mb-2">
                                         @if($review->student)
-                                            <img class="h-10 w-10 rounded-full" src="{{ $review->student->avatar ? asset('storage/' . $review->student->avatar) : asset('images/default-avatar.png') }}" alt="{{ $review->student->name }}">
+                                            <img class="h-10 w-10 rounded-full" src="{{ $review->student->avatar ? asset('uploads/avatars/' . $review->student->avatar) : asset('images/default-avatar.png') }}" alt="{{ $review->student->name }}">
                                             <div class="ml-3">
                                                 <h3 class="text-sm font-medium text-gray-900">{{ $review->student->name }}</h3>
                                             @else
@@ -199,7 +215,11 @@
 
                                             <div>
                                                 <label for="comment" class="block text-sm font-medium text-gray-700">Comment</label>
-                                                <textarea id="comment" name="comment" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="{{ __('common.experience_with_tutor') }}">{{ old('comment') }}</textarea>
+                                                @php
+                                                    $commentValue = old('comment', '');
+                                                    if (is_array($commentValue)) { $commentValue = ''; }
+                                                @endphp
+                                                <textarea id="comment" name="comment" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="{{ __('common.experience_with_tutor') }}">{{ $commentValue }}</textarea>
                                                 @error('comment')
                                                     <p class="mt-1 text-sm text-red-600">{{ $errors->first('comment') }}</p>
                                                 @enderror
@@ -302,6 +322,63 @@
         checkAvailability();
         // Refresh availability every 5 minutes
         setInterval(checkAvailability, 300000);
+
+        // Certificate modal functionality
+        function showCertificateModal(imageUrl, degree, institution) {
+            const modal = document.getElementById('certificateModal');
+            const modalImage = document.getElementById('modalCertificateImage');
+            const modalTitle = document.getElementById('modalCertificateTitle');
+            const modalInstitution = document.getElementById('modalCertificateInstitution');
+
+            modalImage.src = imageUrl;
+            modalTitle.textContent = degree;
+            modalInstitution.textContent = institution;
+            modal.classList.remove('hidden');
+        }
+
+        function closeCertificateModal() {
+            document.getElementById('certificateModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('certificateModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCertificateModal();
+            }
+        });
     </script>
     @endpush
+
+    <!-- Certificate Modal -->
+    <div id="certificateModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <!-- Modal Header -->
+                <div class="flex justify-between items-center pb-3">
+                    <div>
+                        <h3 id="modalCertificateTitle" class="text-lg font-bold text-gray-900"></h3>
+                        <p id="modalCertificateInstitution" class="text-sm text-gray-600"></p>
+                    </div>
+                    <button onclick="closeCertificateModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="text-center">
+                    <img id="modalCertificateImage" src="" alt="Certificate" class="max-w-full max-h-96 mx-auto rounded border shadow-lg">
+                    <p class="mt-2 text-sm text-gray-500">{{ __('Certificate/Diploma Image') }}</p>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="flex justify-end pt-4">
+                    <button onclick="closeCertificateModal()" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        {{ __('common.close') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-app-layout>

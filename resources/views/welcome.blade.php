@@ -330,15 +330,13 @@
                                 <select name="price_range" class="modern-input w-full">
                                     <option value="">{{ __('welcome.search.any_price') }}</option>
                                     @if(app()->getLocale() === 'vi')
-                                        <option value="0-25">0 - 625.000₫/giờ</option>
-                                        <option value="26-50">650.000 - 1.250.000₫/giờ</option>
-                                        <option value="51-100">1.275.000 - 2.500.000₫/giờ</option>
-                                        <option value="101+">2.525.000₫+/giờ</option>
+                                        <option value="3-4">80.000 - 100.000₫/giờ</option>
+                                        <option value="4-8">110.000 - 200.000₫/giờ</option>
+                                        <option value="8-12">210.000 - 300.000₫/giờ</option>
                                     @else
-                                        <option value="0-25">$0 - $25/hr</option>
-                                        <option value="26-50">$26 - $50/hr</option>
-                                        <option value="51-100">$51 - $100/hr</option>
-                                        <option value="101+">$101+/hr</option>
+                                        <option value="3-4">$3 - $4/hr</option>
+                                        <option value="4-8">$4 - $8/hr</option>
+                                        <option value="8-12">$8 - $12/hr</option>
                                     @endif
                                 </select>
                             </div>

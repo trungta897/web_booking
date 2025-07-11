@@ -55,10 +55,17 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
         // Filter by price range
         if (!empty($filters['price_range'])) {
             $range = explode('-', $filters['price_range']);
+            $usdToVnd = 25000; // 1 USD = 25,000 VND
+
             if (count($range) === 2) {
-                $query->whereBetween('hourly_rate', [$range[0], $range[1]]);
-            } else {
-                $query->where('hourly_rate', '>=', substr($filters['price_range'], 0, -1));
+                // Convert USD to VND for filtering
+                $minPrice = (int)$range[0] * $usdToVnd;
+                $maxPrice = (int)$range[1] * $usdToVnd;
+                $query->whereBetween('hourly_rate', [$minPrice, $maxPrice]);
+            } elseif (strpos($filters['price_range'], '+') !== false) {
+                // Handle "101+" format
+                $minPrice = (int)substr($filters['price_range'], 0, -1) * $usdToVnd;
+                $query->where('hourly_rate', '>=', $minPrice);
             }
         }
 

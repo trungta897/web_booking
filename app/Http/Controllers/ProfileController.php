@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Requests\EducationUpdateRequest;
 use App\Services\UserService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -25,8 +27,24 @@ class ProfileController extends Controller
     public function edit(): View
     {
         $user = Auth::user();
+        $tutor = null;
+        $subjects = [];
 
-        return view('profile.edit', compact('user'));
+        if ($user->role === 'tutor' && $user->tutor) {
+            $tutor = $user->tutor()->with('education', 'subjects')->first();
+            $subjects = \App\Models\Subject::where('is_active', true)->orderBy('name')->get();
+
+            if ($tutor) {
+                // Defensive check to prevent error on count() if education is unexpectedly null.
+                $educationCount = $tutor->education ? $tutor->education->count() : 0;
+                Log::debug('Tutor data loaded for profile edit', [
+                    'tutor_id' => $tutor->id,
+                    'education_count' => $educationCount,
+                ]);
+            }
+        }
+
+        return view('profile.edit', compact('user', 'tutor', 'subjects'));
     }
 
     /**
@@ -34,15 +52,66 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+        // Debug logging
+        Log::info('Profile update request received', [
+            'user_id' => Auth::id(),
+            'request_data' => $request->all(),
+            'user_role' => Auth::user()->role,
+            'has_education_data' => $request->has('education'),
+            'education_count' => $request->has('education') ? count($request->input('education', [])) : 0,
+            'education_keys' => $request->has('education') ? array_keys($request->input('education', [])) : [],
+        ]);
+
         try {
-            $this->userService->updateProfile(Auth::user(), $request->validated());
+            $user = Auth::user();
+
+            $this->userService->updateProfile($user, $request->validated());
+
+            // Clear any cached user data and reload relationships
+            $user->refresh();
+            if ($user->role === 'tutor' && $user->tutor) {
+                $user->tutor->refresh();
+                $user->tutor->load(['education', 'subjects']);
+            }
+
+            Log::info('Profile updated successfully', [
+                'user_id' => $user->id,
+                'education_count' => $user->tutor?->education?->count() ?? 0
+            ]);
 
             return redirect()->route('profile.edit')
-                ->with('success', __('Profile updated successfully'));
+                ->with('success', 'Profile updated successfully');
         } catch (Exception $e) {
+            Log::error('Profile update failed', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return back()
                 ->withInput()
                 ->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Update the tutor's education information.
+     */
+    public function updateEducation(EducationUpdateRequest $request): RedirectResponse
+    {
+        try {
+            $user = Auth::user();
+            // The authorize method in EducationUpdateRequest already ensures user is a tutor.
+            $this->userService->updateTutorEducation($user->tutor, $request->validated()['education'] ?? []);
+            Log::info('Tutor education updated successfully.', ['user_id' => $user->id]);
+
+            return redirect()->route('profile.edit')->with('success', __('tutors.education_updated_successfully'));
+        } catch (Exception $e) {
+            Log::error('Tutor education update failed', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+            ]);
+            return back()->withInput()->withErrors(['error' => __('common.error_occurred')]);
         }
     }
 

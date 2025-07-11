@@ -59,4 +59,17 @@ return [
     'book_now' => 'Đặt Lịch Ngay',
     'Add to Favorites' => 'Thêm vào Yêu thích',
     'tutor_profile' => 'Hồ Sơ Gia Sư :name',
+
+    // Missing translations for profile page
+    'education_and_certificates' => 'Học vấn và chứng chỉ',
+    'no_education_records_yet' => 'Chưa có thông tin học vấn nào',
+    'add_education' => 'Thêm học vấn',
+    'save_education' => 'Lưu thông tin học vấn',
+    'certificate_image' => 'Hình ảnh chứng chỉ',
+    'current_image_info' => 'Hình ảnh hiện tại',
+    'tutor_information' => 'Thông tin gia sư',
+    'hourly_rate' => 'Giá theo giờ',
+    'bio' => 'Tiểu sử',
+    'experience_years' => 'Số năm kinh nghiệm',
+    'education_updated_successfully' => 'Cập nhật thông tin học vấn thành công',
 ];

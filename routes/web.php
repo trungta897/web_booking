@@ -15,6 +15,7 @@ use App\Http\Controllers\RoleSwitchController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TutorController;
+use App\Http\Controllers\TutorPayoutController;
 use App\Http\Controllers\TutorProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,14 +54,10 @@ Route::middleware(['auth'])->group(function () {
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/education', [ProfileController::class, 'updateEducation'])->name('profile.update-education');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // Tutor profile routes
-    Route::middleware(\App\Http\Middleware\RoleSwitchMiddleware::class . ':tutor')->group(function () {
-        Route::get('/tutor/profile', [TutorProfileController::class, 'show'])->name('tutor.profile.show');
-        Route::get('/tutor/profile/edit', [TutorProfileController::class, 'edit'])->name('tutor.profile.edit');
-        Route::put('/tutor/profile', [TutorProfileController::class, 'update'])->name('tutor.profile.update');
-    });
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
+    Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar'])->name('profile.upload-avatar');
 
     // Booking routes
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
@@ -109,6 +106,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/availability', [TutorController::class, 'availability'])->name('tutor.availability');
         Route::post('/availability', [TutorController::class, 'updateAvailability'])->name('tutor.availability.update');
         Route::get('/calendar/bookings/{date}', [TutorController::class, 'getBookingsForDate'])->name('tutor.calendar.bookings');
+
+        // Tutor earnings and payouts
+        Route::prefix('earnings')->name('tutors.earnings.')->group(function () {
+            Route::get('/', [TutorPayoutController::class, 'index'])->name('index');
+            Route::get('/details', [TutorPayoutController::class, 'earnings'])->name('details');
+            Route::get('/payout/create', [TutorPayoutController::class, 'create'])->name('payout.create');
+            Route::post('/payout', [TutorPayoutController::class, 'store'])->name('payout.store');
+            Route::get('/history', [TutorPayoutController::class, 'history'])->name('history');
+            Route::get('/payout/{payout}', [TutorPayoutController::class, 'show'])->name('payout.show');
+        });
     });
 
     // Review routes
@@ -183,6 +190,15 @@ Route::middleware(['auth', \App\Http\Middleware\RoleSwitchMiddleware::class . ':
     Route::get('/refunds/{refund}/details', [App\Http\Controllers\AdminRefundController::class, 'details'])->name('refunds.details');
     Route::post('/refunds/{booking}/start-processing', [App\Http\Controllers\AdminRefundController::class, 'startProcessing'])->name('refunds.start-processing');
     Route::post('/refunds/{booking}/complete', [App\Http\Controllers\AdminRefundController::class, 'complete'])->name('refunds.complete');
+
+    // Payout management routes
+    Route::get('/payouts', [App\Http\Controllers\AdminPayoutController::class, 'index'])->name('payouts.index');
+    Route::get('/payouts/analytics', [App\Http\Controllers\AdminPayoutController::class, 'analytics'])->name('payouts.analytics');
+    Route::get('/payouts/export', [App\Http\Controllers\AdminPayoutController::class, 'export'])->name('payouts.export');
+    Route::get('/payouts/{payout}', [App\Http\Controllers\AdminPayoutController::class, 'show'])->name('payouts.show');
+    Route::post('/payouts/{payout}/approve', [App\Http\Controllers\AdminPayoutController::class, 'approve'])->name('payouts.approve');
+    Route::post('/payouts/{payout}/reject', [App\Http\Controllers\AdminPayoutController::class, 'reject'])->name('payouts.reject');
+    Route::post('/payouts/{payout}/complete', [App\Http\Controllers\AdminPayoutController::class, 'complete'])->name('payouts.complete');
 });
 
 // Test route for Tutor and Subject relationships
@@ -489,3 +505,277 @@ Route::middleware('throttle:60,1')->group(function () {
 Route::middleware(['auth'])->get('/vnpay-result', [PaymentController::class, 'showVnpayResult'])->name('vnpay.result');
 
 require __DIR__ . '/auth.php';
+
+// Debug route to test avatar upload
+Route::get('/debug-avatar', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+    return response()->json([
+        'user_id' => $user->id,
+        'avatar' => $user->avatar,
+        'avatar_path' => $user->avatar ? asset('storage/avatars/' . $user->avatar) : null,
+        'file_exists' => $user->avatar ? \Illuminate\Support\Facades\Storage::exists('public/avatars/' . $user->avatar) : false,
+        'storage_path' => storage_path('app/public/avatars/'),
+        'public_path' => public_path('storage/avatars/'),
+        'storage_link_exists' => is_link(public_path('storage')),
+        'avatars_dir_exists' => is_dir(storage_path('app/public/avatars')),
+        'avatars_files' => \Illuminate\Support\Facades\Storage::files('public/avatars'),
+    ]);
+})->middleware('auth');
+
+// Debug route to test form submission
+Route::post('/debug-upload', function (\Illuminate\Http\Request $request) {
+    try {
+        $data = [
+            'request_method' => $request->method(),
+            'content_type' => $request->header('Content-Type'),
+            'csrf_token_present' => $request->has('_token'),
+            'has_avatar' => $request->hasFile('avatar'),
+            'avatar_info' => null,
+            'validation_errors' => null,
+            'upload_result' => null,
+            'debug_info' => [
+                'php_version' => PHP_VERSION,
+                'user_id' => \Illuminate\Support\Facades\Auth::user()->id ?? 'not authenticated',
+                'timestamp' => now()->toISOString(),
+            ]
+        ];
+
+        if (!$request->hasFile('avatar')) {
+            $data['error'] = 'No file uploaded';
+            return response()->json($data);
+        }
+
+        $file = $request->file('avatar');
+        $data['avatar_info'] = [
+            'original_name' => $file->getClientOriginalName(),
+            'size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+            'is_valid' => $file->isValid(),
+            'error' => $file->getError(),
+            'error_message' => $file->getErrorMessage(),
+            'max_file_size' => ini_get('upload_max_filesize'),
+            'max_post_size' => ini_get('post_max_size'),
+        ];
+
+        // Validate file
+        if (!$file->isValid()) {
+            $data['upload_result'] = [
+                'success' => false,
+                'error' => 'File is not valid: ' . $file->getErrorMessage(),
+            ];
+            return response()->json($data);
+        }
+
+        // Check file size (5MB limit)
+        if ($file->getSize() > 5242880) {
+            $data['upload_result'] = [
+                'success' => false,
+                'error' => 'File size exceeds 5MB limit',
+            ];
+            return response()->json($data);
+        }
+
+        // Check file type
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+        if (!in_array($file->getMimeType(), $allowedTypes)) {
+            $data['upload_result'] = [
+                'success' => false,
+                'error' => 'Invalid file type. Only JPG, PNG, GIF, and WebP are allowed',
+            ];
+            return response()->json($data);
+        }
+
+        try {
+            // Create avatars directory if it doesn't exist
+            if (!\Illuminate\Support\Facades\Storage::exists('public/avatars')) {
+                \Illuminate\Support\Facades\Storage::makeDirectory('public/avatars');
+            }
+
+            // Test upload
+            $filename = time() . '_debug.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('public/avatars', $filename);
+
+            $data['upload_result'] = [
+                'success' => true,
+                'path' => $path,
+                'filename' => $filename,
+                'storage_exists' => \Illuminate\Support\Facades\Storage::exists($path),
+                'full_path' => storage_path('app/' . $path),
+                'public_url' => asset('storage/avatars/' . $filename),
+                'file_size' => \Illuminate\Support\Facades\Storage::size($path),
+            ];
+
+            // Update user avatar for testing
+            $user = \Illuminate\Support\Facades\Auth::user();
+            if ($user) {
+                $oldAvatar = $user->avatar;
+                $user->avatar = $filename;
+                $user->save();
+
+                $data['user_update'] = [
+                    'success' => true,
+                    'old_avatar' => $oldAvatar,
+                    'new_avatar' => $filename,
+                ];
+            }
+
+        } catch (\Exception $e) {
+            $data['upload_result'] = [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ];
+        }
+
+        return response()->json($data);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Fatal error occurred',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+})->middleware('auth');
+
+// Debug page
+Route::get('/debug-upload', function () {
+    return view('debug-upload');
+})->middleware('auth');
+
+// Test tạo education record thủ công
+Route::get('/test-create-education', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+
+    if ($user->role !== 'tutor' || !$user->tutor) {
+        return response()->json(['error' => 'User is not a tutor']);
+    }
+
+    try {
+        $education = $user->tutor->education()->create([
+            'degree' => 'Test Degree ' . time(),
+            'institution' => 'Test University',
+            'year' => '2024',
+            'image' => null
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'education' => $education,
+            'tutor_id' => $user->tutor->id,
+            'total_education_count' => $user->tutor->education()->count()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+})->middleware('auth');
+
+// Debug route for education
+Route::get('/debug-education', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+    $educationData = $user->tutor ? $user->tutor->education : collect();
+
+    return response()->json([
+        'user_id' => $user->id,
+        'is_tutor' => $user->role === 'tutor',
+        'has_tutor_record' => !!$user->tutor,
+        'tutor_id' => $user->tutor ? $user->tutor->id : null,
+        'education_count' => $educationData ? $educationData->count() : 0,
+        'education_records' => $educationData,
+        'education_storage_path' => storage_path('app/public/education/'),
+        'education_public_path' => public_path('storage/education/'),
+        'education_dir_exists' => is_dir(storage_path('app/public/education')),
+        'education_files' => \Illuminate\Support\Facades\Storage::files('public/education'),
+        'storage_link_exists' => is_link(public_path('storage')),
+    ]);
+})->middleware('auth');
+
+// Clear education records
+Route::get('/clear-education', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+
+    if ($user->role !== 'tutor' || !$user->tutor) {
+        return response()->json(['error' => 'User is not a tutor']);
+    }
+
+    try {
+        $count = $user->tutor->education()->count();
+        $user->tutor->education()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'All education records cleared',
+            'deleted_count' => $count,
+            'remaining_count' => $user->tutor->education()->count()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+})->middleware('auth');
+
+// Clear avatar route
+Route::post('/clear-avatar', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+    $oldAvatar = $user->avatar;
+
+    $user->avatar = null;
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Avatar cleared successfully',
+        'old_avatar' => $oldAvatar,
+        'user_id' => $user->id,
+    ]);
+})->middleware('auth');
+
+// Test route to check if POST works
+Route::post('/test-post', function (\Illuminate\Http\Request $request) {
+    return response()->json([
+        'success' => true,
+        'message' => 'POST route works',
+        'method' => $request->method(),
+        'headers' => $request->headers->all(),
+        'input' => $request->all(),
+        'files' => $request->hasFile('avatar') ? 'Has file' : 'No file',
+        'timestamp' => now()->toISOString(),
+    ]);
+})->middleware('auth');
+
+// Debug route cho profile update
+Route::post('/debug-profile-update', function (\Illuminate\Http\Request $request) {
+    try {
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        return response()->json([
+            'success' => true,
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'is_tutor' => $user->role === 'tutor',
+            'has_tutor_record' => !!$user->tutor,
+            'method' => $request->method(),
+            'has_education' => $request->has('education'),
+            'education_data' => $request->input('education', []),
+            'education_count' => count($request->input('education', [])),
+            'all_data' => $request->all(),
+            'files' => $request->files->all(),
+            'content_type' => $request->header('Content-Type'),
+            'timestamp' => now()->toISOString(),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
+})->middleware('auth');

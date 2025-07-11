@@ -56,4 +56,20 @@ return [
     'sun' => 'Sun',
     'details' => 'Details',
     'any_rating' => 'Any Rating',
+
+    // Missing translations for profile page
+    'education_and_certificates' => 'Education and Certificates',
+    'no_education_records_yet' => 'No education records yet',
+    'add_education' => 'Add Education',
+    'save_education' => 'Save Education',
+    'certificate_image' => 'Certificate Image',
+    'current_image_info' => 'Current image',
+    'tutor_information' => 'Tutor Information',
+    'hourly_rate' => 'Hourly Rate',
+    'bio' => 'Bio',
+    'experience_years' => 'Years of Experience',
+    'education_updated_successfully' => 'Education updated successfully',
+    'book_now' => 'Book Now',
+    'Add to Favorites' => 'Add to Favorites',
+    'tutor_profile' => 'Tutor Profile: :name',
 ];

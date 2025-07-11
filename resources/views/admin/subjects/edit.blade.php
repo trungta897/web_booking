@@ -29,7 +29,11 @@
 
                         <div>
                             <x-input-label for="name" :value="__('Subject Name')" />
-                            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name', $subject->name)" required autofocus />
+                            @php
+                $nameValue = old('name', $subject->name);
+                if (is_array($nameValue)) { $nameValue = $subject->name ?? ''; }
+            @endphp
+            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="$nameValue" required autofocus />
                             <x-input-error :messages="$errors->get('name')" class="mt-2" />
                         </div>
 

@@ -146,7 +146,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(TutorService::class, function ($app) {
-            return new TutorService();
+            return new TutorService(
+                $app->make(TutorRepository::class),
+                $app->make(UserRepository::class)
+            );
         });
 
         $this->app->singleton(PaymentService::class, function ($app) {
@@ -154,11 +157,16 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(SubjectService::class, function ($app) {
-            return new SubjectService();
+            return new SubjectService(
+                $app->make(SubjectRepository::class),
+                $app->make(TutorRepository::class)
+            );
         });
 
         $this->app->singleton(MessageService::class, function ($app) {
-            return new MessageService();
+            return new MessageService(
+                $app->make(MessageRepository::class)
+            );
         });
 
         $this->app->singleton(NotificationService::class, function ($app) {
@@ -166,7 +174,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(AdminService::class, function ($app) {
-            return new AdminService();
+            return new AdminService(
+                $app->make(UserRepository::class),
+                $app->make(BookingRepository::class),
+                $app->make(TutorRepository::class),
+                $app->make(SubjectRepository::class)
+            );
         });
 
         $this->app->singleton(VnpayService::class, function ($app) {

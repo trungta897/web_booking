@@ -43,5 +43,6 @@ class Kernel extends HttpKernel
         'checkrole' => \App\Http\Middleware\RoleSwitchMiddleware::class,
         'admin.domain' => \App\Http\Middleware\AdminDomainMiddleware::class,
         'locale' => \App\Http\Middleware\SetLocale::class,
+        'check.avatar' => \App\Http\Middleware\CheckAvatarExists::class,
     ];
 }

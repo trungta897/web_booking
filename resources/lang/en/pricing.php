@@ -2,11 +2,12 @@
 
 return [
     'title' => 'Simple, Transparent Pricing',
-    'subtitle' => 'Choose the plan that works best for you',
+    'subtitle' => 'Choose the plan that\'s right for you',
+    'hourly_rate' => 'Hourly Rate',
 
     'plans' => [
         'basic' => [
-            'title' => 'Basic: Up to $25/hr',
+            'title' => 'Basic: $3-4/hr',
             'features' => [
                 'One-on-one tutoring',
                 'Basic subject coverage',
@@ -14,7 +15,7 @@ return [
             ],
         ],
         'standard' => [
-            'title' => 'Standard: $25-$40/hr',
+            'title' => 'Standard: $4-8/hr',
             'features' => [
                 'One-on-one tutoring',
                 'All subjects covered',
@@ -23,7 +24,7 @@ return [
             ],
         ],
         'premium' => [
-            'title' => 'Premium: $40+/hr',
+            'title' => 'Premium: $8-12/hr',
             'features' => [
                 'One-on-one tutoring',
                 'All subjects covered',

@@ -61,6 +61,11 @@ class Tutor extends Model
         return $this->hasMany(Education::class, 'tutor_id');
     }
 
+    public function payouts()
+    {
+        return $this->hasMany(TutorPayout::class);
+    }
+
     /**
      * Check if the tutor is available at the given time slot.
      *

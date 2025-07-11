@@ -12,7 +12,11 @@
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
+            @php
+                $emailValue = old('email', '');
+                if (is_array($emailValue)) { $emailValue = ''; }
+            @endphp
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="$emailValue" required autofocus />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
