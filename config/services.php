@@ -49,4 +49,9 @@ return [
         'ipn_url' => env('VNPAY_IPN_URL', 'http://localhost/web_booking/public/payments/vnpay/ipn'),
     ],
 
+    'Exception' => [
+        'url' => env('EXCEPTION_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
+        'hash_secret' => env('EXCEPTION_HASH_SECRET', 'VNPAY_HASH_SECRET'),
+    ],
+
 ];

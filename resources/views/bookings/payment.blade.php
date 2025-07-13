@@ -446,8 +446,8 @@
 
                 if (selectedPaymentMethod === 'vnpay') {
                     processVNPayPayment();
-                } else if (selectedPaymentMethod === 'stripe') {
-                    processStripePayment();
+                // } else if (selectedPaymentMethod === 'stripe') {
+                //     processStripePayment();
                 }
             });
 
@@ -470,9 +470,7 @@
                     @endauth
                 }
             });
-
-                                                                                                function processVNPayPayment() {
-
+            function processVNPayPayment() {
                 fetch(`/web_booking/public/bookings/{{ $booking->id }}/payment/process`, {
                     method: 'POST',
                     headers: {
@@ -509,7 +507,7 @@
 
                     return response.json();
                 })
-                                .then(data => {
+                .then(data => {
                     if (data.payment_url) {
                         window.location.href = data.payment_url;
                     } else {
@@ -533,90 +531,90 @@
                 });
             }
 
-            function processStripePayment() {
-                // Check if Stripe and card element are ready
-                if (!stripe || !cardElement) {
-                    showError('Stripe chưa được khởi tạo. Vui lòng thử lại sau.');
-                    resetPaymentButton();
-                    return;
-                }
+            // function processStripePayment() {
+            //     // Check if Stripe and card element are ready
+            //     if (!stripe || !cardElement) {
+            //         showError('Stripe chưa được khởi tạo. Vui lòng thử lại sau.');
+            //         resetPaymentButton();
+            //         return;
+            //     }
 
-                fetch(`/web_booking/public/bookings/{{ $booking->id }}/payment-intent`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        payment_method: 'stripe'
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        // Handle different error status codes
-                        if (response.status === 403) {
-                            throw new Error('Bạn không có quyền thanh toán cho booking này.');
-                        } else if (response.status === 422) {
-                            throw new Error('Booking này không thể thanh toán (đã thanh toán hoặc chưa được chấp nhận).');
-                        } else if (response.status === 404) {
-                            throw new Error('Booking không tồn tại hoặc đã bị xóa. Vui lòng kiểm tra lại.');
-                        }
+            //     fetch(`/web_booking/public/bookings/{{ $booking->id }}/payment-intent`, {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            //         },
+            //         body: JSON.stringify({
+            //             payment_method: 'stripe'
+            //         })
+            //     })
+            //     .then(response => {
+            //         if (!response.ok) {
+            //             // Handle different error status codes
+            //             if (response.status === 403) {
+            //                 throw new Error('Bạn không có quyền thanh toán cho booking này.');
+            //             } else if (response.status === 422) {
+            //                 throw new Error('Booking này không thể thanh toán (đã thanh toán hoặc chưa được chấp nhận).');
+            //             } else if (response.status === 404) {
+            //                 throw new Error('Booking không tồn tại hoặc đã bị xóa. Vui lòng kiểm tra lại.');
+            //             }
 
-                        // If response is not ok, try to get error message
-                        return response.json().then(data => {
-                            throw new Error(data.error || `Lỗi server: ${response.status}`);
-                        }).catch(() => {
-                            if (response.status === 500) {
-                                throw new Error('Lỗi server nội bộ. Vui lòng thử lại sau.');
-                            } else {
-                                throw new Error(`Lỗi kết nối server: ${response.status}`);
-                            }
-                        });
-                    }
+            //             // If response is not ok, try to get error message
+            //             return response.json().then(data => {
+            //                 throw new Error(data.error || `Lỗi server: ${response.status}`);
+            //             }).catch(() => {
+            //                 if (response.status === 500) {
+            //                     throw new Error('Lỗi server nội bộ. Vui lòng thử lại sau.');
+            //                 } else {
+            //                     throw new Error(`Lỗi kết nối server: ${response.status}`);
+            //                 }
+            //             });
+            //         }
 
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.clientSecret) {
-                        // Confirm the payment with Stripe using the mounted card element
-                        return stripe.confirmCardPayment(data.clientSecret, {
-                            payment_method: {
-                                card: cardElement,
-                                billing_details: {
-                                    name: '{{ auth()->user()->name ?? "" }}',
-                                    email: '{{ auth()->user()->email ?? "" }}'
-                                }
-                            }
-                        });
-                    } else {
-                        throw new Error(data.error || 'Có lỗi xảy ra khi tạo Stripe payment intent');
-                    }
-                })
-                .then(result => {
-                    if (result.error) {
-                        // Show error from Stripe (e.g., card declined)
-                        throw new Error(result.error.message);
-                    } else {
-                        // Payment succeeded, redirect to confirmation
-                        window.location.href = `/web_booking/public/bookings/{{ $booking->id }}/payment/confirm`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Stripe payment error:', error);
+            //         return response.json();
+            //     })
+            //     .then(data => {
+            //         if (data.clientSecret) {
+            //             // Confirm the payment with Stripe using the mounted card element
+            //             return stripe.confirmCardPayment(data.clientSecret, {
+            //                 payment_method: {
+            //                     card: cardElement,
+            //                     billing_details: {
+            //                         name: '{{ auth()->user()->name ?? "" }}',
+            //                         email: '{{ auth()->user()->email ?? "" }}'
+            //                     }
+            //                 }
+            //             });
+            //         } else {
+            //             throw new Error(data.error || 'Có lỗi xảy ra khi tạo Stripe payment intent');
+            //         }
+            //     })
+            //     .then(result => {
+            //         if (result.error) {
+            //             // Show error from Stripe (e.g., card declined)
+            //             throw new Error(result.error.message);
+            //         } else {
+            //             // Payment succeeded, redirect to confirmation
+            //             window.location.href = `/web_booking/public/bookings/{{ $booking->id }}/payment/confirm`;
+            //         }
+            //     })
+            //     .catch(error => {
+            //         console.error('Stripe payment error:', error);
 
-                    // Handle different error types
-                    let errorMessage = 'Có lỗi xảy ra khi kết nối đến Stripe';
+            //         // Handle different error types
+            //         let errorMessage = 'Có lỗi xảy ra khi kết nối đến Stripe';
 
-                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                        errorMessage = 'Không thể kết nối đến server. Vui lòng thử lại.';
-                    } else if (error.message) {
-                        errorMessage = error.message;
-                    }
+            //         if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            //             errorMessage = 'Không thể kết nối đến server. Vui lòng thử lại.';
+            //         } else if (error.message) {
+            //             errorMessage = error.message;
+            //         }
 
-                    showError(errorMessage);
-                resetPaymentButton();
-                });
-            }
+            //         showError(errorMessage);
+            //     resetPaymentButton();
+            //     });
+            // }
 
             function showError(message) {
                 paymentError.textContent = message;
