@@ -76,98 +76,43 @@
                     <div class="mb-8">
                         <h2 class="text-lg font-medium text-gray-900 mb-4">{{ __('tutors.education') }}</h2>
                         <div class="space-y-4">
-                            @if($tutor->education && count($tutor->education) > 0)
-                                @foreach($tutor->education as $education)
-                                    <div class="border border-gray-200 rounded-lg p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+                            @php
+                                // Đảm bảo $tutor->education luôn là một collection, kể cả khi không có dữ liệu
+                                $educations = $tutor->education ?? collect();
+                            @endphp
+
+                            @if($educations->isNotEmpty())
+                                @foreach($educations as $edu)
+                                    <div class="mb-4 p-4 border rounded-lg bg-gray-50">
                                         <div class="flex justify-between items-start">
-                                            <div class="flex-1">
-                                                <div class="flex items-start mb-3">
-                                                    <!-- Education Icon -->
-                                                    <div class="flex-shrink-0 mr-4">
-                                                        <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-                                                            </svg>
-                                                        </div>
-                                                    </div>
+                                            <div>
+                                                <h4 class="font-bold text-lg text-gray-800">{{ $edu->degree }}</h4>
+                                                <p class="text-md text-gray-600">{{ $edu->institution }}</p>
+                                            </div>
+                                            <span class="text-sm font-medium text-gray-500 bg-gray-200 px-2 py-1 rounded">{{ $edu->year }}</span>
+                                        </div>
 
-                                                    <div class="flex-1">
-                                                        <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ $education->degree }}</h3>
-                                                        <p class="text-indigo-600 font-medium text-base mb-1">{{ $education->institution }}</p>
-                                                        @if($education->year)
-                                                            <div class="flex items-center text-sm text-gray-600">
-                                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4"/>
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18a1 1 0 001-1V10a1 1 0 00-1-1H3a1 1 0 00-1 1v10a1 1 0 001 1z"/>
-                                                                </svg>
-                                                                {{ $education->year }}
-                                                            </div>
-                                                        @endif
-
-                                                        <!-- Experience indicator -->
-                                                        <div class="mt-2">
-                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                                                </svg>
-                                                                {{ __('tutors.verified_education') }}
-                                                            </span>
-                                                        </div>
-                                                    </div>
+                                        @if(!empty($edu->images) && is_array($edu->images))
+                                            <div class="mt-3">
+                                                <p class="text-sm font-semibold text-gray-700 mb-2">Chứng chỉ:</p>
+                                                <div class="flex flex-wrap gap-2">
+                                                    @foreach($edu->images as $image)
+                                                        <a href="{{ asset('uploads/education/' . $image) }}" data-fancybox="gallery-{{ $edu->id }}" class="block">
+                                                            <img src="{{ asset('uploads/education/' . $image) }}" alt="Chứng chỉ" class="h-20 w-20 object-cover rounded-md border hover:ring-2 hover:ring-blue-500 transition-all">
+                                                        </a>
+                                                    @endforeach
                                                 </div>
                                             </div>
-
-                                            <!-- Display education images -->
-                                            @if($education->hasImages())
-                                                <div class="ml-6 flex-shrink-0">
-                                                    <p class="text-xs text-gray-500 mb-2 text-center">{{ __('tutors.certificate_images') }}</p>
-                                                    <div class="grid grid-cols-2 gap-2 max-w-[120px]">
-                                                        @foreach($education->getAllImages() as $index => $imageName)
-                                                            @if($index < 4) {{-- Show max 4 images --}}
-                                                                <div class="relative group">
-                                                                    <img src="{{ asset('uploads/education/' . $imageName) }}"
-                                                                         alt="Certificate {{ $index + 1 }} for {{ $education->degree }}"
-                                                                         class="h-12 w-12 object-cover rounded-lg border-2 border-white shadow-md cursor-pointer hover:scale-105 transition-transform duration-200"
-                                                                         onclick="showCertificateModal('{{ asset('uploads/education/' . $imageName) }}', '{{ $education->degree }}', '{{ $education->institution }}')" />
-                                                                    <!-- Hover overlay -->
-                                                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-opacity duration-200 flex items-center justify-center">
-                                                                        <svg class="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                                                        </svg>
-                                                                    </div>
-                                                                </div>
-                                                            @endif
-                                                        @endforeach
-                                                    </div>
-                                                    @if(count($education->getAllImages()) > 4)
-                                                        <p class="text-xs text-gray-500 mt-2 text-center font-medium">+{{ count($education->getAllImages()) - 4 }} {{ __('tutors.more_certificates') }}</p>
-                                                    @endif
-                                                    <p class="text-xs text-indigo-600 mt-1 text-center hover:text-indigo-800 cursor-pointer" onclick="showCertificateModal('{{ asset('uploads/education/' . $education->getAllImages()[0]) }}', '{{ $education->degree }}', '{{ $education->institution }}')">
-                                                        {{ __('tutors.click_to_view') }}
-                                                    </p>
-                                                </div>
-                                            @else
-                                                <div class="ml-6 flex-shrink-0 w-[120px]">
-                                                    <div class="flex flex-col items-center justify-center h-16 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300">
-                                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                                        </svg>
-                                                        <p class="text-xs text-gray-400 mt-1">{{ __('tutors.no_certificates') }}</p>
-                                                    </div>
-                                                </div>
-                                            @endif
-                                        </div>
+                                        @endif
                                     </div>
                                 @endforeach
                             @else
-                                <div class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                <div class="text-center py-8 px-4 border-2 border-dashed rounded-lg">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
                                     </svg>
-                                    <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('tutors.no_education_info') }}</h3>
-                                    <p class="mt-1 text-sm text-gray-500">{{ __('tutors.no_education_provided') }}</p>
+                                    <h3 class="mt-2 text-sm font-medium text-gray-900">Không có thông tin học vấn</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Gia sư này chưa cập nhật thông tin học vấn.</p>
                                 </div>
                             @endif
                         </div>
@@ -338,7 +283,7 @@
                 }
             })
             .then(response => response.json())
-            .then data => {
+            .then(data) => {
                 const btn = document.getElementById('favoriteBtn');
                 const text = document.getElementById('favoriteText');
                 if (data.is_favorite) {
@@ -348,6 +293,9 @@
                     btn.classList.remove('bg-red-50', 'border-red-300', 'text-red-700');
                     text.textContent = '{{ __('common.add_to_favorites') }}';
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
         }
 
@@ -357,15 +305,21 @@
             days.forEach(day => {
                 fetch(`/tutors/{{ $tutor->id }}/availability/${day}`)
                     .then(response => response.json())
-                    .then(data => {
+                    .then(data) => {
                         const element = document.getElementById(`availability-${day}`);
                         if (data.available) {
                             element.textContent = data.slots.join(', ');
                             element.classList.add('text-green-600');
                         } else {
-                                                            element.textContent = '{{ __('common.unavailable') }}';
+                            element.textContent = '{{ __('common.unavailable') }}';
                             element.classList.add('text-red-600');
                         }
+                    })
+                    .catch(error => {
+                        console.error('Error loading availability:', error);
+                        const element = document.getElementById(`availability-${day}`);
+                        element.textContent = '{{ __('common.error') }}';
+                        element.classList.add('text-red-600');
                     });
             });
         }

@@ -203,7 +203,7 @@
                                             </div>
                                             <span class="text-sm text-gray-600">({{ $booking->tutor->reviews_count ?? 0 }} {{ __('reviews') }})</span>
                                         </div>
-                                        
+
                                         <!-- Tutor badges/credentials -->
                                         <div class="flex items-center mt-2 space-x-2">
                                             @if($booking->tutor->experience_years >= 5)
@@ -214,7 +214,7 @@
                                                     {{ __('Experienced') }}
                                                 </span>
                                             @endif
-                                            
+
                                             @if($booking->tutor->education && $booking->tutor->education->count() > 0)
                                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -224,7 +224,7 @@
                                                     {{ __('Verified Education') }}
                                                 </span>
                                             @endif
-                                            
+
                                             @if(($booking->tutor->reviews_avg_rating ?? 0) >= 4.5)
                                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -254,7 +254,7 @@
                                         <span class="text-gray-500">{{ __('Hourly Rate') }}:</span>
                                         <span class="font-medium text-gray-900">{{ formatHourlyRate($booking->tutor->hourly_rate) }}</span>
                                     </div>
-                                    
+
                                     <!-- Education summary -->
                                     @if($booking->tutor->education && $booking->tutor->education->count() > 0)
                                         <div class="flex justify-between text-sm">
@@ -270,7 +270,7 @@
                                             </div>
                                         </div>
                                     @endif
-                                    
+
                                     <div class="flex justify-between pt-3 border-t border-gray-200">
                                         <span class="text-base font-medium text-gray-900">{{ __('booking.total_amount') }}:</span>
                                         <span class="text-lg font-bold text-gray-900">{{ $booking->display_amount }}</span>
