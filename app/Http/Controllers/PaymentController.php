@@ -28,14 +28,14 @@ class PaymentController extends Controller
     }
 
     /**
-     * Process payment (unified endpoint).
+     * Process payment (unified endpoint) - VNPay only.
      */
     public function processPayment(Request $request, Booking $booking): JsonResponse
     {
         try {
-            // Validate request
+            // Validate request - only VNPay allowed
             $request->validate([
-                'payment_method' => 'required|in:stripe,vnpay',
+                'payment_method' => 'required|in:vnpay',
             ]);
 
             // Log the request for debugging
@@ -56,12 +56,8 @@ class PaymentController extends Controller
             // Validate booking status for payment
             $this->validateBookingForPayment($booking);
 
-            // Process based on payment method
-            if ($request->payment_method === 'vnpay') {
-                return $this->handleVnpayPayment($booking, $request);
-            } else {
-                return $this->handleStripePayment($booking, $request);
-            }
+            // Process VNPay payment only
+            return $this->handleVnpayPayment($booking, $request);
         } catch (Exception $e) {
             Log::error('Payment processing failed', [
                 'booking_id' => $booking->id,
