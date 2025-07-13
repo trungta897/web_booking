@@ -78,4 +78,10 @@ return [
     'bio' => 'Tiểu sử',
     'experience_years' => 'Số năm kinh nghiệm',
     'education_updated_successfully' => 'Cập nhật thông tin học vấn thành công',
+    'verified_education' => 'Học vấn đã xác minh',
+    'more_certificates' => 'chứng chỉ khác',
+    'click_to_view' => 'Nhấp để xem',
+    'no_certificates' => 'Không có chứng chỉ',
+    'no_education_provided' => 'Gia sư này chưa cung cấp thông tin học vấn.',
+    'certificate_diploma_image' => 'Hình ảnh chứng chỉ/bằng cấp',
 ];

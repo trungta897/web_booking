@@ -78,4 +78,10 @@ return [
     'book_now' => 'Book Now',
     'Add to Favorites' => 'Add to Favorites',
     'tutor_profile' => 'Tutor Profile: :name',
+    'verified_education' => 'Verified Education',
+    'more_certificates' => 'more certificates',
+    'click_to_view' => 'Click to view',
+    'no_certificates' => 'No certificates',
+    'no_education_provided' => 'This tutor has not provided education information yet.',
+    'certificate_diploma_image' => 'Certificate/Diploma Image',
 ];
