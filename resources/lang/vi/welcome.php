@@ -54,8 +54,8 @@ return [
         'title' => 'Gia Sư <span class="text-gradient">Nổi Bật</span>',
         'view_profile' => 'Xem Hồ Sơ',
         'browse_all' => 'Duyệt Tất Cả Gia Sư',
-        'reviews' => 'đánh giá',
-        'review' => 'đánh giá',
+        'reviews' => 'Đánh giá',
+        'review' => 'Đánh giá',
     ],
 
     // Why choose us

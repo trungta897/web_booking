@@ -153,7 +153,7 @@ return [
 
     // Payment page translations
     'Complete Payment' => 'Hoàn tất thanh toán',
-    'reviews' => 'đánh giá',
+    'reviews' => 'Đánh giá',
     'Duration' => 'Thời lượng',
     'minutes' => 'phút',
     'Hourly Rate' => 'Giá theo giờ',
