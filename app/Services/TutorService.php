@@ -51,6 +51,9 @@ class TutorService extends BaseService implements TutorServiceInterface
     {
         $cacheKey = CacheService::tutorDetailsKey($tutorId);
 
+        // Force clear cache for this specific tutor to ensure fresh data
+        CacheService::forget($cacheKey);
+
         return CacheService::remember($cacheKey, CacheService::TTL_LONG, function () use ($tutorId) {
             return $this->tutorRepository->getTutorWithDetails($tutorId);
         });

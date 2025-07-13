@@ -11,7 +11,6 @@ class Education extends Model
     use HasFactory;
 
     protected $fillable = [
-        // 'tutor_profile_id', // Removed
         'tutor_id',
         'institution',
         'degree',
@@ -29,6 +28,9 @@ class Education extends Model
         'images' => 'array',
     ];
 
+    /**
+     * Get the tutor that owns the education.
+     */
     public function tutor(): BelongsTo
     {
         return $this->belongsTo(Tutor::class, 'tutor_id'); // Ensure foreign key is specified if not default

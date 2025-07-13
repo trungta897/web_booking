@@ -131,7 +131,7 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
      */
     public function getTutorWithDetails(int $id): ?Tutor
     {
-        return $this->query()->with([
+        $tutor = $this->query()->with([
             'user',
             'subjects',
             'education',
@@ -141,6 +141,8 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->find($id);
+
+        return $tutor;
     }
 
     /**
