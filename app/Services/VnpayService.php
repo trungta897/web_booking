@@ -248,7 +248,6 @@ class VnpayService
             // Verify security hash
             if (!$this->verifyIpn($vnpData)) {
                 LogService::vnpay('IPN verification failed', $vnpData, 'error');
-
                 return ['success' => false, 'message' => 'Invalid signature'];
             }
 
@@ -257,12 +256,47 @@ class VnpayService
             $transactionNo = $vnpData['vnp_TransactionNo'] ?? null;
             $amount = $vnpData['vnp_Amount'] / 100; // Convert back to VND
 
+            // 🔍 KIỂM TRA GIAO DỊCH ĐÃ XỬ LÝ
+            $existingCompletedTransaction = Transaction::where('transaction_id', $txnRef)
+                ->where('status', Transaction::STATUS_COMPLETED)
+                ->first();
+
+            if ($existingCompletedTransaction) {
+                LogService::vnpay('Transaction already processed - skipping duplicate', [
+                    'txn_ref' => $txnRef,
+                    'existing_transaction_id' => $existingCompletedTransaction->id,
+                    'processed_at' => $existingCompletedTransaction->processed_at,
+                ], 'warning');
+
+                // Trả về thành công để VNPay không retry
+                return [
+                    'success' => true,
+                    'booking' => $existingCompletedTransaction->booking,
+                    'message' => 'Transaction already processed successfully',
+                    'duplicate' => true
+                ];
+            }
+
             // Tìm booking
             $booking = Booking::where('vnpay_txn_ref', $txnRef)->first();
             if (!$booking) {
                 LogService::vnpay('Booking not found for txn_ref: ' . $txnRef, ['txn_ref' => $txnRef], 'error');
-
                 return ['success' => false, 'message' => 'Booking not found'];
+            }
+
+            // 🎯 BOOLEAN LOGIC: Check if booking is already paid using is_confirmed
+            if ($booking->is_confirmed) {
+                LogService::vnpay('Booking already paid', [
+                    'booking_id' => $booking->id,
+                    'current_is_confirmed' => $booking->is_confirmed,
+                ], 'warning');
+
+                return [
+                    'success' => true,
+                    'booking' => $booking,
+                    'message' => 'Booking đã được thanh toán rồi',
+                    'duplicate' => true
+                ];
             }
 
             // Tìm transaction
@@ -271,7 +305,7 @@ class VnpayService
             if ($responseCode === '00') {
                 // Thanh toán thành công
                 $booking->update([
-                    'payment_status' => 'paid',
+                    'is_confirmed' => true, // ✅ Đã chấp nhận VÀ đã thanh toán = sẵn sàng học
                     'payment_method' => 'vnpay',
                     'payment_at' => Carbon::now(),
                     'payment_metadata' => array_merge($booking->payment_metadata ?? [], [
@@ -323,7 +357,7 @@ class VnpayService
                 ];
             } else {
                 // Thanh toán thất bại
-                $booking->update(['payment_status' => 'failed']);
+                $booking->update(['payment_at' => null]); // Clear payment timestamp on failure
 
                 if ($transaction) {
                     $transaction->update([

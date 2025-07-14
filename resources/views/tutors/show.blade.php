@@ -66,7 +66,7 @@
                         <div class="flex flex-wrap gap-2">
                             @foreach($tutor->subjects as $subject)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                                    {{ $subject->name }}
+                                    {{ translateSubjectName($subject->name) }}
                                 </span>
                             @endforeach
                         </div>
@@ -173,7 +173,7 @@
                         @auth
                             @if(auth()->user()->role === 'student')
                                 <div class="mt-8 border-t border-gray-200 pt-8">
-                                    <h3 class="text-lg font-medium text-gray-900 mb-4">Leave a Review</h3>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('tutors.leave_review') }}</h3>
 
                                     @if(session('error'))
                                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -183,23 +183,25 @@
 
                                     <!-- Check if user has any completed bookings with this tutor -->
                                     @php
-                                        $completedBookings = \App\Models\Booking::where('student_id', auth()->id())
-                                            ->where('tutor_id', $tutor->id)
-                                            ->where('status', 'completed')
+                                        $completedBookingsWithoutReview = $tutor->bookings()
+                                            ->where('student_id', auth()->id())
+                                            ->where('is_completed', true)
                                             ->whereDoesntHave('review')
+                                            ->with(['subject'])
+                                            ->orderBy('end_time', 'desc')
                                             ->get();
                                     @endphp
 
-                                    @if($completedBookings->count() > 0)
+                                    @if($completedBookingsWithoutReview->count() > 0)
                                         <form action="{{ route('tutors.reviews.store', $tutor) }}" method="POST" class="space-y-4">
                                             @csrf
 
                                             <div>
-                                                <label for="booking_id" class="block text-sm font-medium text-gray-700">Select Session</label>
+                                                <label for="booking_id" class="block text-sm font-medium text-gray-700">{{ __('tutors.select_session') }}</label>
                                                 <select name="booking_id" id="booking_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                                    @foreach($completedBookings as $booking)
+                                                    @foreach($completedBookingsWithoutReview as $booking)
                                                         <option value="{{ $booking->id }}">
-                                                            {{ $booking->subject->name }} - {{ $booking->start_time->format('M d, Y H:i') }}
+                                                            {{ translateSubjectName($booking->subject->name) }} - {{ $booking->start_time->format('M d, Y H:i') }}
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -209,7 +211,7 @@
                                             </div>
 
                                             <div>
-                                                <label for="rating" class="block text-sm font-medium text-gray-700">Rating</label>
+                                                <label for="rating" class="block text-sm font-medium text-gray-700">{{ __('tutors.rating') }}</label>
                                                 <div class="mt-1 flex items-center">
                                                     <div class="flex space-x-1">
                                                         @for($i = 1; $i <= 5; $i++)
@@ -228,12 +230,12 @@
                                             </div>
 
                                             <div>
-                                                <label for="comment" class="block text-sm font-medium text-gray-700">Comment</label>
+                                                <label for="comment" class="block text-sm font-medium text-gray-700">{{ __('tutors.comment') }}</label>
                                                 @php
                                                     $commentValue = old('comment', '');
                                                     if (is_array($commentValue)) { $commentValue = ''; }
                                                 @endphp
-                                                <textarea id="comment" name="comment" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="{{ __('common.experience_with_tutor') }}">{{ $commentValue }}</textarea>
+                                                <textarea id="comment" name="comment" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="{{ __('tutors.experience_with_tutor') }}">{{ $commentValue }}</textarea>
                                                 @error('comment')
                                                     <p class="mt-1 text-sm text-red-600">{{ $errors->first('comment') }}</p>
                                                 @enderror
@@ -241,7 +243,7 @@
 
                                             <div class="text-right">
                                                 <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                    Submit Review
+                                                    {{ __('tutors.submit_review') }}
                                                 </button>
                                             </div>
                                         </form>
@@ -255,7 +257,7 @@
                                                 </div>
                                                 <div class="ml-3">
                                                     <p class="text-sm text-yellow-700">
-                                                        You can only leave a review after completing a session with this tutor.
+                                                        {{ __('tutors.review_after_session') }}
                                                     </p>
                                                 </div>
                                             </div>

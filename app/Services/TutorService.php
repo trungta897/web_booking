@@ -229,7 +229,7 @@ class TutorService extends BaseService implements TutorServiceInterface
         $booking = \App\Models\Booking::where('id', $data['booking_id'])
             ->where('student_id', $data['student_id'])
             ->where('tutor_id', $tutor->id)
-            ->where('status', 'completed')
+            ->where('is_completed', true) // 🎯 BOOLEAN LOGIC: Use is_completed instead of status = 'completed'
             ->first();
 
         if (!$booking) {
@@ -549,7 +549,7 @@ class TutorService extends BaseService implements TutorServiceInterface
 
         // Get upcoming sessions
         $upcomingSessions = \App\Models\Booking::where('tutor_id', $tutor->id)
-            ->where('status', 'confirmed')
+            ->where('is_confirmed', true) // 🎯 BOOLEAN LOGIC: Use is_confirmed instead of status = 'accepted'
             ->where('start_time', '>', now())
             ->with(['student', 'subject'])
             ->orderBy('start_time')
@@ -566,21 +566,22 @@ class TutorService extends BaseService implements TutorServiceInterface
         // Count statistics for dashboard
         $totalBookings = \App\Models\Booking::where('tutor_id', $tutor->id)->count();
         $completedBookings = \App\Models\Booking::where('tutor_id', $tutor->id)
-            ->where('status', 'completed')
+            ->where('is_completed', true)
             ->count();
         $pendingBookings = \App\Models\Booking::where('tutor_id', $tutor->id)
-            ->where('status', 'pending')
+            ->pending() // 🎯 BOOLEAN LOGIC: Use pending() scope instead of status = 'pending'
             ->count();
         $upcomingBookings = \App\Models\Booking::where('tutor_id', $tutor->id)
-            ->where('status', 'confirmed')
+            ->where('is_confirmed', true) // 🎯 BOOLEAN LOGIC: Use is_confirmed instead of status = 'accepted'
             ->where('start_time', '>', now())
             ->count();
         $totalStudents = \App\Models\Booking::where('tutor_id', $tutor->id)
             ->select('student_id')
             ->distinct()
             ->count();
+        // 🎯 BOOLEAN LOGIC: Use payment_at instead of payment_status
         $totalEarnings = \App\Models\Booking::where('tutor_id', $tutor->id)
-            ->where('payment_status', 'paid')
+            ->whereNotNull('payment_at')
             ->sum('price');
 
         // Get calendar data for current month
@@ -613,9 +614,16 @@ class TutorService extends BaseService implements TutorServiceInterface
         $nextMonth = $currentDate->copy()->addMonth();
         $endOfNextMonth = $nextMonth->copy()->endOfMonth();
 
-        // Get all bookings for current and next month
+        // Get all bookings for current and next month - 🎯 BOOLEAN LOGIC: Use boolean fields instead of status
         $bookings = \App\Models\Booking::where('tutor_id', $tutor->id)
-            ->whereIn('status', ['confirmed', 'pending'])
+            ->where(function($query) {
+                $query->where('is_confirmed', true)  // Confirmed bookings
+                      ->orWhere(function($q) {
+                          $q->where('is_confirmed', false)
+                            ->where('is_cancelled', false)
+                            ->where('is_completed', false); // Pending bookings
+                      });
+            })
             ->whereBetween('start_time', [$startOfMonth, $endOfNextMonth])
             ->with(['student', 'subject'])
             ->orderBy('start_time')
@@ -681,6 +689,7 @@ class TutorService extends BaseService implements TutorServiceInterface
                 'is_past' => $currentDate->isPast(),
             ];
 
+            // Check if we've reached the end of the week (Saturday)
             if ($currentDate->dayOfWeek === \Carbon\Carbon::SATURDAY) {
                 $weeks[] = $currentWeek;
                 $currentWeek = [];
@@ -694,6 +703,33 @@ class TutorService extends BaseService implements TutorServiceInterface
             $weeks[] = $currentWeek;
         }
 
+        // 🎯 SAFETY CHECK: Ensure we always return valid weeks
+        if (empty($weeks)) {
+            // Fallback: create a minimal week structure
+            $weeks = [[]];
+        }
+
+        // 🎯 VALIDATION: Ensure each week has valid day data
+        foreach ($weeks as $weekIndex => $week) {
+            if (empty($week)) {
+                // Remove empty weeks
+                unset($weeks[$weekIndex]);
+            } else {
+                // Validate each day in the week
+                foreach ($week as $dayIndex => $day) {
+                    if (!isset($day['date']) || !isset($day['day'])) {
+                        // Remove invalid day entries
+                        unset($weeks[$weekIndex][$dayIndex]);
+                    }
+                }
+                // Re-index the week array
+                $weeks[$weekIndex] = array_values($weeks[$weekIndex]);
+            }
+        }
+
+        // Re-index the weeks array and ensure we have at least one valid week
+        $weeks = array_values($weeks);
+
         return $weeks;
     }
 
@@ -705,17 +741,29 @@ class TutorService extends BaseService implements TutorServiceInterface
         $startOfDay = \Carbon\Carbon::parse($date)->startOfDay();
         $endOfDay = \Carbon\Carbon::parse($date)->endOfDay();
 
+        // 🎯 BOOLEAN LOGIC: Use boolean fields instead of status column
         $bookings = \App\Models\Booking::where('tutor_id', $tutor->id)
-            ->whereIn('status', ['confirmed', 'pending'])
+            ->where(function($query) {
+                $query->where('is_confirmed', true)  // Confirmed bookings
+                      ->orWhere(function($q) {
+                          $q->where('is_confirmed', false)
+                            ->where('is_cancelled', false)
+                            ->where('is_completed', false); // Pending bookings
+                      });
+            })
             ->whereBetween('start_time', [$startOfDay, $endOfDay])
             ->with(['student', 'subject'])
             ->orderBy('start_time')
             ->get();
 
         return $bookings->map(function ($booking) {
-            $durationInMinutes = $booking->start_time && $booking->end_time
-                ? $booking->start_time->diffInMinutes($booking->end_time)
-                : 0;
+            $durationInMinutes = 0;
+            if ($booking->start_time && $booking->end_time) {
+                // 🎯 FIX: Use Carbon methods properly
+                $startTime = \Carbon\Carbon::parse($booking->start_time);
+                $endTime = \Carbon\Carbon::parse($booking->end_time);
+                $durationInMinutes = $endTime->diffInMinutes($startTime);
+            }
 
             return [
                 'id' => $booking->id,

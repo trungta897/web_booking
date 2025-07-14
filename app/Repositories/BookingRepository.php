@@ -28,9 +28,23 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
             })
             : $this->query()->where('student_id', $userId);
 
-        // Apply filters
+        // Apply filters using boolean logic
         if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
+            switch ($filters['status']) {
+                case 'pending':
+                    $query->pending();
+                    break;
+                case 'confirmed':
+                case 'accepted':
+                    $query->confirmed();
+                    break;
+                case 'cancelled':
+                    $query->cancelled();
+                    break;
+                case 'completed':
+                    $query->completed();
+                    break;
+            }
         }
 
         if (isset($filters['subject_id'])) {
@@ -49,7 +63,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     {
         return $this->query()->where('student_id', $studentId)
             ->where('tutor_id', $tutorId)
-            ->where('status', 'pending')
+            ->pending() // Use scope instead of where('status', 'pending')
             ->exists();
     }
 
@@ -58,8 +72,26 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
      */
     public function getBookingsByStatus(string $status, int $perPage = 10): LengthAwarePaginator
     {
-        return $this->query()->where('status', $status)
-            ->with(['tutor.user', 'student', 'subject'])
+        $query = $this->query();
+
+        // Use boolean scopes instead of status column
+        switch ($status) {
+            case 'pending':
+                $query->pending();
+                break;
+            case 'confirmed':
+            case 'accepted':
+                $query->confirmed();
+                break;
+            case 'cancelled':
+                $query->cancelled();
+                break;
+            case 'completed':
+                $query->completed();
+                break;
+        }
+
+        return $query->with(['tutor.user', 'student', 'subject'])
             ->latest()
             ->paginate($perPage);
     }
@@ -70,7 +102,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     public function getUpcomingBookingsForTutor(int $tutorId): Collection
     {
         return $this->query()->where('tutor_id', $tutorId)
-            ->where('status', 'accepted')
+            ->confirmed() // Use scope instead of where('status', 'accepted')
             ->where('start_time', '>', Carbon::now())
             ->with(['student', 'subject'])
             ->orderBy('start_time')
@@ -83,7 +115,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     public function getCompletedBookingsForStudent(int $studentId): Collection
     {
         return $this->query()->where('student_id', $studentId)
-            ->where('status', 'completed')
+            ->completed() // Use scope instead of where('status', 'completed')
             ->with(['tutor.user', 'subject'])
             ->orderBy('end_time', 'desc')
             ->get();
@@ -118,7 +150,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     public function getTutorTotalEarnings(int $tutorId): float
     {
         return $this->query()->where('tutor_id', $tutorId)
-            ->where('payment_status', 'paid')
+            ->whereNotNull('payment_at') // Use payment_at instead of payment_status = 'paid'
             ->sum('price');
     }
 
@@ -128,7 +160,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     public function getTutorMonthlyEarnings(int $tutorId, int $year, int $month): float
     {
         return $this->query()->where('tutor_id', $tutorId)
-            ->where('payment_status', 'paid')
+            ->whereNotNull('payment_at') // Use payment_at instead of payment_status = 'paid'
             ->whereYear('end_time', $year)
             ->whereMonth('end_time', $month)
             ->sum('price');
@@ -140,7 +172,7 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     public function getBookingsNeedingReview(int $studentId): Collection
     {
         return $this->query()->where('student_id', $studentId)
-            ->where('status', 'completed')
+            ->where('is_completed', true)
             ->whereDoesntHave('review')
             ->with(['tutor.user', 'subject'])
             ->orderBy('end_time', 'desc')
@@ -154,8 +186,23 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
     {
         $query = $this->query()->with(['tutor.user', 'student', 'subject']);
 
+        // Use boolean scopes instead of status column
         if (isset($filters['status'])) {
-            $query->where('status', $filters['status']);
+            switch ($filters['status']) {
+                case 'pending':
+                    $query->pending();
+                    break;
+                case 'confirmed':
+                case 'accepted':
+                    $query->confirmed();
+                    break;
+                case 'cancelled':
+                    $query->cancelled();
+                    break;
+                case 'completed':
+                    $query->completed();
+                    break;
+            }
         }
 
         if (isset($filters['subject_id'])) {

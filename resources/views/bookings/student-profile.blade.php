@@ -32,11 +32,11 @@
                         </div>
                         <div class="bg-green-50 p-4 rounded-lg">
                             <h4 class="text-sm font-medium text-gray-500 mb-2">{{ __('common.completed_sessions') }}</h4>
-                            <p class="text-2xl font-bold text-green-600">{{ $allBookings->where('status', 'completed')->count() }}</p>
+                            <p class="text-2xl font-bold text-green-600">{{ $allBookings->where('is_completed', true)->count() }}</p>
                         </div>
                         <div class="bg-yellow-50 p-4 rounded-lg">
                             <h4 class="text-sm font-medium text-gray-500 mb-2">{{ __('common.pending_sessions') }}</h4>
-                            <p class="text-2xl font-bold text-yellow-600">{{ $allBookings->where('status', 'pending')->count() }}</p>
+                            <p class="text-2xl font-bold text-yellow-600">{{ $allBookings->where('is_confirmed', false)->where('is_cancelled', false)->where('is_completed', false)->count() }}</p>
                         </div>
                     </div>
                 </div>
@@ -72,13 +72,16 @@
                                     @foreach($allBookings as $bookingItem)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-900">{{ $bookingItem->subject->name }}</div>
+                                                <div class="text-sm text-gray-900">{{ translateSubjectName($bookingItem->subject->name) }}</div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm text-gray-900">{{ $bookingItem->start_time->format('M d, Y') }}</div>
                                                 <div class="text-sm text-gray-500">{{ $bookingItem->start_time->format('H:i') }} - {{ $bookingItem->end_time->format('H:i') }}</div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
+                                                @php
+                                                    $statusBadge = getBookingStatusBadge($bookingItem->status);
+                                                @endphp
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                                     @if($bookingItem->status === 'accepted') bg-green-100 text-green-800
                                                     @elseif($bookingItem->status === 'pending') bg-yellow-100 text-yellow-800
@@ -86,7 +89,7 @@
                                                     @elseif($bookingItem->status === 'completed') bg-blue-100 text-blue-800
                                                     @else bg-gray-100 text-gray-800
                                                     @endif">
-                                                    {{ ucfirst($bookingItem->status) }}
+                                                    {{ $statusBadge['text'] }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

@@ -141,6 +141,11 @@ class AdminService extends BaseService
         return $this->executeTransaction(function () use ($userId) {
             $user = $this->userRepository->findByIdOrFail($userId);
 
+            // Cast to User model to ensure proper type
+            if (!$user instanceof User) {
+                throw new Exception('Invalid user type');
+            }
+
             $this->validateUserCanBeDeleted($user);
 
             $result = $this->userRepository->delete($user->id);
@@ -176,13 +181,25 @@ class AdminService extends BaseService
     {
         if ($user->role === 'student') {
             return Booking::where('student_id', $user->id)
-                ->whereIn('status', ['pending', 'accepted'])
+                ->where(function($query) {
+                    $query->where(function($q) {
+                        $q->where('is_confirmed', false)
+                          ->where('is_cancelled', false)
+                          ->where('is_completed', false); // Pending bookings
+                    })->orWhere('is_confirmed', true); // Accepted bookings
+                })
                 ->count();
         }
 
         return Booking::whereHas('tutor', function ($q) use ($user) {
             $q->where('user_id', $user->id);
-        })->whereIn('status', ['pending', 'accepted'])->count();
+        })->where(function($query) {
+            $query->where(function($q) {
+                $q->where('is_confirmed', false)
+                  ->where('is_cancelled', false)
+                  ->where('is_completed', false); // Pending bookings
+            })->orWhere('is_confirmed', true); // Accepted bookings
+        })->count();
     }
 
     /**
@@ -190,11 +207,12 @@ class AdminService extends BaseService
      */
     protected function getBookingStatistics(): array
     {
+        // 🎯 BOOLEAN LOGIC: Get booking statistics using boolean fields
         $total = Booking::count();
-        $pending = Booking::where('status', 'pending')->count();
-        $accepted = Booking::where('status', 'accepted')->count();
-        $completed = Booking::where('status', 'completed')->count();
-        $cancelled = Booking::where('status', 'cancelled')->count();
+        $pending = Booking::where('is_confirmed', false)->where('is_cancelled', false)->where('is_completed', false)->count();
+        $accepted = Booking::where('is_confirmed', true)->where('is_completed', false)->count();
+        $completed = Booking::where('is_completed', true)->count();
+        $cancelled = Booking::where('is_cancelled', true)->count();
 
         return [
             'total' => $total,
@@ -212,15 +230,16 @@ class AdminService extends BaseService
      */
     protected function getRevenueStatistics(): array
     {
-        $totalRevenue = Booking::where('payment_status', 'paid')
+        // 🎯 BOOLEAN LOGIC: Use payment_at instead of payment_status for revenue
+        $totalRevenue = Booking::whereNotNull('payment_at')
             ->sum('price');
 
-        $monthlyRevenue = Booking::where('payment_status', 'paid')
+        $monthlyRevenue = Booking::whereNotNull('payment_at')
             ->whereMonth('created_at', Carbon::now()->month)
             ->whereYear('created_at', Carbon::now()->year)
             ->sum('price');
 
-        $weeklyRevenue = Booking::where('payment_status', 'paid')
+        $weeklyRevenue = Booking::whereNotNull('payment_at')
             ->whereBetween('created_at', [
                 Carbon::now()->startOfWeek(),
                 Carbon::now()->endOfWeek(),
@@ -301,7 +320,8 @@ class AdminService extends BaseService
 
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
-            $revenue = Booking::where('payment_status', 'paid')
+            // 🎯 BOOLEAN LOGIC: Use payment_at instead of payment_status
+            $revenue = Booking::whereNotNull('payment_at')
                 ->whereDate('created_at', $date)
                 ->sum('price');
 
@@ -498,10 +518,12 @@ class AdminService extends BaseService
 
         $averageRating = $user->reviewsReceived->avg('rating');
         $totalBookings = $user->tutorBookings->count();
-        $completedBookings = $user->tutorBookings->where('status', 'completed')->count();
+        // 🎯 BOOLEAN LOGIC: Count completed bookings
+        $completedBookings = $user->tutorBookings->where('is_completed', true)->count();
 
         return [
             'user' => $user,
+            'averageRating' => $averageRating, // Thêm biến này vào return array
             'average_rating' => $averageRating,
             'total_bookings' => $totalBookings,
             'completed_bookings' => $completedBookings,
@@ -523,7 +545,8 @@ class AdminService extends BaseService
         ]);
 
         $totalBookings = $user->studentBookings->count();
-        $totalSpent = $user->studentBookings->where('status', 'completed')->sum('price');
+        // 🎯 BOOLEAN LOGIC: Total spent from completed bookings
+        $totalSpent = $user->studentBookings->where('is_completed', true)->sum('price');
 
         return [
             'user' => $user,
@@ -666,7 +689,13 @@ class AdminService extends BaseService
     {
         return $this->executeTransaction(function () use ($subject) {
             // Check if subject has active bookings or tutors
-            $activeBookings = $subject->bookings()->whereIn('status', ['pending', 'confirmed'])->count();
+            $activeBookings = $subject->bookings()->where(function($query) {
+                $query->where(function($q) {
+                    $q->where('is_confirmed', false)
+                      ->where('is_cancelled', false)
+                      ->where('is_completed', false); // Pending bookings
+                })->orWhere('is_confirmed', true); // Accepted bookings
+            })->count();
             $activeTutors = $subject->tutors()->count();
 
             if ($activeBookings > 0) {
@@ -704,9 +733,9 @@ class AdminService extends BaseService
             ->orderBy('month')
             ->get();
 
-        // Revenue by month
+        // Revenue by month - 🎯 BOOLEAN LOGIC: Use payment_at instead of payment_status
         $monthlyRevenue = Booking::selectRaw('MONTH(created_at) as month, SUM(price) as revenue')
-            ->where('payment_status', 'paid')
+            ->whereNotNull('payment_at')
             ->whereYear('created_at', date('Y'))
             ->groupBy('month')
             ->orderBy('month')

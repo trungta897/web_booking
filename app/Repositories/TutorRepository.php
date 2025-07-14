@@ -215,8 +215,8 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
 
         return [
             'total_bookings' => $tutor->bookings()->count(),
-            'completed_bookings' => $tutor->bookings()->where('status', 'completed')->count(),
-            'total_earnings' => $tutor->bookings()->where('payment_status', 'paid')->sum('price'),
+            'completed_bookings' => $tutor->bookings()->where('is_completed', true)->count(),
+            'total_earnings' => $tutor->bookings()->whereNotNull('payment_at')->sum('price'), // Use payment_at instead of payment_status
             'average_rating' => $tutor->reviews()->avg('rating'),
             'total_reviews' => $tutor->reviews()->count(),
             'response_rate' => $this->calculateResponseRate($tutorId),
@@ -234,8 +234,16 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
         }
 
         $totalRequests = $tutor->bookings()->count();
+
+        // 🎯 BOOLEAN LOGIC: Count bookings that have been responded to
+        // (confirmed, cancelled, or completed - anything that's not just pending)
         $respondedRequests = $tutor->bookings()
-            ->whereIn('status', ['accepted', 'rejected'])->count();
+            ->where(function($query) {
+                $query->where('is_confirmed', true)    // Accepted bookings
+                      ->orWhere('is_cancelled', true)   // Cancelled/rejected bookings
+                      ->orWhere('is_completed', true);  // Completed bookings
+            })
+            ->count();
 
         return $totalRequests > 0 ? ($respondedRequests / $totalRequests) * 100 : 0;
     }

@@ -42,16 +42,11 @@ class RefundSystemTest extends TestCase
         $this->tutor = Tutor::factory()->create(['user_id' => $this->tutorUser->id]);
         $this->subject = Subject::factory()->create();
 
-        $this->booking = Booking::create([
+        $this->booking = Booking::factory()->create([
             'student_id' => $this->student->id,
             'tutor_id' => $this->tutor->id,
-            'subject_id' => $this->subject->id,
-            'start_time' => Carbon::now()->addDay(),
-            'end_time' => Carbon::now()->addDay()->addHour(),
-            'status' => 'confirmed',
-            'price' => 100000,
+            'status' => 'accepted',
             'payment_status' => 'paid',
-            'payment_method' => 'vnpay',
         ]);
 
         // Create completed payment transaction
@@ -69,7 +64,7 @@ class RefundSystemTest extends TestCase
     }
 
     /** @test */
-    public function tutor_can_refund_confirmed_booking()
+    public function tutor_can_refund_accepted_booking()
     {
         $this->actingAs($this->tutorUser);
 

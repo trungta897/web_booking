@@ -102,8 +102,9 @@ class SubjectRepository extends BaseRepository implements SubjectRepositoryInter
             'active_tutors' => $subject->tutors()->whereHas('user', function ($q) {
                 $q->where('account_status', 'active');
             })->count(),
+            // 🎯 BOOLEAN LOGIC: Use is_completed instead of status = 'completed'
             'total_bookings' => $subject->bookings()->count(),
-            'completed_bookings' => $subject->bookings()->where('status', 'completed')->count(),
+            'completed_bookings' => $subject->bookings()->where('is_completed', true)->count(),
             'average_rating' => $subject->tutors()->with('reviews')->get()
                 ->flatMap(function ($tutor) {
                     return $tutor->reviews;

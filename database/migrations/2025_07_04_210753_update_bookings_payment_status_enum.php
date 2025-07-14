@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     /**
@@ -9,8 +10,10 @@ return new class () extends Migration {
      */
     public function up(): void
     {
-        // For MySQL, we need to alter the enum to include new values
-        DB::statement("ALTER TABLE bookings MODIFY COLUMN payment_status ENUM('pending', 'paid', 'failed', 'refunded', 'partial_refunded') DEFAULT 'pending'");
+        // Chỉ modify nếu column payment_status tồn tại
+        if (Schema::hasColumn('bookings', 'payment_status')) {
+            DB::statement("ALTER TABLE bookings MODIFY COLUMN payment_status ENUM('pending', 'paid', 'failed', 'refunded', 'partial_refunded') DEFAULT 'pending'");
+        }
     }
 
     /**
@@ -18,7 +21,9 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        // Remove partial_refunded from enum
-        DB::statement("ALTER TABLE bookings MODIFY COLUMN payment_status ENUM('pending', 'paid', 'failed', 'refunded') DEFAULT 'pending'");
+        // Chỉ modify nếu column payment_status tồn tại
+        if (Schema::hasColumn('bookings', 'payment_status')) {
+            DB::statement("ALTER TABLE bookings MODIFY COLUMN payment_status ENUM('pending', 'paid', 'failed', 'refunded') DEFAULT 'pending'");
+        }
     }
 };

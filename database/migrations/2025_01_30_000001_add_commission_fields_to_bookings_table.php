@@ -11,16 +11,30 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            // Commission fields - với DEFAULT values để không ảnh hưởng existing data
-            $table->decimal('platform_fee_percentage', 5, 2)->default(15.00)->after('currency');
-            $table->decimal('platform_fee_amount', 10, 2)->nullable()->after('platform_fee_percentage');
-            $table->decimal('tutor_earnings', 10, 2)->nullable()->after('platform_fee_amount');
-            $table->timestamp('commission_calculated_at')->nullable()->after('tutor_earnings');
-            $table->bigInteger('payout_id')->unsigned()->nullable()->after('commission_calculated_at');
+            // Commission fields - chỉ thêm nếu chưa có
+            if (!Schema::hasColumn('bookings', 'platform_fee_percentage')) {
+                $table->decimal('platform_fee_percentage', 5, 2)->default(15.00)->after('price');
+            }
+            if (!Schema::hasColumn('bookings', 'platform_fee_amount')) {
+                $table->decimal('platform_fee_amount', 10, 2)->nullable()->after('platform_fee_percentage');
+            }
+            if (!Schema::hasColumn('bookings', 'tutor_earnings')) {
+                $table->decimal('tutor_earnings', 10, 2)->nullable()->after('platform_fee_amount');
+            }
+            if (!Schema::hasColumn('bookings', 'commission_calculated_at')) {
+                $table->timestamp('commission_calculated_at')->nullable()->after('tutor_earnings');
+            }
+            if (!Schema::hasColumn('bookings', 'payout_id')) {
+                $table->bigInteger('payout_id')->unsigned()->nullable()->after('commission_calculated_at');
+            }
 
-            // Index for performance
-            $table->index(['tutor_id', 'payout_id'], 'idx_tutor_payout');
-            $table->index('commission_calculated_at', 'idx_commission_calculated');
+            // Index for performance - chỉ thêm nếu chưa có
+            if (!$this->hasIndex('bookings', 'idx_tutor_payout')) {
+                $table->index(['tutor_id', 'payout_id'], 'idx_tutor_payout');
+            }
+            if (!$this->hasIndex('bookings', 'idx_commission_calculated')) {
+                $table->index('commission_calculated_at', 'idx_commission_calculated');
+            }
         });
     }
 
@@ -43,5 +57,18 @@ return new class () extends Migration {
                 'payout_id'
             ]);
         });
+    }
+
+    /**
+     * Check if an index exists on a table.
+     */
+    private function hasIndex(string $table, string $index): bool
+    {
+        try {
+            $exists = Schema::getConnection()->select("SHOW INDEX FROM `{$table}` WHERE Key_name = ?", [$index]);
+            return !empty($exists);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 };

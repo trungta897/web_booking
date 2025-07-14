@@ -62,37 +62,30 @@ if (!function_exists('getTutorCard')) {
 
 if (!function_exists('formatCurrency')) {
     /**
-     * Format currency for display with automatic conversion based on locale.
+     * Format currency for display - always show VND for Vietnamese locale
      */
-    function formatCurrency(float $amount, string $currency = 'USD'): string
+    function formatCurrency($amount, $currency = 'VND'): string
     {
-        // Get current locale with multiple fallbacks
+        // Get current locale
         $locale = session('locale') ?: app()->getLocale();
         if (!$locale || !in_array($locale, ['en', 'vi'])) {
             $locale = config('app.locale', 'vi');
         }
 
-        // Smart detection: If amount > 1000, it's likely already VND
-        // This prevents double conversion when database stores VND but code passes 'USD'
-        if ($amount > 1000) {
-            // Amount is already VND
-            if ($locale === 'vi') {
-                return number_format($amount, 0, ',', '.') . ' VND';
-            } else {
-                // Convert VND to USD for English display
-                $usdAmount = $amount / 25000;
+        // Convert amount to float to handle any data type
+        $amount = (float) $amount;
 
-                return '$' . number_format($usdAmount, 2);
-            }
+        // For Vietnamese locale, ALWAYS show VND regardless of amount
+        if ($locale === 'vi') {
+            return number_format($amount, 0, ',', '.') . ' VND';
         } else {
-            // Amount is in USD (small amounts)
-            if ($locale === 'vi') {
-                // Convert USD to VND for Vietnamese display
-                $vndAmount = $amount * 25000;
-
-                return number_format($vndAmount, 0, ',', '.') . ' VND';
+            // For English locale, convert VND to USD if amount is large
+            if ($amount > 1000) {
+                // Convert VND to USD for display
+                $usdAmount = $amount / 25000;
+                return '$' . number_format($usdAmount, 2);
             } else {
-                // Display USD as-is for English
+                // Already USD
                 return '$' . number_format($amount, 2);
             }
         }
@@ -106,7 +99,7 @@ if (!function_exists('formatBookingAmount')) {
     function formatBookingAmount(\App\Models\Booking $booking): string
     {
         $currency = $booking->currency ?? 'VND';
-        $amount = $booking->price;
+        $amount = (float) $booking->price; // Cast to float
 
         // Protection against negative prices - should not happen but just in case
         if ($amount < 0) {
@@ -370,40 +363,6 @@ if (!function_exists('getBookingUrgency')) {
         }
 
         return 'low';
-    }
-}
-
-if (!function_exists('formatCurrency')) {
-    function formatCurrency($amount, $currency = 'VND')
-    {
-        // Smart detection: if amount > 1000, treat as VND (don't convert)
-        // if amount <= 1000, treat as USD (convert to VND)
-        if ($amount > 1000) {
-            // Already in VND, just format
-            return number_format($amount, 0, ',', '.') . ' VND';
-        } else {
-            // Convert USD to VND
-            $vndAmount = $amount * 25000;
-
-            return number_format($vndAmount, 0, ',', '.') . ' VND';
-        }
-    }
-}
-
-if (!function_exists('formatHourlyRate')) {
-    function formatHourlyRate($rate)
-    {
-        // Smart detection: if rate > 1000, treat as VND (don't convert)
-        // if rate <= 1000, treat as USD (convert to VND)
-        if ($rate > 1000) {
-            // Already in VND, just format
-            return number_format($rate, 0, ',', '.') . ' VND/giờ';
-        } else {
-            // Convert USD to VND
-            $vndRate = $rate * 25000;
-
-            return number_format($vndRate, 0, ',', '.') . ' VND/giờ';
-        }
     }
 }
 

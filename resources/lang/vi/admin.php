@@ -117,7 +117,6 @@ return [
     // Status translations
     'pending' => 'Chờ duyệt',
     'accepted' => 'Đã chấp nhận',
-    'confirmed' => 'Đã xác nhận',
     'completed' => 'Hoàn thành',
     'cancelled' => 'Đã hủy',
     'rejected' => 'Đã từ chối',

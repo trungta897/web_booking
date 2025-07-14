@@ -24,12 +24,12 @@ class BookingPolicy
     public function delete(User $user, Booking $booking)
     {
         // Students can cancel their own pending bookings
-        if ($user->id === $booking->student_id && $booking->status === 'pending') {
+        if ($user->id === $booking->student_id && $booking->isPending()) {
             return true;
         }
 
-        // Tutors can cancel/reject bookings assigned to them
-        if ($user->id === $booking->tutor->user->id && in_array($booking->status, ['pending', 'accepted'])) {
+        // Tutors can cancel/reject bookings assigned to them  
+        if ($user->id === $booking->tutor->user->id && ($booking->isPending() || $booking->status === 'accepted')) {
             return true;
         }
 

@@ -17,7 +17,7 @@ class ReviewSeeder extends Seeder
         $this->command->info('ReviewSeeder: Deleted all existing reviews.');
 
         // Get all completed bookings
-        $completedBookings = Booking::where('status', 'completed')->get();
+        $completedBookings = Booking::where('is_completed', true)->get();
 
         if ($completedBookings->isEmpty()) {
             $this->command->info('ReviewSeeder: No completed bookings found to review. Skipping review creation.');

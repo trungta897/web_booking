@@ -46,7 +46,7 @@ class TutorCard
     {
         return [
             'name' => $this->tutor->user->name,
-            'hourly_rate' => number_format($this->tutor->hourly_rate, 2) . ' USD/hour',
+            'hourly_rate' => formatCurrency($this->tutor->hourly_rate),
             'experience' => $this->tutor->experience_years . ' years experience',
             'location' => $this->tutor->user->address ?? 'Not specified',
             'bio' => $this->tutor->bio ? \Illuminate\Support\Str::limit($this->tutor->bio, 150) : 'No bio available',

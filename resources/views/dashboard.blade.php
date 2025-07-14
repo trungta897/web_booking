@@ -152,19 +152,22 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900">{{ $booking->subject->name }}</div>
+                                            <div class="text-sm text-gray-900">{{ translateSubjectName($booking->subject->name) }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm text-gray-900">{{ $booking->start_time->format('M d, Y') }}</div>
                                             <div class="text-sm text-gray-500">{{ $booking->start_time->format('H:i') }} - {{ $booking->end_time->format('H:i') }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
+                                            @php
+                                                $statusBadge = getBookingStatusBadge($booking->status);
+                                            @endphp
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                                 @if($booking->status === 'accepted') bg-green-100 text-green-800
                                                 @elseif($booking->status === 'pending') bg-yellow-100 text-yellow-800
                                                 @elseif($booking->status === 'cancelled') bg-red-100 text-red-800
                                                 @else bg-gray-100 text-gray-800 @endif">
-                                                {{ ucfirst($booking->status) }}
+                                                {{ $statusBadge['text'] }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

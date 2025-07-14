@@ -58,7 +58,7 @@ class BookingCard
             'duration' => $this->calculateDuration(),
             'price' => formatCurrency($this->booking->price),
             'status_text' => ucfirst($this->booking->status),
-            'payment_status_text' => ucfirst($this->booking->payment_status ?? 'unpaid'),
+            ...$this->getPaymentStatusProperties(),
         ];
     }
 
@@ -152,18 +152,6 @@ class BookingCard
                 break;
 
             case 'accepted':
-                if ($this->booking->payment_status !== 'paid' && !$this->booking->completedTransactions()->exists()) {
-                    if ($user->role === 'student' && $this->booking->student_id === $user->id) {
-                        $actions[] = [
-                            'type' => 'pay',
-                            'label' => __('booking.actions.pay'),
-                            'route' => route('bookings.payment', $this->booking),
-                            'class' => 'btn-primary',
-                            'icon' => 'credit-card',
-                        ];
-                    }
-                }
-
                 if ($this->booking->canBeCancelled()) {
                     $actions[] = [
                         'type' => 'cancel',
@@ -274,5 +262,46 @@ class BookingCard
         }
 
         return 'low';
+    }
+
+    /**
+     * Get payment status properties.
+     */
+    protected function getPaymentStatusProperties(): array
+    {
+        // BOOLEAN LOGIC: Use boolean fields instead of payment_status
+        $isConfirmed = $this->booking->is_confirmed ?? false;
+        $isCompleted = $this->booking->is_completed ?? false;
+        $isCancelled = $this->booking->is_cancelled ?? false;
+
+        if ($isConfirmed) {
+            $paymentStatusText = 'Paid';
+        } elseif ($isCompleted) {
+            $paymentStatusText = 'Completed';
+        } elseif ($isCancelled) {
+            $paymentStatusText = 'Cancelled';
+        } else {
+            $paymentStatusText = 'Unpaid';
+        }
+
+        return [
+            'payment_status_text' => $paymentStatusText,
+            'payment_status_class' => $this->getPaymentStatusClass($paymentStatusText),
+        ];
+    }
+
+    /**
+     * Get payment status CSS class.
+     */
+    protected function getPaymentStatusClass(string $paymentStatus): string
+    {
+        $statusClasses = [
+            'Paid' => 'text-success',
+            'Completed' => 'text-primary',
+            'Cancelled' => 'text-secondary',
+            'Unpaid' => 'text-warning',
+        ];
+
+        return $statusClasses[$paymentStatus] ?? 'text-muted';
     }
 }

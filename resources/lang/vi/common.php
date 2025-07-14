@@ -195,6 +195,7 @@ return [
     'meeting_link' => 'Liên kết họp',
 
     // Status translations
+    'pending' => 'Chờ duyệt',
     'accepted' => 'Đã chấp nhận',
     'rejected' => 'Đã từ chối',
     'cancelled' => 'Đã hủy',
@@ -256,7 +257,6 @@ return [
     'schedule_for' => 'Lịch học ngày',
     'no_bookings_on_this_date' => 'Không có lịch học nào trong ngày này',
     'has_classes' => 'Có lớp học',
-    'confirmed' => 'Đã xác nhận',
     'add_education' => 'Thêm Bằng Cấp/Chứng Chỉ',
     'e.g., Bachelor of Science' => 'vd: Cử nhân Khoa học',
     'e.g., Stanford University' => 'vd: Đại học Stanford',

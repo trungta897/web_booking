@@ -128,36 +128,17 @@
 
                         <!-- ========== UNIFIED PAYMENT/TRANSACTION HISTORY SECTION START ========== -->
                         <div class="md:col-span-2">
-                            @if($booking->status === 'accepted' && auth()->user()->id === $booking->student_id)
-                                {{-- This block is for the student viewing their own accepted booking --}}
+                            @if(!$booking->isPending() && auth()->user()->id === $booking->student_id)
+                                {{-- This block is for the student viewing their own booking --}}
                                 @php
-                                    // Ensure we have fresh transaction data
-                                    $booking->load('transactions');
-
-                                    // Check if booking is fully paid (comprehensive check)
-                                    $isAlreadyPaid = $booking->isFullyPaid();
-
-                                    // Determine if payment can be made/retried - không kiểm tra pending transaction nữa
-                                    $canMakePayment = $booking->status === 'accepted' && !$isAlreadyPaid;
-
-                                    // Show retry payment if:
-                                    // 1. Payment status is pending
-                                    // 2. Not fully paid yet
-                                    // Không kiểm tra recent active transactions nữa - cho phép retry ngay lập tức
-                                    $showRetryPayment = $booking->payment_status === 'pending' && !$isAlreadyPaid;
-
-                                    // Sync payment status if needed
-                                    if (!$isAlreadyPaid && $booking->payment_status !== 'paid' &&
-                                        $booking->transactions()->where('type', 'payment')->where('status', 'completed')->exists()) {
-                                        $booking->update(['payment_status' => 'paid']);
-                                        $isAlreadyPaid = true;
-                                        $canMakePayment = false;
-                                        $showRetryPayment = false;
-                                    }
+                                    // 🎯 BOOLEAN LOGIC - ĐƠN GIẢN HÓA
+                                    $isAlreadyPaid = $booking->is_confirmed || $booking->isPaid();
+                                    $canMakePayment = !$booking->is_confirmed && !$booking->is_cancelled && !$booking->is_completed && !$booking->isPaid();
+                                    $showRetryPayment = !$booking->is_confirmed && !$booking->isPaid();
                                 @endphp
 
                                 @if($isAlreadyPaid)
-                                    <!-- Case 1: Already Paid - Hide payment button completely -->
+                                    <!-- ✅ ĐÃ THANH TOÁN - CHỈ HIỂN THỊ LỊCH SỬ, KHÔNG CHO THANH TOÁN NỮA -->
                                     <h4 class="text-sm font-medium text-gray-500">{{ __('common.Payment History') }}</h4>
                                     <div class="mt-2">
                                         <div class="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -167,24 +148,28 @@
                                                 </svg>
                                                 <span class="text-sm text-green-800 font-medium">{{ __('booking.info.payment_completed_successfully') }}</span>
                                             </div>
+
+                                            <!-- 🛡️ THÔNG BÁO RÕ RÀNG: ĐÃ THANH TOÁN XONG -->
+                                            <div class="mt-2 p-2 bg-green-100 border border-green-300 rounded">
+                                                <p class="text-xs text-green-800 font-semibold">
+                                                    ✅ Booking này đã được thanh toán hoàn tất. Không thể thanh toán lại.
+                                                </p>
+                                            </div>
+
                                             <p class="text-sm text-green-700 mt-2">
                                                 {{ __('booking.info.payment_amount_was') }}: <span class="font-semibold">{{ $booking->display_amount }}</span>
                                             </p>
 
-                                            @php
-                                                $completedTransaction = $booking->completedTransactions()->latest()->first();
-                                            @endphp
-
-                                            @if($completedTransaction)
+                                            @if($booking->isPaid())
                                                 <div class="mt-3 pt-3 border-t border-green-200">
                                                     <div class="grid grid-cols-2 gap-2 text-xs">
                                                         <div>
                                                             <span class="text-green-600">{{ __('booking.info.payment_method') }}:</span>
-                                                            <span class="font-medium text-green-800">{{ $completedTransaction->payment_method_name }}</span>
+                                                            <span class="font-medium text-green-800">{{ $booking->payment_method_display }}</span>
                                                         </div>
                                                         <div>
                                                             <span class="text-green-600">{{ __('booking.info.paid_at') }}:</span>
-                                                            <span class="font-medium text-green-800">{{ $completedTransaction->processed_at ? $completedTransaction->processed_at->format('d/m/Y H:i') : $completedTransaction->created_at->format('d/m/Y H:i') }}</span>
+                                                            <span class="font-medium text-green-800">{{ $booking->payment_at ? $booking->payment_at->format('d/m/Y H:i') : 'N/A' }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -199,63 +184,50 @@
                                             </div>
                                         </div>
                                     </div>
-                                @elseif($canMakePayment || $showRetryPayment)
-                                    <!-- Case 2: Needs Payment or Retry Payment -->
+                                @elseif($canMakePayment)
+                                    <!-- 💳 CHƯA THANH TOÁN - CHO PHÉP THANH TOÁN -->
                                     <h4 class="text-sm font-medium text-gray-500">
-                                        @if($showRetryPayment)
-                                            {{ __('booking.payment_retry_required') }}
-                                        @else
-                                            {{ __('common.Payment Required') }}
-                                        @endif
+                                        {{ __('common.Payment Required') }}
                                     </h4>
                                     <div class="mt-2">
                                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                             <div class="flex items-center">
                                                 <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                    @if($showRetryPayment)
-                                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
-                                                    @else
-                                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                                    @endif
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                                                 </svg>
-                                                <span class="text-sm text-blue-800">
-                                                    @if($showRetryPayment)
-                                                        {{ __('booking.payment_retry_message') }}
-                                                    @else
-                                                        {{ __('common.This booking requires payment to confirm.') }}
-                                                    @endif
-                                                </span>
+                                                <span class="text-sm text-blue-800">{{ __('common.This booking requires payment to confirm.') }}</span>
                                             </div>
-
-                                            @if($showRetryPayment)
-                                                <div class="mt-2 p-3 bg-blue-100 rounded-lg">
-                                                    <p class="text-xs text-blue-700">
-                                                        <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                                        </svg>
-                                                        {{ __('booking.payment_retry_explanation') }}
-                                                    </p>
-                                                </div>
-                                            @endif
 
                                             <div class="mt-3">
                                                 <a href="{{ route('bookings.payment', $booking) }}"
                                                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:from-blue-700 hover:to-purple-700 transition-all duration-200">
                                                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                                        @if($showRetryPayment)
-                                                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
-                                                        @else
-                                                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
-                                                            <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
-                                                        @endif
+                                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                                                        <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/>
                                                     </svg>
-                                                    @if($showRetryPayment)
-                                                        {{ __('booking.retry_payment') }} {{ $booking->display_amount }}
-                                                    @else
-                                                        {{ __('common.Complete Payment') }} {{ $booking->display_amount }}
-                                                    @endif
+                                                    {{ __('common.Complete Payment') }} {{ $booking->display_amount }}
                                                 </a>
                                             </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <!-- 🚫 TRẠNG THÁI KHÁC - KHÔNG CHO THANH TOÁN -->
+                                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-gray-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <span class="text-sm text-gray-700">
+                                                @if($booking->isPending())
+                                                    Booking đang chờ gia sư chấp nhận.
+                                                @elseif($booking->is_cancelled)
+                                                    Booking đã bị hủy.
+                                                @elseif($booking->is_completed)
+                                                    Booking đã hoàn thành.
+                                                @else
+                                                    Booking này không thể thanh toán.
+                                                @endif
+                                            </span>
                                         </div>
                                     </div>
                                 @endif
@@ -277,7 +249,7 @@
                         <!-- ========== UNIFIED PAYMENT/TRANSACTION HISTORY SECTION END ========== -->
 
                         <!-- Refund section for tutors -->
-                        @if($booking->status === 'accepted' && ($booking->payment_status === 'paid' || $booking->completedTransactions()->exists()) && auth()->user()->role === 'tutor' && auth()->user()->tutor && $booking->tutor_id === auth()->user()->tutor->id)
+                        @if($booking->status === 'accepted' && ($booking->is_confirmed || $booking->completedTransactions()->exists()) && auth()->user()->role === 'tutor' && auth()->user()->tutor && $booking->tutor_id === auth()->user()->tutor->id)
                             <div class="md:col-span-2">
                                 <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
                                     <div class="flex items-center">
@@ -317,7 +289,7 @@
                                 <form action="{{ route('bookings.update', $booking) }}" method="POST">
                                     @csrf
                                     @method('PUT')
-                                    <input type="hidden" name="status" value="accepted">
+                                    <input type="hidden" name="action" value="accept">
                                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition">
                                         {{ __('common.accept') }}
                                     </button>
@@ -346,7 +318,7 @@
                 <form action="{{ route('bookings.update', $booking) }}" method="POST">
                     @csrf
                     @method('PUT')
-                    <input type="hidden" name="status" value="rejected">
+                    <input type="hidden" name="action" value="reject">
 
                     <div class="mb-4">
                         <label for="rejection_reason" class="block text-sm font-medium text-gray-700 mb-2">

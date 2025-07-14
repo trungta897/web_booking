@@ -86,7 +86,7 @@ class BookingService extends BaseService
             // Check if student has any pending bookings with this tutor
             $hasPendingBooking = Booking::where('student_id', $student->id)
                 ->where('tutor_id', $tutor->id)
-                ->where('status', Booking::STATUS_PENDING)
+                ->pending() // Use scope instead of where('status', ...)
                 ->exists();
 
             if ($hasPendingBooking) {
@@ -121,8 +121,10 @@ class BookingService extends BaseService
                 'end_time' => $data['end_time'],
                 'notes' => $data['notes'] ?? null,
                 'price' => $price,
-                'currency' => 'VND', // Always save as VND
-                'status' => Booking::STATUS_PENDING,
+                // Use boolean fields instead of status
+                'is_confirmed' => false,
+                'is_cancelled' => false,
+                'is_completed' => false,
             ]);
             $booking->save();
 
@@ -200,7 +202,7 @@ class BookingService extends BaseService
             ]);
 
             $booking->update([
-                'status' => Booking::STATUS_CANCELLED,
+                'is_cancelled' => true, // Use boolean field instead of status
                 'cancellation_reason' => $validated['cancellation_reason'],
                 'cancellation_description' => $validated['cancellation_description'] ?? null,
             ]);
@@ -264,7 +266,8 @@ class BookingService extends BaseService
             : Booking::where('student_id', $user->id);
 
         return $query->with(['tutor.user', 'student', 'subject'])
-            ->whereIn('status', ['completed', 'paid'])
+            ->completed() // Use scope instead of whereIn('status', ...)
+            ->paid() // Use scope for paid bookings
             ->latest()
             ->paginate(10);
     }
@@ -275,7 +278,7 @@ class BookingService extends BaseService
     public function getUpcomingBookingsForTutor(int $tutorId): Collection
     {
         return Booking::where('tutor_id', $tutorId)
-            ->where('status', 'confirmed')
+            ->confirmed() // Use scope instead of where('status', 'accepted')
             ->where('start_time', '>', Carbon::now())
             ->with(['student', 'subject'])
             ->orderBy('start_time')
@@ -287,14 +290,15 @@ class BookingService extends BaseService
      */
     public function getTutorEarnings(int $tutorId, ?int $year = null, ?int $month = null): array
     {
+        // 🎯 BOOLEAN LOGIC: Use payment_at instead of payment_status
         $totalEarnings = Booking::where('tutor_id', $tutorId)
-            ->where('payment_status', 'paid')
+            ->whereNotNull('payment_at')
             ->sum('price');
 
         $monthlyEarnings = 0;
         if ($year && $month) {
             $monthlyEarnings = Booking::where('tutor_id', $tutorId)
-                ->where('payment_status', 'paid')
+                ->whereNotNull('payment_at')
                 ->whereYear('start_time', $year)
                 ->whereMonth('start_time', $month)
                 ->sum('price');
@@ -313,8 +317,9 @@ class BookingService extends BaseService
      */
     public function getBookingsNeedingReview(int $studentId): Collection
     {
+        // 🎯 BOOLEAN LOGIC: Use is_completed instead of status = 'completed'
         return Booking::where('student_id', $studentId)
-            ->where('status', 'completed')
+            ->where('is_completed', true)
             ->whereDoesntHave('review')
             ->with(['tutor.user', 'subject'])
             ->orderBy('end_time', 'desc')

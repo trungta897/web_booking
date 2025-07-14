@@ -10,28 +10,41 @@ class Booking extends Model
 {
     use HasFactory;
 
+    // Status constants for backward compatibility
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_ACCEPTED = 'accepted';
+    public const STATUS_CONFIRMED = 'confirmed';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_COMPLETED = 'completed';
+
+    // Payment status constants
+    public const PAYMENT_STATUS_PENDING = 'pending';
+    public const PAYMENT_STATUS_PAID = 'paid';
+    public const PAYMENT_STATUS_FAILED = 'failed';
+    public const PAYMENT_STATUS_REFUNDED = 'refunded';
+
     protected $fillable = [
         'student_id',
         'tutor_id',
         'subject_id',
         'start_time',
         'end_time',
-        'status',
+        'is_confirmed',
+        'is_cancelled',
+        'is_completed',
+        'cancellation_reason',
+        'rejection_reason',
+        'rejection_description', // Thêm field này
+        'accepted_at', // Thêm field này để track khi tutor accept
         'notes',
         'price',
         'meeting_link',
-        'payment_status',
-        'payment_intent_id',
         'payment_method',
         'vnpay_txn_ref',
-        'exchange_rate',
-        'currency',
-        'original_amount',
+        'payment_intent_id',
+        'payment_at',
         'payment_metadata',
-        'rejection_reason',
-        'rejection_description',
-        'cancellation_reason',
-        'cancellation_description',
         // Commission fields
         'platform_fee_percentage',
         'platform_fee_amount',
@@ -44,9 +57,11 @@ class Booking extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'price' => 'decimal:2',
-        'exchange_rate' => 'decimal:4',
-        'original_amount' => 'decimal:2',
         'payment_metadata' => 'array',
+        'payment_at' => 'datetime',
+        'is_confirmed' => 'boolean',
+        'is_cancelled' => 'boolean',
+        'is_completed' => 'boolean',
         // Commission fields
         'platform_fee_percentage' => 'decimal:2',
         'platform_fee_amount' => 'decimal:2',
@@ -54,34 +69,115 @@ class Booking extends Model
         'commission_calculated_at' => 'datetime',
     ];
 
-    // Add status constants
-    public const STATUS_PENDING = 'pending';
-
-    public const STATUS_ACCEPTED = 'accepted';
-
-    public const STATUS_REJECTED = 'rejected';
-
-    public const STATUS_CANCELLED = 'cancelled';
-
-    public const PAYMENT_STATUS_PENDING = 'pending';
-
-    public const PAYMENT_STATUS_PAID = 'paid';
-
-    public const PAYMENT_STATUS_FAILED = 'failed';
-
-    public const PAYMENT_STATUS_REFUNDED = 'refunded';
-
-    public const PAYMENT_STATUS_PARTIAL_REFUNDED = 'partial_refunded';
-
-    // Add scopes for common queries
-    public function scopePending($query)
+    // 🎯 BOOLEAN LOGIC HELPERS
+    public function isPending(): bool
     {
-        return $query->where('status', self::STATUS_PENDING);
+        return !$this->is_confirmed && !$this->is_cancelled && !$this->is_completed;
     }
 
-    public function scopeAccepted($query)
+    public function isConfirmed(): bool
     {
-        return $query->where('status', self::STATUS_ACCEPTED);
+        return $this->is_confirmed && !$this->is_cancelled && !$this->is_completed;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->is_cancelled;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->is_completed;
+    }
+
+    public function isPaid(): bool
+    {
+        return !is_null($this->payment_at);
+    }
+
+    public function canBeCancelled(): bool
+    {
+        return !$this->is_cancelled && !$this->is_completed;
+    }
+
+    public function canBeReviewed(): bool
+    {
+        return $this->is_completed && !$this->review;
+    }
+
+    // 🎯 STATUS DISPLAY HELPERS - Sử dụng accepted_at để xác định trạng thái
+    public function getStatusAttribute(): string
+    {
+        // Logic ưu tiên: completed > cancelled > confirmed > rejected > accepted > pending
+        if ($this->is_completed) {
+            return 'completed';
+        }
+        
+        if ($this->is_cancelled) {
+            return 'cancelled';
+        }
+        
+        if ($this->is_confirmed) {
+            return 'confirmed';
+        }
+        
+        // Nếu có rejection_reason thì là rejected
+        if (!empty($this->rejection_reason)) {
+            return 'rejected';
+        }
+        
+        // 🎯 SỬA LOGIC: Sử dụng accepted_at để xác định trạng thái accepted
+        if (!is_null($this->accepted_at)) {
+            return 'accepted';
+        }
+        
+        // Mặc định là pending
+        return 'pending';
+    }
+
+    // Thêm method để kiểm tra trạng thái "accepted" (đã chấp nhận nhưng chưa thanh toán)
+    public function isAccepted(): bool
+    {
+        // Booking được chấp nhận khi:
+        // - Không bị cancelled
+        // - Không completed  
+        // - Không pending (tức là đã có action từ tutor)
+        // - Nhưng chưa confirmed (chưa thanh toán)
+        return !$this->is_cancelled && 
+               !$this->is_completed && 
+               !$this->isPending() && 
+               !$this->is_confirmed;
+    }
+
+    public function getPaymentStatusAttribute(): string
+    {
+        if ($this->isPaid()) return 'paid';
+        return 'pending';
+    }
+
+    // Scopes for boolean logic
+    public function scopePending($query)
+    {
+        return $query->where('is_confirmed', false)
+                    ->where('is_cancelled', false)
+                    ->where('is_completed', false);
+    }
+
+    public function scopeConfirmed($query)
+    {
+        return $query->where('is_confirmed', true)
+                    ->where('is_cancelled', false)
+                    ->where('is_completed', false);
+    }
+
+    public function scopeCancelled($query)
+    {
+        return $query->where('is_cancelled', true);
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('is_completed', true);
     }
 
     public function scopeUpcoming($query)
@@ -96,62 +192,10 @@ class Booking extends Model
 
     public function scopePaid($query)
     {
-        return $query->where('payment_status', self::PAYMENT_STATUS_PAID);
+        return $query->whereNotNull('payment_at');
     }
 
-    // Add helper methods
-    public function isPending()
-    {
-        return $this->status === self::STATUS_PENDING;
-    }
-
-    public function isAccepted()
-    {
-        return $this->status === self::STATUS_ACCEPTED;
-    }
-
-    public function isRejected()
-    {
-        return $this->status === self::STATUS_REJECTED;
-    }
-
-    public function isCancelled()
-    {
-        return $this->status === self::STATUS_CANCELLED;
-    }
-
-    public function isPaid()
-    {
-        return $this->payment_status === self::PAYMENT_STATUS_PAID;
-    }
-
-    /**
-     * Check if booking is fully paid (comprehensive check).
-     */
-    public function isFullyPaid()
-    {
-        // Check payment_status field
-        if ($this->payment_status === self::PAYMENT_STATUS_PAID) {
-            return true;
-        }
-
-        // Check if there are completed payment transactions
-        return $this->transactions()
-            ->where('type', 'payment')
-            ->where('status', 'completed')
-            ->exists();
-    }
-
-    public function canBeCancelled()
-    {
-        return $this->isPending() || ($this->isAccepted() && $this->start_time > now());
-    }
-
-    public function canBeReviewed()
-    {
-        return $this->isAccepted() && $this->end_time < now() && !$this->review;
-    }
-
+    // ...existing relationships and methods...
     public function student()
     {
         return $this->belongsTo(User::class, 'student_id');
@@ -176,7 +220,6 @@ class Booking extends Model
         $start = Carbon::parse($this->start_time);
         $end = Carbon::parse($this->end_time);
 
-        // Return absolute value to ensure positive duration
         return abs($start->diffInMinutes($end));
     }
 
@@ -205,7 +248,6 @@ class Booking extends Model
         return $this->transactions()->completed();
     }
 
-    // Payment method helpers
     public function isStripePayment()
     {
         return $this->payment_method === 'stripe';
@@ -273,8 +315,9 @@ class Booking extends Model
     // Scope for unpaid earnings (eligible for payout)
     public function scopeEligibleForPayout($query)
     {
-        return $query->where('payment_status', self::PAYMENT_STATUS_PAID)
-                    ->where('status', 'completed')
+        return $query->where('is_confirmed', true)
+                    ->where('is_completed', true)
+                    ->whereNotNull('payment_at')
                     ->whereNull('payout_id')
                     ->whereNotNull('commission_calculated_at');
     }

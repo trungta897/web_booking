@@ -117,7 +117,6 @@ return [
     // Status translations
     'pending' => 'Pending',
     'accepted' => 'Accepted',
-    'confirmed' => 'Confirmed',
     'completed' => 'Completed',
     'cancelled' => 'Cancelled',
     'rejected' => 'Rejected',

@@ -11,7 +11,10 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->text('rejection_reason')->nullable()->after('notes');
+            // Chỉ thêm nếu column chưa tồn tại
+            if (!Schema::hasColumn('bookings', 'rejection_reason')) {
+                $table->text('rejection_reason')->nullable()->after('notes');
+            }
         });
     }
 

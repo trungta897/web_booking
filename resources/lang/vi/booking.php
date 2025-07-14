@@ -25,6 +25,8 @@ return [
     'success' => [
         'booking_requested' => 'Yêu cầu đặt lịch đã được gửi thành công.',
         'booking_updated' => 'Cập nhật trạng thái đặt lịch thành công.',
+        'booking_accepted' => 'Đã chấp nhận lịch đặt thành công.',
+        'booking_rejected' => 'Đã từ chối lịch đặt thành công.',
         'booking_cancelled' => 'Hủy lịch thành công.',
     ],
     'errors' => [

@@ -77,13 +77,13 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     public function confirmStripePayment(Booking $booking, array $paymentData = []): bool
     {
         return $this->executeTransaction(function () use ($booking) {
-            if ($booking->payment_status === 'paid') {
+            if ($booking->isPaid()) {
                 return true;
             }
 
-            // Mark booking as paid
+            // 🎯 THANH TOÁN THÀNH CÔNG - CẬP NHẬT BOOLEAN LOGIC
             $booking->update([
-                'payment_status' => 'paid',
+                'is_confirmed' => true, // ✅ Đã chấp nhận VÀ đã thanh toán = sẵn sàng học
                 'payment_method' => 'stripe',
                 'payment_at' => now(),
             ]);
@@ -283,64 +283,113 @@ class PaymentService extends BaseService implements PaymentServiceInterface
     }
 
     /**
-     * Get transaction history for booking.
+     * Create initial transaction for booking.
      */
-    public function getTransactionHistory(Booking $booking): Collection
+    public function createInitialTransaction(Booking $booking, string $paymentMethod): Transaction
     {
-        return Transaction::where('booking_id', $booking->id)
-            ->whereIn('status', [Transaction::STATUS_PENDING, Transaction::STATUS_COMPLETED])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return Transaction::create([
+            'booking_id' => $booking->id,
+            'type' => 'payment',
+            'amount' => $booking->price,
+            'currency' => 'VND',
+            'payment_method' => $paymentMethod,
+            'status' => Transaction::STATUS_PENDING,
+            'payment_at' => null, // Will be set when payment is completed
+        ]);
     }
 
     /**
-     * Get payment history for booking.
-     *
-     * @param Booking $booking
-     * @return array{transactions: Collection, total_paid: float, total_refunded: float, payment_status: string, formatted: array{total_paid: string, total_refunded: string}}
+     * Complete payment process.
      */
-    public function getPaymentHistory(Booking $booking): array
+    public function completePayment(Booking $booking, array $transactionData): bool
     {
-        $transactions = $this->getTransactionHistory($booking);
+        return $this->executeTransaction(function () use ($booking, $transactionData) {
+            // Update booking payment status using boolean field
+            if ($booking && !$booking->isPaid()) {
+                $booking->update([
+                    'payment_at' => now(), // Use payment_at instead of payment_status
+                ]);
+            }
+
+            // Create transaction record
+            Transaction::create([
+                'booking_id' => $booking->id,
+                'user_id' => $booking->student_id,
+                'amount' => $booking->price,
+                'currency' => 'VND',
+                'payment_method' => 'stripe', // Assuming stripe for now
+                'type' => Transaction::TYPE_PAYMENT,
+                'status' => Transaction::STATUS_COMPLETED,
+                'transaction_id' => $transactionData['id'] ?? null,
+                'processed_at' => now(),
+            ]);
+
+            $this->logActivity('Payment completed', [
+                'booking_id' => $booking->id,
+                'amount' => $booking->price,
+            ]);
+
+            return true;
+        });
+    }
+
+    /**
+     * Get payment details for booking.
+     */
+    public function getPaymentDetails(Booking $booking): array
+    {
+        $transactions = $booking->transactions()
+            ->whereIn('status', [Transaction::STATUS_PENDING, Transaction::STATUS_COMPLETED])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalPaid = $booking->transactions()
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->sum('amount');
+
+        $totalRefunded = $booking->transactions()
+            ->where('status', Transaction::STATUS_REFUNDED)
+            ->sum('amount');
 
         return [
             'transactions' => $transactions,
-            'total_paid' => $transactions->where('type', Transaction::TYPE_PAYMENT)
-                ->where('status', Transaction::STATUS_COMPLETED)
-                ->sum('amount'),
-            'total_refunded' => $transactions->where('type', Transaction::TYPE_REFUND)
-                ->where('status', Transaction::STATUS_REFUNDED)
-                ->sum('amount'),
-            'payment_status' => $booking->payment_status,
+            'total_paid' => $totalPaid,
+            'total_refunded' => $totalRefunded,
+            'payment_status' => $booking->getPaymentStatusAttribute(), // Use accessor instead of direct column
             'formatted' => [
-                'total_paid' => $this->formatCurrency($transactions->where('type', Transaction::TYPE_PAYMENT)->sum('amount')),
-                'total_refunded' => $this->formatCurrency(abs($transactions->where('type', Transaction::TYPE_REFUND)->sum('amount'))),
+                'total_paid' => formatCurrency($totalPaid),
+                'total_refunded' => formatCurrency($totalRefunded),
             ],
         ];
     }
 
     /**
-     * Get booking transactions summary.
-     *
-     * @param Booking $booking
-     * @return array{transactions: Collection, total_paid: float, total_refunded: float, payment_status: string, formatted: array{total_paid: string, total_refunded: string}}
+     * Get refund details for booking.
      */
-    public function getBookingTransactions(Booking $booking): array
+    public function getRefundDetails(Booking $booking): array
     {
-        $transactions = $this->getTransactionHistory($booking);
+        $transactions = $booking->transactions()
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->with(['booking.subject'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalPaid = $booking->transactions()
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->sum('amount');
+
+        $totalRefunded = $booking->transactions()
+            ->where('status', Transaction::STATUS_REFUNDED)
+            ->sum('amount');
 
         return [
             'transactions' => $transactions,
-            'total_paid' => $transactions->where('type', Transaction::TYPE_PAYMENT)
-                ->where('status', Transaction::STATUS_COMPLETED)
-                ->sum('amount'),
-            'total_refunded' => $transactions->whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
-                ->where('status', Transaction::STATUS_COMPLETED)
-                ->sum('amount'),
-            'payment_status' => $booking->payment_status,
+            'total_paid' => $totalPaid,
+            'total_refunded' => $totalRefunded,
+            'payment_status' => $booking->getPaymentStatusAttribute(), // Use accessor instead of direct column
             'formatted' => [
-                'total_paid' => $this->formatCurrency($transactions->where('type', Transaction::TYPE_PAYMENT)->sum('amount')),
-                'total_refunded' => $this->formatCurrency(abs($transactions->whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])->sum('amount'))),
+                'total_paid' => formatCurrency($totalPaid),
+                'total_refunded' => formatCurrency($totalRefunded),
             ],
         ];
     }
@@ -533,5 +582,46 @@ class PaymentService extends BaseService implements PaymentServiceInterface
             ->whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
             ->where('status', Transaction::STATUS_COMPLETED)
             ->sum('amount'); // This will be negative, so we need abs() when displaying
+    }
+
+    /**
+     * Get booking transactions.
+     */
+    public function getBookingTransactions(Booking $booking): array
+    {
+        $transactions = $booking->transactions()
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalPaid = $booking->transactions()
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->where('type', Transaction::TYPE_PAYMENT)
+            ->sum('amount');
+
+        $totalRefunded = abs($booking->transactions()
+            ->whereIn('type', [Transaction::TYPE_REFUND, Transaction::TYPE_PARTIAL_REFUND])
+            ->where('status', Transaction::STATUS_COMPLETED)
+            ->sum('amount'));
+
+        return [
+            'transactions' => $transactions,
+            'total_paid' => $totalPaid,
+            'total_refunded' => $totalRefunded,
+            'net_amount' => $totalPaid - $totalRefunded,
+            'payment_status' => $booking->getPaymentStatusAttribute(),
+            'formatted' => [
+                'total_paid' => formatCurrency($totalPaid),
+                'total_refunded' => formatCurrency($totalRefunded),
+                'net_amount' => formatCurrency($totalPaid - $totalRefunded),
+            ],
+        ];
+    }
+
+    /**
+     * Get payment history for booking.
+     */
+    public function getPaymentHistory(Booking $booking): array
+    {
+        return $this->getBookingTransactions($booking);
     }
 }

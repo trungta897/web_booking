@@ -13,14 +13,21 @@ return new class () extends Migration {
         // Expand bookings price columns for VND
         Schema::table('bookings', function (Blueprint $table) {
             // Change price to support VND amounts (up to 99,999,999 VND)
-            $table->decimal('price', 10, 2)->change();
-            $table->decimal('original_amount', 10, 2)->nullable()->change();
+            if (Schema::hasColumn('bookings', 'price')) {
+                $table->decimal('price', 10, 2)->change();
+            }
+            // Chỉ change nếu column tồn tại
+            if (Schema::hasColumn('bookings', 'original_amount')) {
+                $table->decimal('original_amount', 10, 2)->nullable()->change();
+            }
         });
 
         // Expand tutors hourly_rate for VND
         Schema::table('tutors', function (Blueprint $table) {
             // Change hourly_rate to support VND amounts (up to 99,999,999 VND)
-            $table->decimal('hourly_rate', 10, 2)->change();
+            if (Schema::hasColumn('tutors', 'hourly_rate')) {
+                $table->decimal('hourly_rate', 10, 2)->change();
+            }
         });
     }
 

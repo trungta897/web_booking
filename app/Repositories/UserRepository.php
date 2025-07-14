@@ -152,11 +152,11 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         // Add role-specific statistics
         if ($user->role === 'student') {
             $stats['total_bookings'] = $user->bookings()->count();
-            $stats['completed_bookings'] = $user->bookings()->where('status', 'completed')->count();
+            $stats['completed_bookings'] = $user->bookings()->where('is_completed', true)->count();
             $stats['favorite_tutors_count'] = $user->favoriteTutors()->count();
         } elseif ($user->role === 'tutor' && $user->tutor) {
             $stats['total_bookings'] = $user->tutor->bookings()->count();
-            $stats['completed_bookings'] = $user->tutor->bookings()->where('status', 'completed')->count();
+            $stats['completed_bookings'] = $user->tutor->bookings()->where('is_completed', true)->count();
             $stats['average_rating'] = $user->tutor->reviews()->avg('rating') ?? 0;
             $stats['total_reviews'] = $user->tutor->reviews()->count();
         }

@@ -25,6 +25,8 @@ return [
     'success' => [
         'booking_requested' => 'Booking request sent successfully.',
         'booking_updated' => 'Booking status updated successfully.',
+        'booking_accepted' => 'Booking has been accepted successfully.',
+        'booking_rejected' => 'Booking has been rejected successfully.',
         'booking_cancelled' => 'Booking cancelled successfully.',
     ],
     'errors' => [

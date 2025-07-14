@@ -27,7 +27,7 @@
                             <select name="subject_id" id="subject_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
                                 <option value="">{{ __('booking.select_subject') }}</option>
                                 @foreach($subjects as $subject)
-                                    <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                    <option value="{{ $subject->id }}">{{ translateSubjectName($subject->name) }}</option>
                                 @endforeach
                             </select>
                             @error('subject_id')

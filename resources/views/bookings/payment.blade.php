@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             <!-- Check if already paid -->
-            @if($booking->payment_status === 'paid' || $booking->completedTransactions()->exists())
+            @if($booking->is_confirmed || $booking->completedTransactions()->exists())
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                     <div class="p-6 bg-white border-b border-gray-200">
                         <div class="text-center py-8">
@@ -216,7 +216,7 @@
                                    </div>
                                     <div>
                                         <h3 class="text-lg font-medium text-gray-900">{{ $booking->tutor->user->name }}</h3>
-                                        <p class="text-sm text-gray-600">{{ $booking->subject->name }}</p>
+                                        <p class="text-sm text-gray-600">{{ translateSubjectName($booking->subject->name) }}</p>
                                         <div class="flex items-center mt-1">
                                             <div class="flex items-center">
                                                 @for($i = 1; $i <= 5; $i++)
@@ -271,7 +271,6 @@
                                         <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3">
                                             <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                            </svg>
                                         </div>
                                         <h3 class="text-lg font-medium text-blue-900">VNPay Payment</h3>
                                     </div>

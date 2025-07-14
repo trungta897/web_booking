@@ -22,17 +22,21 @@
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                                                     </svg>
                                                 @endfor
-                                                <span class="ml-2 text-sm text-gray-600">({{ $tutor->reviews_count }} reviews)</span>
+                                                <span class="ml-2 text-sm text-gray-600">({{ $tutor->reviews_count }} {{ $tutor->reviews_count == 1 ? __('tutors.review') : __('tutors.reviews') }})</span>
                                             </div>
                                             @else
-                                                <span class="text-sm text-gray-500 mt-1">No reviews yet</span>
+                                                <span class="text-sm text-gray-500 mt-1">{{ __('tutors.no_reviews_yet') }}</span>
                                             @endif
                                         </div>
                                     </div>
-                                    <p class="text-sm text-gray-600 mb-2"><strong>Teaches:</strong> {{ $tutor->subjects->pluck('name')->implode(', ') }}</p>
+                                    <p class="text-sm text-gray-600 mb-2"><strong>{{ __('tutors.teaches') }}:</strong> 
+                                        @foreach($tutor->subjects as $index => $subject)
+                                            {{ translateSubjectName($subject->name) }}{{ $index < $tutor->subjects->count() - 1 ? ', ' : '' }}
+                                        @endforeach
+                                    </p>
                                     <p class="text-sm text-gray-600 mb-4 min-h-[60px]">{{ Str::limit($tutor->bio, 120) }}</p>
                                     <div class="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
-                                        <div class="text-lg font-medium text-gray-900">${{ number_format($tutor->hourly_rate, 2) }}/hr</div>
+                                        <div class="text-lg font-medium text-gray-900">{{ formatCurrency($tutor->hourly_rate) }}{{ __('tutors.per_hour') }}</div>
                                         <a href="{{ route('tutors.show', $tutor) }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                             {{ __('tutors.view_profile') }}
                                         </a>

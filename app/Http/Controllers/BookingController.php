@@ -86,7 +86,7 @@ class BookingController extends Controller
         try {
             // Validate input
             $validated = $request->validate([
-                'status' => 'required|in:accepted,rejected',
+                'action' => 'required|in:accept,reject', // Đổi từ 'status' thành 'action'
                 'rejection_reason' => 'nullable|string|max:100',
                 'rejection_description' => 'nullable|string|max:500',
             ]);
@@ -101,13 +101,37 @@ class BookingController extends Controller
                 return back()->withErrors(['error' => 'You can only update your own bookings']);
             }
 
-            // Cập nhật booking
-            $booking->update($validated);
+            // 🎯 SỬA LOGIC XÁC NHẬN - Chỉ sử dụng boolean fields
+            if ($validated['action'] === 'accept') {
+                $booking->update([
+                    // Boolean logic: Booking được chấp nhận nhưng chưa confirmed (chưa thanh toán)
+                    'is_confirmed' => false, // Sẽ thành true khi thanh toán xong
+                    'is_cancelled' => false,
+                    'is_completed' => false,
+                    'accepted_at' => now(), // 🎯 THÊM: Track thời điểm tutor accept
+                ]);
+                
+                // Gửi thông báo cho student
+                $booking->student->notify(new \App\Notifications\BookingStatusChanged($booking));
+                
+            } elseif ($validated['action'] === 'reject') {
+                $booking->update([
+                    'rejection_reason' => $validated['rejection_reason'],
+                    'rejection_description' => $validated['rejection_description'],
+                    // Boolean logic: Booking bị từ chối = cancelled
+                    'is_confirmed' => false,
+                    'is_cancelled' => true,
+                    'is_completed' => false,
+                ]);
+                
+                // Gửi thông báo cho student
+                $booking->student->notify(new \App\Notifications\BookingStatusChanged($booking));
+            }
 
             // Thông báo thành công
-            $message = $validated['status'] === 'accepted'
-                ? 'Booking has been accepted successfully'
-                : 'Booking has been rejected successfully';
+            $message = $validated['action'] === 'accept'
+                ? __('booking.success.booking_accepted')
+                : __('booking.success.booking_rejected');
 
             return back()->with('success', $message);
         } catch (Exception $e) {
@@ -170,17 +194,26 @@ class BookingController extends Controller
     {
         $this->authorize('view', $booking);
 
-        if ($booking->status === 'cancelled') {
+        if ($booking->is_cancelled) {
             return redirect()->route('bookings.show', $booking)
                 ->with('error', __('booking.errors.booking_cancelled_payment'));
         }
 
-        if ($booking->payment_status === 'paid' || $booking->completedTransactions()->exists()) {
+        // 🔐 KIỂM TRA CHẶT CHẼ: ĐÃ THANH TOÁN CHƯA?
+        if ($booking->is_confirmed || $booking->isPaid()) {
             return redirect()->route('bookings.show', $booking)
+                ->with('success', '✅ Booking này đã được thanh toán hoàn tất. Bạn có thể xem lịch sử giao dịch.')
                 ->with('info', __('booking.info.already_paid'));
         }
 
-        if ($booking->status !== 'accepted') {
+        // Double check với transaction database
+        if ($booking->transactions()->where('type', 'payment')->where('status', 'completed')->exists()) {
+            return redirect()->route('bookings.show', $booking)
+                ->with('success', '✅ Booking này đã có giao dịch thanh toán hoàn thành. Không thể thanh toán lại.')
+                ->with('info', 'Giao dịch đã hoàn tất.');
+        }
+
+        if ($booking->isPending()) {
             return redirect()->route('bookings.show', $booking)
                 ->with('error', __('booking.errors.booking_not_accepted_payment'));
         }

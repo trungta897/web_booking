@@ -80,7 +80,7 @@
                                     <div class="border border-gray-200 rounded-lg p-4">
                                         <div class="flex justify-between items-start">
                                             <div>
-                                                <h5 class="font-medium text-gray-900">{{ $booking->subject->name ?? 'N/A' }}</h5>
+                                                <h5 class="font-medium text-gray-900">{{ translateSubjectName($booking->subject->name) ?? 'N/A' }}</h5>
                                                 <p class="text-sm text-gray-600">{{ __('common.student') }}: {{ $booking->student->name ?? 'N/A' }}</p>
                                                 <p class="text-sm text-gray-500">
                                                     {{ Carbon\Carbon::parse($booking->start_time)->format('d/m/Y H:i') }}
@@ -89,8 +89,8 @@
                                             </div>
                                             <div class="text-right">
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                    @if($booking->status === 'completed') bg-green-100 text-green-800
-                                                    @elseif($booking->status === 'confirmed') bg-blue-100 text-blue-800
+                                                    @if($booking->status === 'accepted') bg-green-100 text-green-800
+                                                    @elseif($booking->status === 'completed') bg-blue-100 text-blue-800
                                                     @elseif($booking->status === 'pending') bg-yellow-100 text-yellow-800
                                                     @else bg-gray-100 text-gray-800 @endif">
                                                     {{ ucfirst($booking->status) }}
@@ -156,8 +156,8 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                    @if($booking->status === 'completed') bg-green-100 text-green-800
-                                                    @elseif($booking->status === 'confirmed') bg-blue-100 text-blue-800
+                                                    @if($booking->status === 'accepted') bg-green-100 text-green-800
+                                                    @elseif($booking->status === 'completed') bg-blue-100 text-blue-800
                                                     @elseif($booking->status === 'pending') bg-yellow-100 text-yellow-800
                                                     @else bg-gray-100 text-gray-800 @endif">
                                                     {{ ucfirst($booking->status) }}

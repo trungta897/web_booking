@@ -143,7 +143,7 @@ class User extends Authenticatable
             return Booking::with(['student', 'subject'])
                 ->where('tutor_id', $this->tutor->id)
                 ->where('start_time', '>=', $now)
-                ->where('status', 'accepted')
+                ->where('is_confirmed', true) // 🎯 BOOLEAN LOGIC: Use is_confirmed instead of status = 'accepted'
                 ->orderBy('start_time')
                 ->take(5)
                 ->get();
@@ -151,7 +151,14 @@ class User extends Authenticatable
             return Booking::with(['tutor.user', 'subject'])
                 ->where('student_id', $this->id)
                 ->where('start_time', '>=', $now)
-                ->whereIn('status', ['accepted', 'pending'])
+                ->where(function($query) {
+                    $query->where('is_confirmed', true)  // Accepted bookings
+                          ->orWhere(function($q) {
+                              $q->where('is_confirmed', false)
+                                ->where('is_cancelled', false)
+                                ->where('is_completed', false); // Pending bookings
+                          });
+                })
                 ->orderBy('start_time')
                 ->take(5)
                 ->get();
@@ -165,12 +172,19 @@ class User extends Authenticatable
         if ($this->role === 'tutor') {
             return Booking::where('tutor_id', $this->tutor->id)
                 ->where('start_time', '>=', $now)
-                ->where('status', 'accepted')
+                ->where('is_confirmed', true) // 🎯 BOOLEAN LOGIC: Use is_confirmed instead of status = 'accepted'
                 ->count();
         } else {
             return Booking::where('student_id', $this->id)
                 ->where('start_time', '>=', $now)
-                ->whereIn('status', ['accepted', 'pending'])
+                ->where(function($query) {
+                    $query->where('is_confirmed', true)  // Accepted bookings
+                          ->orWhere(function($q) {
+                              $q->where('is_confirmed', false)
+                                ->where('is_cancelled', false)
+                                ->where('is_completed', false); // Pending bookings
+                          });
+                })
                 ->count();
         }
     }
@@ -178,8 +192,8 @@ class User extends Authenticatable
     public function getTotalHoursAttribute()
     {
         $query = $this->role === 'tutor'
-            ? Booking::where('tutor_id', $this->tutor->id)->where('status', 'completed')
-            : Booking::where('student_id', $this->id)->where('status', 'completed');
+            ? Booking::where('tutor_id', $this->tutor->id)->where('is_completed', true) // 🎯 BOOLEAN LOGIC: Use is_completed instead of status = 'completed'
+            : Booking::where('student_id', $this->id)->where('is_completed', true);
 
         $totalSeconds = $query->get()->sum(function ($booking) {
             $start = Carbon::parse($booking->start_time);
@@ -204,5 +218,16 @@ class User extends Authenticatable
 
         // Return default avatar using UI Avatars service
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name ?? 'User') . '&color=7F9CF5&background=EBF4FF';
+    }
+
+    /**
+     * Get completed bookings for the user.
+     */
+    public function completedBookings()
+    {
+        // 🎯 BOOLEAN LOGIC: Use is_completed instead of status = 'completed'
+        return $this->role === 'tutor'
+            ? Booking::where('tutor_id', $this->tutor->id)->where('is_completed', true)
+            : Booking::where('student_id', $this->id)->where('is_completed', true);
     }
 }

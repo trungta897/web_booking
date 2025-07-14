@@ -65,8 +65,9 @@
                                             </div>
                                             <div class="flex flex-col items-end space-y-2">
                                                 <span :class="{
-                                                    'bg-green-100 text-green-800': booking.status === 'confirmed',
-                                                    'bg-yellow-100 text-yellow-800': booking.status === 'pending',
+                                                    'bg-yellow-50': booking.status === 'pending',
+                                                    'bg-green-50': booking.status === 'accepted',
+                                                    'bg-blue-50': booking.status === 'completed',
                                                     'bg-gray-100 text-gray-800': booking.status === 'cancelled'
                                                 }" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" x-text="booking.status"></span>
                                                 <a :href="`/bookings/${booking.id}`" class="text-sm text-indigo-600 hover:text-indigo-900">
@@ -95,7 +96,7 @@
             </div>
             <div class="flex items-center">
                 <div class="w-4 h-4 bg-green-100 border border-green-200 rounded mr-2"></div>
-                <span class="text-gray-600">{{ __('common.confirmed') }}</span>
+                <span class="text-gray-600">{{ __('common.accepted') }}</span>
             </div>
             <div class="flex items-center">
                 <div class="w-4 h-4 bg-yellow-100 border border-yellow-200 rounded mr-2"></div>
@@ -166,22 +167,28 @@ function tutorCalendar(calendarData) {
         },
 
         hasBookings(date) {
-            return this.calendarData.days_with_bookings.includes(date);
+            return this.calendarData.days_with_bookings && this.calendarData.days_with_bookings.includes(date);
         },
 
         getBookingCount(date) {
-            return this.calendarData.bookings_by_date[date]?.length || 0;
+            return this.calendarData.bookings_by_date && this.calendarData.bookings_by_date[date] ? this.calendarData.bookings_by_date[date].length : 0;
         },
 
         getBookingStatus(date) {
-            const bookings = this.calendarData.bookings_by_date[date] || [];
+            if (!this.calendarData.bookings_by_date || !this.calendarData.bookings_by_date[date]) {
+                return null;
+            }
+            
+            const bookings = this.calendarData.bookings_by_date[date];
             if (bookings.length === 0) return null;
 
-            const hasConfirmed = bookings.some(booking => booking.status === 'confirmed');
             const hasPending = bookings.some(booking => booking.status === 'pending');
+            const hasAccepted = bookings.some(booking => booking.status === 'accepted');
+            const hasCompleted = bookings.some(booking => booking.status === 'completed');
 
-            if (hasConfirmed && hasPending) return 'mixed';
-            if (hasConfirmed) return 'confirmed';
+            if (hasAccepted && hasPending) return 'mixed';
+            if (hasCompleted) return 'completed';
+            if (hasAccepted) return 'accepted';
             if (hasPending) return 'pending';
             return null;
         }

@@ -61,9 +61,10 @@ class BookingSeeder extends Seeder
             $startTime = Carbon::now()->subDays($days)->setHour(rand(9, 17))->setMinute(0)->setSecond(0);
             $endTime = (clone $startTime)->addHours(rand(1, 2));
 
-            // Past bookings can be completed or cancelled
-            $pastStatuses = ['completed', 'cancelled', 'rejected'];
-            $status = $pastStatuses[array_rand($pastStatuses)];
+            // 🎯 BOOLEAN LOGIC: Past bookings can be completed or cancelled
+            $isCompleted = $i < 10; // 10 completed, 5 cancelled
+            $isCancelled = !$isCompleted;
+            $isConfirmed = $isCompleted; // completed bookings were confirmed
 
             Booking::create([
                 'student_id' => $student->id,
@@ -71,7 +72,9 @@ class BookingSeeder extends Seeder
                 'subject_id' => $subject->id,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
-                'status' => $status,
+                'is_confirmed' => $isConfirmed,
+                'is_cancelled' => $isCancelled,
+                'is_completed' => $isCompleted,
                 'notes' => 'Need help with ' . $subject->name . ' concepts.',
                 'price' => $tutor->hourly_rate * $startTime->diffInHours($endTime),
                 'created_at' => $startTime->copy()->subDays(rand(1, 5)),
@@ -99,8 +102,9 @@ class BookingSeeder extends Seeder
             $startTime = Carbon::today()->setHour($startHour)->setMinute(0)->setSecond(0);
             $endTime = (clone $startTime)->addHours(rand(1, 2));
 
-            // Today's bookings are pending or accepted
-            $status = $i < 3 ? 'accepted' : 'pending';
+            // 🎯 BOOLEAN LOGIC: Today's bookings are pending or confirmed
+            $isConfirmed = $i < 3; // 3 confirmed, 2 pending
+            $isPending = !$isConfirmed;
 
             Booking::create([
                 'student_id' => $student->id,
@@ -108,7 +112,9 @@ class BookingSeeder extends Seeder
                 'subject_id' => $subject->id,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
-                'status' => $status,
+                'is_confirmed' => $isConfirmed,
+                'is_cancelled' => false,
+                'is_completed' => false,
                 'notes' => 'Need help with ' . $subject->name . ' homework.',
                 'price' => $tutor->hourly_rate * $startTime->diffInHours($endTime),
                 'created_at' => $startTime->copy()->subDays(rand(0, 1)),
@@ -133,8 +139,8 @@ class BookingSeeder extends Seeder
             $startTime = Carbon::now()->addDays($days)->setHour(rand(9, 17))->setMinute(0)->setSecond(0);
             $endTime = (clone $startTime)->addHours(rand(1, 2));
 
-            // Future bookings are pending or accepted
-            $status = $i < 6 ? 'accepted' : 'pending';
+            // 🎯 BOOLEAN LOGIC: Future bookings are pending or confirmed
+            $isConfirmed = $i < 6; // 6 confirmed, 4 pending
 
             Booking::create([
                 'student_id' => $student->id,
@@ -142,7 +148,9 @@ class BookingSeeder extends Seeder
                 'subject_id' => $subject->id,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
-                'status' => $status,
+                'is_confirmed' => $isConfirmed,
+                'is_cancelled' => false,
+                'is_completed' => false,
                 'notes' => 'Need help with upcoming ' . $subject->name . ' exam.',
                 'price' => $tutor->hourly_rate * $startTime->diffInHours($endTime),
                 'created_at' => Carbon::now()->subDays(rand(0, 3)),

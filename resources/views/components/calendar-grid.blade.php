@@ -14,47 +14,63 @@
 
     <!-- Calendar Body -->
     <div class="border border-gray-200 rounded-lg overflow-hidden">
-        @foreach($weeks as $weekIndex => $week)
-            <div class="grid grid-cols-7 gap-0">
-                @foreach($week as $dayIndex => $day)
-                    <div class="border-r border-b border-gray-100 last:border-r-0 {{ $weekIndex === count($weeks) - 1 ? 'border-b-0' : '' }}"
-                         :class="{
-                             'bg-blue-50': hasBookings('{{ $day['date'] }}'),
-                             'bg-green-50': getBookingStatus('{{ $day['date'] }}') === 'confirmed',
-                             'bg-yellow-50': getBookingStatus('{{ $day['date'] }}') === 'pending',
-                             'bg-gradient-to-br from-green-50 to-yellow-50': getBookingStatus('{{ $day['date'] }}') === 'mixed'
-                         }">
-                        <button @click="openBookingModal('{{ $day['date'] }}')"
-                                class="w-full h-16 p-1 hover:bg-gray-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
-                                :class="{
-                                    'cursor-pointer': hasBookings('{{ $day['date'] }}'),
-                                    'cursor-default': !hasBookings('{{ $day['date'] }}')
-                                }">
-                            <div class="flex flex-col items-center justify-center h-full">
-                                <!-- Day Number -->
-                                <span class="text-sm font-medium {{ !$day['is_current_month'] ? 'text-gray-400' : ($day['is_today'] ? 'text-blue-600 font-bold' : ($day['is_past'] ? 'text-gray-500' : 'text-gray-900')) }}">
-                                    {{ $day['day'] }}
-                                </span>
+        @if(isset($weeks) && is_array($weeks) && !empty($weeks))
+            @foreach($weeks as $weekIndex => $week)
+                @if(isset($week) && is_array($week) && !empty($week))
+                    <div class="grid grid-cols-7 gap-0">
+                        @foreach($week as $dayIndex => $day)
+                            @if(isset($day) && is_array($day) && isset($day['date']) && isset($day['day']))
+                                <div class="border-r border-b border-gray-100 last:border-r-0 {{ $weekIndex === count($weeks) - 1 ? 'border-b-0' : '' }}"
+                                     :class="{
+                                         'bg-blue-50': hasBookings('{{ $day['date'] }}'),
+                                         'bg-yellow-50': getBookingStatus('{{ $day['date'] }}') === 'pending',
+                                         'bg-green-50': getBookingStatus('{{ $day['date'] }}') === 'accepted',
+                                         'bg-blue-50': getBookingStatus('{{ $day['date'] }}') === 'completed'
+                                     }">
+                                    <button @click="openBookingModal('{{ $day['date'] }}')"
+                                            class="w-full h-16 p-1 hover:bg-gray-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                                            :class="{
+                                                'cursor-pointer': hasBookings('{{ $day['date'] }}'),
+                                                'cursor-default': !hasBookings('{{ $day['date'] }}')
+                                            }">
+                                        <div class="flex flex-col items-center justify-center h-full">
+                                            <!-- Day Number -->
+                                            <span class="text-sm font-medium {{ !($day['is_current_month'] ?? true) ? 'text-gray-400' : (($day['is_today'] ?? false) ? 'text-blue-600 font-bold' : (($day['is_past'] ?? false) ? 'text-gray-500' : 'text-gray-900')) }}">
+                                                {{ $day['day'] }}
+                                            </span>
 
-                                <!-- Booking Indicator -->
-                                <div x-show="hasBookings('{{ $day['date'] }}')" class="mt-1">
-                                    <div class="flex items-center justify-center">
-                                        <span class="inline-flex items-center justify-center w-5 h-4 text-xs font-medium rounded-full"
-                                              :class="{
-                                                  'bg-green-100 text-green-700': getBookingStatus('{{ $day['date'] }}') === 'confirmed',
-                                                  'bg-yellow-100 text-yellow-700': getBookingStatus('{{ $day['date'] }}') === 'pending',
-                                                  'bg-blue-100 text-blue-700': getBookingStatus('{{ $day['date'] }}') === 'mixed'
-                                              }"
-                                              x-text="getBookingCount('{{ $day['date'] }}')">
-                                        </span>
-                                    </div>
+                                            <!-- Booking Indicator -->
+                                            <div x-show="hasBookings('{{ $day['date'] }}')" class="mt-1">
+                                                <div class="flex items-center justify-center">
+                                                    <span class="inline-flex items-center justify-center w-5 h-4 text-xs font-medium rounded-full"
+                                                          :class="{
+                                                              'bg-yellow-100 text-yellow-700': getBookingStatus('{{ $day['date'] }}') === 'pending',
+                                                              'bg-green-100 text-green-700': getBookingStatus('{{ $day['date'] }}') === 'accepted',
+                                                              'bg-blue-100 text-blue-700': getBookingStatus('{{ $day['date'] }}') === 'completed'
+                                                          }"
+                                                          x-text="getBookingCount('{{ $day['date'] }}')">
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
                                 </div>
-                            </div>
-                        </button>
+                            @else
+                                {{-- 🎯 FALLBACK: Empty cell for invalid day data --}}
+                                <div class="border-r border-b border-gray-100 last:border-r-0 {{ $weekIndex === count($weeks) - 1 ? 'border-b-0' : '' }}">
+                                    <div class="w-full h-16 p-1 bg-gray-50"></div>
+                                </div>
+                            @endif
+                        @endforeach
                     </div>
-                @endforeach
+                @endif
+            @endforeach
+        @else
+            {{-- 🎯 FALLBACK: Display empty calendar if no weeks data --}}
+            <div class="p-8 text-center text-gray-500">
+                <p>{{ __('common.no_calendar_data') }}</p>
             </div>
-        @endforeach
+        @endif
     </div>
 </div>
 

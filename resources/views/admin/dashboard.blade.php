@@ -81,7 +81,7 @@
                                 <td>{{ optional($booking->subject)->name }}</td>
                                 <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('M d, Y') }}</td>
                                 <td>
-                                    <span class="admin-badge {{ $booking->status === 'confirmed' ? 'admin-badge-success' : 'admin-badge-warning' }}">
+                                    <span class="admin-badge {{ $booking->status === 'accepted' ? 'admin-badge-success' : 'admin-badge-warning' }}">
                                         {{ __('admin.' . $booking->status) }}
                                     </span>
                                 </td>

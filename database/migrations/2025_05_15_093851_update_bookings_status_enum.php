@@ -12,27 +12,80 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            // Add new columns
-            $table->string('cancellation_reason')->nullable()->after('notes');
-            $table->timestamp('cancelled_at')->nullable()->after('cancellation_reason');
-            $table->timestamp('accepted_at')->nullable()->after('cancelled_at');
-            $table->timestamp('rejected_at')->nullable()->after('accepted_at');
-            $table->string('rejection_reason')->nullable()->after('rejected_at');
-            $table->boolean('is_recurring')->default(false)->after('rejection_reason');
-            $table->string('recurring_pattern')->nullable()->after('is_recurring');
-            $table->integer('recurring_interval')->nullable()->after('recurring_pattern');
-            $table->date('recurring_end_date')->nullable()->after('recurring_interval');
+            // Add new columns - chỉ nếu chưa có
+            if (!Schema::hasColumn('bookings', 'cancellation_reason')) {
+                $table->string('cancellation_reason')->nullable()->after('notes');
+            }
+            if (!Schema::hasColumn('bookings', 'cancelled_at')) {
+                $table->timestamp('cancelled_at')->nullable()->after('cancellation_reason');
+            }
+            if (!Schema::hasColumn('bookings', 'accepted_at')) {
+                $table->timestamp('accepted_at')->nullable()->after('cancelled_at');
+            }
+            if (!Schema::hasColumn('bookings', 'rejected_at')) {
+                $table->timestamp('rejected_at')->nullable()->after('accepted_at');
+            }
+            if (!Schema::hasColumn('bookings', 'rejection_reason')) {
+                $table->string('rejection_reason')->nullable()->after('rejected_at');
+            }
+            if (!Schema::hasColumn('bookings', 'is_recurring')) {
+                $table->boolean('is_recurring')->default(false)->after('rejection_reason');
+            }
+            if (!Schema::hasColumn('bookings', 'recurring_pattern')) {
+                $table->string('recurring_pattern')->nullable()->after('is_recurring');
+            }
+            if (!Schema::hasColumn('bookings', 'recurring_interval')) {
+                $table->integer('recurring_interval')->nullable()->after('recurring_pattern');
+            }
+            if (!Schema::hasColumn('bookings', 'recurring_end_date')) {
+                $table->date('recurring_end_date')->nullable()->after('recurring_interval');
+            }
 
-            // Add new indexes
-            $table->index(['status', 'start_time']);
-            $table->index(['payment_status', 'status']);
-            $table->index('cancelled_at');
-            $table->index('accepted_at');
-            $table->index('rejected_at');
+            // Add new indexes - chỉ nếu column tồn tại
+            if (Schema::hasColumn('bookings', 'status') && Schema::hasColumn('bookings', 'start_time')) {
+                if (!$this->hasIndex('bookings', 'bookings_status_start_time_index')) {
+                    $table->index(['status', 'start_time']);
+                }
+            }
+            if (Schema::hasColumn('bookings', 'payment_status') && Schema::hasColumn('bookings', 'status')) {
+                if (!$this->hasIndex('bookings', 'bookings_payment_status_status_index')) {
+                    $table->index(['payment_status', 'status']);
+                }
+            }
+            if (Schema::hasColumn('bookings', 'cancelled_at')) {
+                if (!$this->hasIndex('bookings', 'bookings_cancelled_at_index')) {
+                    $table->index('cancelled_at');
+                }
+            }
+            if (Schema::hasColumn('bookings', 'accepted_at')) {
+                if (!$this->hasIndex('bookings', 'bookings_accepted_at_index')) {
+                    $table->index('accepted_at');
+                }
+            }
+            if (Schema::hasColumn('bookings', 'rejected_at')) {
+                if (!$this->hasIndex('bookings', 'bookings_rejected_at_index')) {
+                    $table->index('rejected_at');
+                }
+            }
         });
 
-        // Modify the status enum to include 'completed'
-        DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM('pending', 'accepted', 'rejected', 'cancelled', 'completed') DEFAULT 'pending'");
+        // Modify the status enum to include 'completed' - chỉ nếu column status tồn tại
+        if (Schema::hasColumn('bookings', 'status')) {
+            DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM('pending', 'accepted', 'rejected', 'cancelled', 'completed') DEFAULT 'pending'");
+        }
+    }
+
+    /**
+     * Check if an index exists on a table.
+     */
+    private function hasIndex(string $table, string $index): bool
+    {
+        try {
+            $exists = Schema::getConnection()->select("SHOW INDEX FROM `{$table}` WHERE Key_name = ?", [$index]);
+            return !empty($exists);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**

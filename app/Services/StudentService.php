@@ -32,27 +32,27 @@ class StudentService extends BaseService
 
         // Calculate statistics
         $totalBookings = $bookings->count();
-        $completedBookings = $bookings->where('status', 'completed')->count();
-        $pendingBookings = $bookings->where('status', 'pending')->count();
-        $upcomingBookings = $bookings->where('status', 'confirmed')
+        $completedBookings = $bookings->where('is_completed', true)->count();
+        $pendingBookings = $bookings->where('is_confirmed', false)->where('is_cancelled', false)->where('is_completed', false)->count();
+        $upcomingBookings = $bookings->where('is_confirmed', true)
             ->where('start_time', '>', Carbon::now())
             ->count();
 
         // Calculate total spent (from completed bookings)
-        $totalSpent = $bookings->where('status', 'completed')
+        $totalSpent = $bookings->where('is_completed', true)
             ->sum('price');
 
         // Get unique tutors count
         $totalTutors = $bookings->pluck('tutor_id')->unique()->count();
 
         // Get upcoming sessions (next 5)
-        $upcomingSessions = $bookings->where('status', 'confirmed')
+        $upcomingSessions = $bookings->where('is_confirmed', true)
             ->where('start_time', '>', Carbon::now())
             ->sortBy('start_time')
             ->take(5);
 
         // Get completed sessions for history (last 10)
-        $completedSessions = $bookings->where('status', 'completed')
+        $completedSessions = $bookings->where('is_completed', true)
             ->sortByDesc('start_time')
             ->take(10);
 
@@ -83,15 +83,13 @@ class StudentService extends BaseService
     {
         $bookings = $this->bookingRepository->getStudentBookings($student->id);
 
+        // 🎯 BOOLEAN LOGIC: Use boolean fields instead of status
         $stats = [
             'total_bookings' => $bookings->count(),
-            'completed_bookings' => $bookings->where('status', 'completed')->count(),
-            'pending_bookings' => $bookings->where('status', 'pending')->count(),
-            'cancelled_bookings' => $bookings->where('status', 'cancelled')->count(),
-            'total_spent' => $bookings->where('status', 'completed')->sum('price'),
-            'average_session_cost' => 0,
-            'total_hours' => 0,
-            'favorite_subjects' => [],
+            'total_spent' => $bookings->where('is_completed', true)->sum('price'),
+            'pending_bookings' => $bookings->where('is_pending', true)->count(),
+            'upcoming_bookings' => $bookings->where('is_accepted', true)
+                ->where('start_time', '>', now())->count(),
         ];
 
         // Calculate average session cost

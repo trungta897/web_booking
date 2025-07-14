@@ -309,7 +309,7 @@ class PaymentController extends Controller
             ]);
 
             // Check if booking can be refunded
-            if ($booking->payment_status !== 'paid') {
+            if (!$booking->isPaid()) { // Use isPaid() method instead of payment_status
                 throw new Exception(__('booking.errors.booking_not_paid_refund'));
             }
 
@@ -398,7 +398,7 @@ class PaymentController extends Controller
             $this->checkRefundPermission($booking);
 
             // Check if booking can be refunded
-            if ($booking->payment_status !== 'paid') {
+            if (!$booking->isPaid()) { // Use isPaid() method instead of payment_status
                 return redirect()->route('bookings.show', $booking->id)
                     ->with('error', __('booking.errors.booking_not_paid_refund'));
             }
@@ -496,8 +496,8 @@ class PaymentController extends Controller
             throw new Exception(__('booking.errors.refund_time_expired'), 422);
         }
 
-        // Kiểm tra booking status - chỉ có thể hoàn tiền khi booking confirmed hoặc pending
-        if (!in_array($booking->status, ['confirmed', 'pending'])) {
+        // Kiểm tra booking status - chỉ có thể hoàn tiền khi booking accepted hoặc pending
+        if (!in_array($booking->status, ['accepted', 'pending'])) {
             throw new Exception(__('booking.errors.invalid_status_for_refund'), 422);
         }
 
@@ -512,25 +512,23 @@ class PaymentController extends Controller
      */
     private function validateBookingForPayment(Booking $booking): void
     {
-        if ($booking->status === 'cancelled') {
+        if ($booking->is_cancelled) {
             throw new Exception(__('booking.errors.booking_cancelled_payment'), 422);
         }
 
-        if ($booking->payment_status === 'paid') {
-            throw new Exception(__('booking.info.already_paid'), 422);
+        // 🔐 KIỂM TRA CHẶT CHẼ: ĐÃ THANH TOÁN CHƯA?
+        if ($booking->is_confirmed || $booking->completedTransactions()->exists()) {
+            throw new Exception('Booking này đã được thanh toán rồi. Không thể thanh toán lại.', 422);
         }
 
-        // Kiểm tra xem có transaction đã hoàn thành không
-        if ($booking->completedTransactions()->exists()) {
-            throw new Exception(__('booking.info.already_paid'), 422);
+        // Double check với transaction database
+        if ($booking->transactions()->where('type', 'payment')->where('status', 'completed')->exists()) {
+            throw new Exception('Booking này đã có giao dịch thanh toán hoàn thành. Không thể thanh toán lại.', 422);
         }
 
-        if ($booking->status !== 'accepted') {
+        if ($booking->isPending()) {
             throw new Exception(__('booking.errors.booking_not_accepted_payment'), 422);
         }
-
-        // Không kiểm tra pending transaction nữa - cho phép retry payment ngay cả khi có pending transaction
-        // User có thể retry khi gặp lỗi server hoặc kết nối
     }
 
     /**
