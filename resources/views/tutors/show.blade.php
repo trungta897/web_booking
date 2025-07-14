@@ -77,8 +77,8 @@
                         <h2 class="text-lg font-medium text-gray-900 mb-4">{{ __('tutors.education') }}</h2>
                         <div class="space-y-4">
                             @php
-                                // Đảm bảo $tutor->education luôn là một collection, kể cả khi không có dữ liệu
-                                $educations = $tutor->education ?? collect();
+                                // Get education records directly from database to avoid null relationship issues
+                                $educations = \App\Models\Education::where('tutor_id', $tutor->id)->get();
                             @endphp
 
                             @if($educations->isNotEmpty())
@@ -95,11 +95,22 @@
                                         @if(!empty($edu->images) && is_array($edu->images))
                                             <div class="mt-3">
                                                 <p class="text-sm font-semibold text-gray-700 mb-2">Chứng chỉ:</p>
-                                                <div class="flex flex-wrap gap-2">
-                                                    @foreach($edu->images as $image)
-                                                        <a href="{{ asset('uploads/education/' . $image) }}" data-fancybox="gallery-{{ $edu->id }}" class="block">
-                                                            <img src="{{ asset('uploads/education/' . $image) }}" alt="Chứng chỉ" class="h-20 w-20 object-cover rounded-md border hover:ring-2 hover:ring-blue-500 transition-all">
-                                                        </a>
+                                                <div class="certificate-grid">
+                                                    @foreach($edu->images as $index => $image)
+                                                        <div class="certificate-image-container">
+                                                            <img src="{{ asset('uploads/education/' . $image) }}"
+                                                                 alt="Chứng chỉ {{ $index + 1 }}"
+                                                                 class="certificate-image cursor-pointer hover:opacity-80 transition-all duration-300"
+                                                                 onclick="openImageModal('{{ asset('uploads/education/' . $image) }}', '{{ $edu->degree }}', '{{ $edu->institution }} - {{ $edu->year }}')" />
+                                                            <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all rounded-md pointer-events-none">
+                                                                <svg class="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z M15 15l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2"></path>
+                                                                </svg>
+                                                            </div>
+                                                            <div class="absolute bottom-1 right-1 bg-black bg-opacity-60 text-white text-xs px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                {{ $index + 1 }}/{{ count($edu->images) }}
+                                                            </div>
+                                                        </div>
                                                     @endforeach
                                                 </div>
                                             </div>
@@ -111,8 +122,8 @@
                                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                         <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
                                     </svg>
-                                    <h3 class="mt-2 text-sm font-medium text-gray-900">Không có thông tin học vấn</h3>
-                                    <p class="mt-1 text-sm text-gray-500">Gia sư này chưa cập nhật thông tin học vấn.</p>
+                                    <h3 class="mt-2 text-sm font-medium text-gray-900">{{ __('tutors.no_education_provided') }}</h3>
+                                    <p class="mt-1 text-sm text-gray-500">{{ __('tutors.no_education_provided') }}</p>
                                 </div>
                             @endif
                         </div>
@@ -406,4 +417,7 @@
             </div>
         </div>
     </div>
+
+    <!-- Include the modern image modal component -->
+    @include('profile.partials.image-modal-and-scripts')
 </x-app-layout>

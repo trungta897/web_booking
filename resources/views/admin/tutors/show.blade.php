@@ -150,6 +150,72 @@
                 @endif
             </div>
 
+            <!-- Education and Certificates Card -->
+            @if($user->tutor && $user->tutor->educations && $user->tutor->educations->count() > 0)
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('tutors.education_and_certificates') }}</h3>
+                <div class="space-y-6">
+                    @foreach($user->tutor->educations as $edu)
+                        <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                            <div class="flex items-start gap-4">
+                                <div class="flex-grow">
+                                    <h4 class="font-semibold text-gray-800 dark:text-gray-200">{{ $edu->degree }}</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ $edu->institution }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-500">{{ $edu->year }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Certificate Images -->
+                            @if($edu->hasImages())
+                                <div class="mt-4">
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ __('tutors.certificate_images') }}:</p>
+                                    <div class="grid grid-cols-4 gap-2">
+                                        @foreach($edu->getAllImages() as $index => $image)
+                                            @if(file_exists(public_path('uploads/education/' . $image)))
+                                                <div class="relative group">
+                                                    <img src="{{ asset('uploads/education/' . $image) }}"
+                                                         alt="Certificate {{ $index + 1 }}"
+                                                         class="certificate-image h-20 w-20 object-cover rounded-md border cursor-pointer hover:opacity-80 transition-all duration-300"
+                                                         onclick="openImageModal('{{ asset('uploads/education/' . $image) }}', '{{ $edu->degree }}', '{{ $edu->institution }} - {{ $edu->year }}')" />
+                                                    <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all rounded-md pointer-events-none">
+                                                        <svg class="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z M15 15l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <div class="absolute bottom-1 right-1 bg-black bg-opacity-60 text-white text-xs px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {{ $index + 1 }}/{{ count($edu->getAllImages()) }}
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <div class="mt-4 flex items-center justify-center h-20 bg-gray-100 dark:bg-gray-600 rounded border-2 border-dashed border-gray-300 dark:border-gray-500">
+                                    <div class="text-center">
+                                        <svg class="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('tutors.no_images_uploaded') }}</p>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            @else
+            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('tutors.education_and_certificates') }}</h3>
+                <div class="text-center py-8 px-4 border-2 border-dashed rounded-lg border-gray-300 dark:border-gray-600">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('tutors.no_education_records_yet') }}</p>
+                </div>
+            </div>
+            @endif
+
             <div class="mt-6">
                 <a href="{{ route('admin.tutors') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                     Back to Tutors List
@@ -157,4 +223,44 @@
             </div>
         </div>
     </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75">
+        <div class="relative max-w-2xl w-full mx-auto rounded-lg overflow-hidden">
+            <span class="absolute top-2 right-2">
+                <button id="closeModal" class="text-white text-3xl">&times;</button>
+            </span>
+            <img id="modalImage" src="" alt="Certificate Image" class="w-full h-auto">
+            <div class="p-4">
+                <h4 id="modalDegree" class="text-lg font-semibold text-white"></h4>
+                <p id="modalInstitutionYear" class="text-sm text-gray-300"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openImageModal(imageSrc, degree, institutionYear) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalDegree = document.getElementById('modalDegree');
+            const modalInstitutionYear = document.getElementById('modalInstitutionYear');
+
+            modalImage.src = imageSrc;
+            modalDegree.innerText = degree;
+            modalInstitutionYear.innerText = institutionYear;
+
+            modal.classList.remove('hidden');
+        }
+
+        document.getElementById('closeModal').onclick = function() {
+            document.getElementById('imageModal').classList.add('hidden');
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                modal.classList.add('hidden');
+            }
+        }
+    </script>
 @endsection

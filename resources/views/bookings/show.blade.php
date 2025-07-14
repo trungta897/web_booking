@@ -128,13 +128,17 @@
 
                         <!-- ========== UNIFIED PAYMENT/TRANSACTION HISTORY SECTION START ========== -->
                         <div class="md:col-span-2">
-                            @if(!$booking->isPending() && auth()->user()->id === $booking->student_id)
+                            @if(auth()->user()->id === $booking->student_id)
                                 {{-- This block is for the student viewing their own booking --}}
                                 @php
-                                    // 🎯 BOOLEAN LOGIC - ĐƠN GIẢN HÓA
-                                    $isAlreadyPaid = $booking->is_confirmed || $booking->isPaid();
-                                    $canMakePayment = !$booking->is_confirmed && !$booking->is_cancelled && !$booking->is_completed && !$booking->isPaid();
-                                    $showRetryPayment = !$booking->is_confirmed && !$booking->isPaid();
+                                    // 🎯 LOGIC CHÍNH XÁC: Kiểm tra có transaction completed
+                                    $hasCompletedTransaction = $booking->transactions()
+                                        ->where('type', 'payment')
+                                        ->where('status', 'completed')
+                                        ->exists();
+                                    $isAccepted = $booking->status === 'accepted';
+                                    $isAlreadyPaid = $hasCompletedTransaction && $isAccepted;
+                                    $canMakePayment = !$isAlreadyPaid && $isAccepted && !$booking->is_cancelled && !$booking->is_completed;
                                 @endphp
 
                                 @if($isAlreadyPaid)

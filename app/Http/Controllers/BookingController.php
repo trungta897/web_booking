@@ -110,10 +110,10 @@ class BookingController extends Controller
                     'is_completed' => false,
                     'accepted_at' => now(), // 🎯 THÊM: Track thời điểm tutor accept
                 ]);
-                
+
                 // Gửi thông báo cho student
                 $booking->student->notify(new \App\Notifications\BookingStatusChanged($booking));
-                
+
             } elseif ($validated['action'] === 'reject') {
                 $booking->update([
                     'rejection_reason' => $validated['rejection_reason'],
@@ -123,7 +123,7 @@ class BookingController extends Controller
                     'is_cancelled' => true,
                     'is_completed' => false,
                 ]);
-                
+
                 // Gửi thông báo cho student
                 $booking->student->notify(new \App\Notifications\BookingStatusChanged($booking));
             }

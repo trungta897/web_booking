@@ -122,8 +122,8 @@ class VnpayService
             'payment_method' => 'vnpay',
         ]);
 
-        // Calculate VND amount for VNPay
-        $vndAmount = $this->calculateVndAmount($booking);
+        // Calculate VND amount for VNPay (with minimum applied if needed)
+        $vndAmount = $this->getVnpayPaymentAmount($booking);
 
         // Convert to VNPay format (VND * 100 for "xu" unit)
         $vnpayAmount = (int) ($vndAmount * 100);
@@ -141,14 +141,16 @@ class VnpayService
         ]);
 
         // Validate amount range for VNPay
-        if ($vnpayAmount < 5000) {
+        if ($vnpayAmount < 500000) { // 5,000 VND = 500,000 xu
             LogService::vnpay('VNPay amount too small', [
                 'booking_id' => $booking->id,
                 'vnpay_amount' => $vnpayAmount,
-                'minimum_required' => 5000,
+                'vnpay_amount_vnd' => $vnpayAmount / 100,
+                'minimum_required' => 500000,
+                'minimum_required_vnd' => 5000,
             ], 'error');
 
-            throw new \Exception('Số tiền thanh toán quá nhỏ (tối thiểu 5,000 VND)');
+            throw new \Exception('Số tiền thanh toán quá nhỏ. VNPay yêu cầu tối thiểu 5,000 VND để xử lý giao dịch.');
         }
 
         if ($vnpayAmount >= 1000000000) {
@@ -306,6 +308,7 @@ class VnpayService
                 // Thanh toán thành công
                 $booking->update([
                     'is_confirmed' => true, // ✅ Đã chấp nhận VÀ đã thanh toán = sẵn sàng học
+                    'accepted_at' => $booking->accepted_at ?: Carbon::now(), // ✅ SỬA: Tự động accept nếu chưa có
                     'payment_method' => 'vnpay',
                     'payment_at' => Carbon::now(),
                     'payment_metadata' => array_merge($booking->payment_metadata ?? [], [
@@ -314,6 +317,7 @@ class VnpayService
                         'vnpay_amount' => $amount,
                         'vnpay_bank_code' => $vnpData['vnp_BankCode'] ?? null,
                         'vnpay_card_type' => $vnpData['vnp_CardType'] ?? null,
+                        'auto_accepted_by_payment' => $booking->accepted_at ? false : true, // Track auto-accept
                     ]),
                 ]);
 
@@ -493,6 +497,32 @@ class VnpayService
         ]);
 
         return $amount;
+    }
+
+    /**
+     * Get payment amount for VNPay (applying minimum if needed)
+     */
+    private function getVnpayPaymentAmount(Booking $booking): float
+    {
+        $originalAmount = $this->calculateVndAmount($booking);
+
+        // VNPay minimum is 5,000 VND (500,000 xu when multiplied by 100)
+        $minVnpayAmount = 5000;
+
+        if ($originalAmount < $minVnpayAmount) {
+            LogService::vnpay('Amount below VNPay minimum - using original amount', [
+                'booking_id' => $booking->id,
+                'original_amount' => $originalAmount,
+                'vnpay_minimum' => $minVnpayAmount,
+                'note' => 'Amount too small for VNPay, but keeping original for consistency'
+            ]);
+
+            // Return original amount to maintain consistency
+            // The validation will catch this later and show appropriate error
+            return $originalAmount;
+        }
+
+        return $originalAmount;
     }
 
     /**

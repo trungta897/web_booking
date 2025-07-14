@@ -178,7 +178,7 @@ function tutorCalendar(calendarData) {
             if (!this.calendarData.bookings_by_date || !this.calendarData.bookings_by_date[date]) {
                 return null;
             }
-            
+
             const bookings = this.calendarData.bookings_by_date[date];
             if (bookings.length === 0) return null;
 

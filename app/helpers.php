@@ -94,21 +94,19 @@ if (!function_exists('formatCurrency')) {
 
 if (!function_exists('formatBookingAmount')) {
     /**
-     * Format booking amount using the booking's stored currency field.
+     * Format booking amount - ALWAYS use stored price directly, no currency conversion.
      */
     function formatBookingAmount(\App\Models\Booking $booking): string
     {
-        $currency = $booking->currency ?? 'VND';
-        $amount = (float) $booking->price; // Cast to float
+        $amount = (float) $booking->price;
 
-        // Protection against negative prices - should not happen but just in case
+        // Protection against negative prices
         if ($amount < 0) {
             \App\Services\LogService::error('Negative price detected in formatBookingAmount', null, [
                 'booking_id' => $booking->id,
                 'price' => $amount,
-                'currency' => $currency,
             ]);
-            $amount = abs($amount); // Use absolute value for display
+            $amount = abs($amount);
         }
 
         // Get current locale
@@ -117,49 +115,15 @@ if (!function_exists('formatBookingAmount')) {
             $locale = config('app.locale', 'vi');
         }
 
-        // Smart detection: If currency is VND but amount is small (< 1000),
-        // it's likely USD amount saved with wrong currency
-        if ($currency === 'VND' && $amount < 1000) {
-            // This is likely USD amount with wrong currency label
-            if ($locale === 'vi') {
-                // Vietnamese: Convert USD to VND for display
-                $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
-
-                return number_format($vndAmount, 0, ',', '.') . ' VND';
-            } else {
-                // English: Display as USD
-                return '$' . number_format($amount, 2);
-            }
+        // FIXED: ALWAYS display stored amount as VND for Vietnamese
+        // NO MORE USD/VND conversion confusion
+        if ($locale === 'vi') {
+            return number_format($amount, 0, ',', '.') . ' VND';
+        } else {
+            // For English: show USD equivalent for display only
+            $usdAmount = $amount / 25000;
+            return '$' . number_format($usdAmount, 2);
         }
-
-        // Case 1: Currency is VND (real VND amounts)
-        if ($currency === 'VND') {
-            if ($locale === 'vi') {
-                // Vietnamese: Display VND as is
-                return number_format($amount, 0, ',', '.') . ' VND';
-            } else {
-                // English: Convert VND to USD for display
-                $usdAmount = $amount / 25000; // 1 USD = 25,000 VND
-
-                return '$' . number_format($usdAmount, 2);
-            }
-        }
-
-        // Case 2: Currency is USD (legacy)
-        if ($currency === 'USD') {
-            if ($locale === 'vi') {
-                // Vietnamese: Convert USD to VND for display
-                $vndAmount = $amount * 25000; // 1 USD = 25,000 VND
-
-                return number_format($vndAmount, 0, ',', '.') . ' VND';
-            } else {
-                // English: Display USD as is
-                return '$' . number_format($amount, 2);
-            }
-        }
-
-        // Default fallback
-        return number_format($amount, 2) . ' ' . $currency;
     }
 }
 

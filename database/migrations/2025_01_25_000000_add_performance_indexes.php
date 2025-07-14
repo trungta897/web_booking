@@ -67,75 +67,138 @@ return new class () extends Migration {
         // Indexes for bookings table
         if (Schema::hasTable('bookings')) {
             Schema::table('bookings', function (Blueprint $table) {
-                if (!$this->hasIndex('bookings', 'bookings_status_payment_status_index')) {
-                    $table->index(['status', 'payment_status']);
+                // Only add indexes if columns exist
+                if (Schema::hasColumn('bookings', 'status') && Schema::hasColumn('bookings', 'payment_status')) {
+                    if (!$this->hasIndex('bookings', 'bookings_status_payment_status_index')) {
+                        $table->index(['status', 'payment_status']);
+                    }
                 }
-                if (!$this->hasIndex('bookings', 'bookings_tutor_id_status_index')) {
-                    $table->index(['tutor_id', 'status']);
+                if (Schema::hasColumn('bookings', 'tutor_id') && Schema::hasColumn('bookings', 'status')) {
+                    if (!$this->hasIndex('bookings', 'bookings_tutor_id_status_index')) {
+                        $table->index(['tutor_id', 'status']);
+                    }
                 }
-                if (!$this->hasIndex('bookings', 'bookings_student_id_status_index')) {
-                    $table->index(['student_id', 'status']);
+                if (Schema::hasColumn('bookings', 'student_id') && Schema::hasColumn('bookings', 'status')) {
+                    if (!$this->hasIndex('bookings', 'bookings_student_id_status_index')) {
+                        $table->index(['student_id', 'status']);
+                    }
                 }
-                if (!$this->hasIndex('bookings', 'bookings_start_time_end_time_index')) {
-                    $table->index(['start_time', 'end_time']);
+                if (Schema::hasColumn('bookings', 'start_time') && Schema::hasColumn('bookings', 'end_time')) {
+                    if (!$this->hasIndex('bookings', 'bookings_start_time_end_time_index')) {
+                        $table->index(['start_time', 'end_time']);
+                    }
                 }
-                if (!$this->hasIndex('bookings', 'bookings_start_time_index')) {
-                    $table->index('start_time');
+                if (Schema::hasColumn('bookings', 'start_time')) {
+                    if (!$this->hasIndex('bookings', 'bookings_start_time_index')) {
+                        $table->index('start_time');
+                    }
                 }
-                if (!$this->hasIndex('bookings', 'bookings_created_at_index')) {
-                    $table->index('created_at');
+                if (Schema::hasColumn('bookings', 'created_at')) {
+                    if (!$this->hasIndex('bookings', 'bookings_created_at_index')) {
+                        $table->index('created_at');
+                    }
                 }
             });
         }
 
         // Indexes for reviews table
-        Schema::table('reviews', function (Blueprint $table) {
-            $table->index(['tutor_id', 'rating']);
-            $table->index('student_id');
-            $table->index('created_at');
-        });
+        if (Schema::hasTable('reviews')) {
+            Schema::table('reviews', function (Blueprint $table) {
+                if (!$this->hasIndex('reviews', 'reviews_tutor_id_rating_index')) {
+                    $table->index(['tutor_id', 'rating']);
+                }
+                if (!$this->hasIndex('reviews', 'reviews_student_id_index')) {
+                    $table->index('student_id');
+                }
+                if (!$this->hasIndex('reviews', 'reviews_created_at_index')) {
+                    $table->index('created_at');
+                }
+            });
+        }
 
         // Indexes for availability table
-        Schema::table('availability', function (Blueprint $table) {
-            $table->index(['tutor_id', 'day_of_week', 'is_available']);
-            $table->index(['day_of_week', 'is_available']);
-        });
+        if (Schema::hasTable('availability')) {
+            Schema::table('availability', function (Blueprint $table) {
+                if (!$this->hasIndex('availability', 'availability_tutor_id_day_of_week_is_available_index')) {
+                    $table->index(['tutor_id', 'day_of_week', 'is_available']);
+                }
+                if (!$this->hasIndex('availability', 'availability_day_of_week_is_available_index')) {
+                    $table->index(['day_of_week', 'is_available']);
+                }
+            });
+        }
 
         // Indexes for subjects table
-        Schema::table('subjects', function (Blueprint $table) {
-            $table->index('is_active');
-            $table->index('name');
-        });
+        if (Schema::hasTable('subjects')) {
+            Schema::table('subjects', function (Blueprint $table) {
+                if (!$this->hasIndex('subjects', 'subjects_is_active_index')) {
+                    $table->index('is_active');
+                }
+                if (!$this->hasIndex('subjects', 'subjects_name_index')) {
+                    $table->index('name');
+                }
+            });
+        }
 
         // Indexes for subject_tutor pivot table
-        Schema::table('subject_tutor', function (Blueprint $table) {
-            $table->index(['subject_id', 'tutor_id']);
-            $table->index('hourly_rate');
-        });
+        if (Schema::hasTable('subject_tutor')) {
+            Schema::table('subject_tutor', function (Blueprint $table) {
+                if (!$this->hasIndex('subject_tutor', 'subject_tutor_subject_id_tutor_id_index')) {
+                    $table->index(['subject_id', 'tutor_id']);
+                }
+                if (!$this->hasIndex('subject_tutor', 'subject_tutor_hourly_rate_index')) {
+                    $table->index('hourly_rate');
+                }
+            });
+        }
 
         // Indexes for favorite_tutors table
-        Schema::table('favorite_tutors', function (Blueprint $table) {
-            $table->index(['user_id', 'tutor_id']);
-        });
+        if (Schema::hasTable('favorite_tutors')) {
+            Schema::table('favorite_tutors', function (Blueprint $table) {
+                if (!$this->hasIndex('favorite_tutors', 'favorite_tutors_user_id_tutor_id_index')) {
+                    $table->index(['user_id', 'tutor_id']);
+                }
+            });
+        }
 
         // Indexes for messages table
-        Schema::table('messages', function (Blueprint $table) {
-            $table->index(['sender_id', 'receiver_id', 'is_read']);
-            $table->index(['receiver_id', 'is_read']);
-            $table->index('created_at');
-        });
+        if (Schema::hasTable('messages')) {
+            Schema::table('messages', function (Blueprint $table) {
+                if (!$this->hasIndex('messages', 'messages_sender_id_receiver_id_is_read_index')) {
+                    $table->index(['sender_id', 'receiver_id', 'is_read']);
+                }
+                if (!$this->hasIndex('messages', 'messages_receiver_id_is_read_index')) {
+                    $table->index(['receiver_id', 'is_read']);
+                }
+                if (!$this->hasIndex('messages', 'messages_created_at_index')) {
+                    $table->index('created_at');
+                }
+            });
+        }
 
         // Indexes for notifications table
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->index(['notifiable_id', 'notifiable_type', 'read_at']);
-            $table->index('created_at');
-        });
+        if (Schema::hasTable('notifications')) {
+            Schema::table('notifications', function (Blueprint $table) {
+                if (!$this->hasIndex('notifications', 'notifications_notifiable_id_notifiable_type_read_at_index')) {
+                    $table->index(['notifiable_id', 'notifiable_type', 'read_at']);
+                }
+                if (!$this->hasIndex('notifications', 'notifications_created_at_index')) {
+                    $table->index('created_at');
+                }
+            });
+        }
 
         // Indexes for transactions table
-        Schema::table('transactions', function (Blueprint $table) {
-            $table->index(['booking_id', 'status']);
-            $table->index('created_at');
-        });
+        if (Schema::hasTable('transactions')) {
+            Schema::table('transactions', function (Blueprint $table) {
+                if (!$this->hasIndex('transactions', 'transactions_booking_id_status_index')) {
+                    $table->index(['booking_id', 'status']);
+                }
+                if (!$this->hasIndex('transactions', 'transactions_created_at_index')) {
+                    $table->index('created_at');
+                }
+            });
+        }
     }
 
     /**

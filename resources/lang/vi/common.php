@@ -216,55 +216,7 @@ return [
     'Cancel' => 'Hủy',
     'each' => 'mỗi',
     'image' => 'Hình ảnh',
-    'paid' => 'Đã thanh toán',
-
-    // Profile form
-    'degree' => 'Bằng cấp',
-    'institution' => 'Trường/Cơ sở',
-    'year' => 'Năm',
-    'name' => 'Tên',
-    'email' => 'Email',
-    'avatar' => 'Ảnh đại diện',
-    'remove' => 'Xóa',
-    'save_changes' => 'Lưu thay đổi',
-    'delete_account' => 'Xóa tài khoản',
-
-    // Profile page translations
-    'Tutor Profile Information' => 'Thông Tin Hồ Sơ Gia Sư',
-    'Years of Experience' => 'Số Năm Kinh Nghiệm',
-    'Total Subjects' => 'Tổng Số Môn Học',
-    'Education Records' => 'Hồ Sơ Học Vấn',
-    'Bio' => 'Tiểu sử',
-    'Current Subjects' => 'Môn Học Hiện Tại',
-    'Education Background' => 'Trình Độ Học Vấn',
-    'Edit Profile Information' => 'Chỉnh Sửa Thông Tin Hồ Sơ',
-    'Tutor Information' => 'Thông Tin Gia Sư',
-    'years' => 'năm',
-    'Hold Ctrl/Cmd to select multiple subjects' => 'Giữ Ctrl/Cmd để chọn nhiều môn học',
-    'partial_refunded' => 'Hoàn tiền một phần',
-    'refunded' => 'Đã hoàn tiền',
-
-    // Payment summary
-    'Payment Summary' => 'Tóm Tắt Thanh Toán',
-    'total_paid' => 'Tổng Đã Thanh Toán',
-    'total_refunded' => 'Tổng Đã Hoàn Tiền',
-    'current_status' => 'Trạng Thái Hiện Tại',
-
-    // Calendar translations
-    'teaching_schedule' => 'Lịch Dạy Học',
-    'current_month' => 'Tháng Hiện Tại',
-    'next_month' => 'Tháng Tới',
-    'schedule_for' => 'Lịch học ngày',
-    'no_bookings_on_this_date' => 'Không có lịch học nào trong ngày này',
-    'has_classes' => 'Có lớp học',
-    'add_education' => 'Thêm Bằng Cấp/Chứng Chỉ',
-    'e.g., Bachelor of Science' => 'vd: Cử nhân Khoa học',
-    'e.g., Stanford University' => 'vd: Đại học Stanford',
-    'Certificate Image (Optional)' => 'Hình Ảnh Bằng Cấp (Tùy Chọn)',
-    'Upload diploma/certificate image for verification' => 'Tải lên hình ảnh bằng cấp để xác thực',
-    'Current certificate image' => 'Hình ảnh bằng cấp hiện tại',
-    'Certificate/Diploma Image' => 'Hình Ảnh Bằng Cấp/Chứng Chỉ',
-    'Click to view' => 'Nhấp để xem',
+    'download' => 'Tải xuống',
 
     // Days of week
     'sunday' => 'CN',

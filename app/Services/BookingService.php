@@ -12,6 +12,7 @@ use App\Repositories\BookingRepository;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
@@ -367,16 +368,34 @@ class BookingService extends BaseService
             throw new Exception(__('booking.validation.end_time_must_be_after_start_time'));
         }
 
-        $duration = $start->diffInMinutes($end); // Correct order: start->diffInMinutes(end)
-        $hours = $duration / 60;
-        $price = $hours * $tutor->hourly_rate;
+        // Calculate duration in minutes with proper order
+        $duration = $start->diffInMinutes($end);
 
-        // Ensure price is positive
-        if ($price <= 0) {
+        // Convert to hours (more precise calculation)
+        $hours = $duration / 60.0;
+
+        // FIXED: Always use tutor's hourly rate as VND directly
+        // No currency conversion in calculation
+        $hourlyRateVND = (float) $tutor->hourly_rate;
+        $totalPriceVND = $hours * $hourlyRateVND;
+
+        // Log for debugging price calculation issues
+        Log::debug('Booking price calculation FIXED', [
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'duration_minutes' => $duration,
+            'duration_hours' => $hours,
+            'hourly_rate_vnd' => $hourlyRateVND,
+            'calculated_price_vnd' => $totalPriceVND,
+        ]);
+
+        // Ensure price is positive and reasonable
+        if ($totalPriceVND <= 0) {
             throw new Exception(__('booking.validation.invalid_price_calculation'));
         }
 
-        return $price;
+        // Round to 2 decimal places to avoid floating point issues
+        return round($totalPriceVND, 2);
     }
 
     /**

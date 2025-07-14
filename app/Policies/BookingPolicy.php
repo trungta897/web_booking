@@ -28,7 +28,7 @@ class BookingPolicy
             return true;
         }
 
-        // Tutors can cancel/reject bookings assigned to them  
+        // Tutors can cancel/reject bookings assigned to them
         if ($user->id === $booking->tutor->user->id && ($booking->isPending() || $booking->status === 'accepted')) {
             return true;
         }

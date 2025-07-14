@@ -29,7 +29,7 @@
                                             @endif
                                         </div>
                                     </div>
-                                    <p class="text-sm text-gray-600 mb-2"><strong>{{ __('tutors.teaches') }}:</strong> 
+                                    <p class="text-sm text-gray-600 mb-2"><strong>{{ __('tutors.teaches') }}:</strong>
                                         @foreach($tutor->subjects as $index => $subject)
                                             {{ translateSubjectName($subject->name) }}{{ $index < $tutor->subjects->count() - 1 ? ', ' : '' }}
                                         @endforeach

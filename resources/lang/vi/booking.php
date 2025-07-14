@@ -90,6 +90,8 @@ return [
         'cancelled' => 'Đã hủy',
         'completed' => 'Hoàn thành',
         'paid' => 'Đã thanh toán',
+        'failed' => 'Thất bại',
+        'processing' => 'Đang xử lý',
     ],
     'transaction_type' => [
         'payment' => 'Thanh toán',

@@ -222,7 +222,6 @@
                                                 @for($i = 1; $i <= 5; $i++)
                                                     <svg class="w-4 h-4 {{ $i <= ($booking->tutor->rating ?? 5) ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                                    </svg>
                                                 @endfor
                                             </div>
                                             <span class="ml-2 text-sm text-gray-600">({{ $booking->tutor->reviews_count ?? 0 }} {{ __('reviews') }})</span>
@@ -249,7 +248,24 @@
                                     </div>
                                     <div class="flex justify-between pt-3 border-t border-gray-200">
                                         <span class="text-base font-medium text-gray-900">{{ __('booking.total_amount') }}:</span>
-                                        <span class="text-lg font-bold text-gray-900">{{ $booking->display_amount }}</span>
+                                        <span class="text-lg font-bold text-gray-900">
+                                            @php
+                                                // FIXED: Always use the stored booking price directly
+                                                // No more recalculation that can cause discrepancies
+                                                $displayAmount = formatBookingAmount($booking);
+                                                
+                                                // Debug logging for price issues
+                                                \Log::debug('Payment view price display', [
+                                                    'booking_id' => $booking->id,
+                                                    'stored_price' => $booking->price,
+                                                    'duration_minutes' => $booking->duration,
+                                                    'hourly_rate' => $booking->tutor->hourly_rate,
+                                                    'calculated_price' => ($booking->duration / 60.0) * $booking->tutor->hourly_rate,
+                                                    'display_amount' => $displayAmount,
+                                                ]);
+                                            @endphp
+                                            {{ $displayAmount }}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -266,6 +282,40 @@
 
                             <!-- VNPay Form -->
                             <div id="vnpay-form" class="payment-form hidden">
+                                <!-- VNPay Minimum Amount Notice (if needed) -->
+                                @php
+                                    $bookingAmount = (float) $booking->price;
+                                    $vnpayMinimum = 5000; // Updated to correct VNPay minimum
+                                    $needsMinimumAdjustment = $bookingAmount < $vnpayMinimum;
+                                @endphp
+
+                                @if($needsMinimumAdjustment)
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <svg class="w-5 h-5 text-red-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="text-sm font-medium text-red-800">
+                                                Không thể thanh toán qua VNPay
+                                            </h3>
+                                            <div class="mt-2 text-sm text-red-700">
+                                                <p>
+                                                    Số tiền booking của bạn là <strong>{{ number_format($bookingAmount, 0, ',', '.') }} VND</strong>,
+                                                    nhưng VNPay yêu cầu số tiền tối thiểu <strong>{{ number_format($vnpayMinimum, 0, ',', '.') }} VND</strong>
+                                                    để xử lý giao dịch.
+                                                </p>
+                                                <p class="mt-1 font-medium">
+                                                    Vui lòng chọn phương thức thanh toán Stripe hoặc liên hệ admin để được hỗ trợ.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+
                                 <div class="bg-blue-50 p-6 rounded-lg">
                                     <div class="flex items-center mb-4">
                                         <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3">
@@ -325,8 +375,6 @@
                             <p class="mt-4 text-xs text-gray-500 text-center">
                                 <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-                                </svg>
-                                {{ __('booking.payment_secure') }}
                             </p>
                         </div>
                     </div>
@@ -352,6 +400,19 @@
             // Payment method selection
             paymentMethodCards.forEach(card => {
                 card.addEventListener('click', function() {
+                    const method = this.dataset.method;
+                    
+                    // Check VNPay minimum amount restriction
+                    @php
+                        $bookingAmount = (float) $booking->price;
+                        $vnpayMinimum = 5000;
+                        $isVnpayBlocked = $bookingAmount < $vnpayMinimum;
+                    @endphp
+                    
+                    if (method === 'vnpay' && {{ $isVnpayBlocked ? 'true' : 'false' }}) {
+                        showError('Số tiền booking quá nhỏ để thanh toán qua VNPay. Vui lòng chọn Stripe.');
+                        return;
+                    }
 
                     // Remove previous selections
                     paymentMethodCards.forEach(c => {
@@ -367,7 +428,6 @@
                     });
 
                     // Select current method
-                    const method = this.dataset.method;
                     selectedPaymentMethod = method;
 
                     const radio = this.querySelector('input[type="radio"]');
@@ -524,11 +584,32 @@
                 document.getElementById('spinner').classList.add('hidden');
             }
 
-            // Auto-select VNPay for Vietnamese users
-            const vnpayCard = document.querySelector('[data-method="vnpay"]');
-            if (vnpayCard) {
-                setTimeout(() => vnpayCard.click(), 100); // Small delay to ensure DOM is ready
-            }
+            // Auto-select appropriate payment method
+            @php
+                $bookingAmount = (float) $booking->price;
+                $vnpayMinimum = 5000;
+                $isVnpayBlocked = $bookingAmount < $vnpayMinimum;
+            @endphp
+            
+            @if($isVnpayBlocked)
+                // VNPay is blocked, disable it and auto-select Stripe
+                const vnpayCard = document.querySelector('[data-method="vnpay"]');
+                if (vnpayCard) {
+                    vnpayCard.classList.add('opacity-50', 'cursor-not-allowed');
+                    vnpayCard.classList.remove('cursor-pointer', 'hover:border-blue-500');
+                }
+                
+                const stripeCard = document.querySelector('[data-method="stripe"]');
+                if (stripeCard) {
+                    setTimeout(() => stripeCard.click(), 100);
+                }
+            @else
+                // Auto-select VNPay for Vietnamese users when amount is sufficient
+                const vnpayCard = document.querySelector('[data-method="vnpay"]');
+                if (vnpayCard) {
+                    setTimeout(() => vnpayCard.click(), 100);
+                }
+            @endif
         });
     </script>
     @endpush

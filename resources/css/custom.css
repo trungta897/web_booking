@@ -221,7 +221,6 @@ label {
 .role-btn.disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    pointer-events: none;
 }
 
 .role-btn.active {
@@ -437,12 +436,190 @@ label {
     color: white;
 }
 
-/* Responsive Design */
+/* Image Zoom Modal Styles - Fix gray area issue */
+.image-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    visibility: hidden; /* IMPORTANT: Only show when active */
+}
+
+.image-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.image-modal-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: transparent;
+}
+
+.image-modal-img {
+    width: 100%;
+    height: auto;
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.image-modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.image-modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Zoomable Image Styles */
+.zoomable-image {
+    cursor: zoom-in;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.zoomable-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Profile Image Container */
+.profile-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    background: white;
+}
+
+.profile-image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: white;
+}
+
+/* Fix for image background color */
+.profile-image-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    z-index: -1;
+}
+
+/* Prevent gray background on image load */
+.profile-image {
+    background-color: white !important;
+    background-image: none !important;
+}
+
+/* Certificate Image Styles - Fix hover gray overlay issue */
+.certificate-image-container {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    width: 80px; /* Fixed width */
+    height: 80px; /* Fixed height */
+}
+
+.certificate-image-container:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
+.certificate-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+    background: white;
+    border: 2px solid #e5e7eb;
+    max-width: 80px; /* Maximum width */
+    max-height: 80px; /* Maximum height */
+}
+
+.certificate-image-container:hover .certificate-image {
+    border-color: #3b82f6;
+    filter: brightness(1.1);
+}
+
+/* Fix cho hình ảnh trong modal */
+#imageModal img,
+#certificateModal img {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    max-width: 90vw; /* Giới hạn chiều rộng tối đa */
+    max-height: 90vh; /* Giới hạn chiều cao tối đa */
+    object-fit: contain; /* Giữ tỷ lệ ảnh */
+}
+
+/* CSS cho grid hiển thị chứng chỉ */
+.certificate-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 8px;
+    max-width: 400px; /* Giới hạn chiều rộng grid */
+}
+
+/* Responsive cho mobile */
 @media (max-width: 768px) {
     .section {
         padding: 3rem 0;
     }
     .search-box {
         margin-top: -2rem;
+    }
+    
+    .certificate-image-container {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .certificate-image {
+        max-width: 60px;
+        max-height: 60px;
+    }
+    
+    .certificate-grid {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        max-width: 300px;
     }
 }

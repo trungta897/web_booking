@@ -210,6 +210,7 @@ return [
     'Cancel' => 'Cancel',
     'each' => 'each',
     'image' => 'Image',
+    'download' => 'Download',
 
     // Additional hardcoded texts found
     'available_for_bookings' => 'Available for bookings',
@@ -365,4 +366,10 @@ return [
     'total_amount' => 'Total Amount',
     'recent_activity' => 'Recent Activity',
     'back_to_dashboard' => 'Back to Dashboard',
+    
+    // Profile form translations - FIX MISSING KEYS
+    'name' => 'Name',
+    'email' => 'Email',
+    'avatar' => 'Avatar',
+    'save_changes' => 'Save Changes',
 ];

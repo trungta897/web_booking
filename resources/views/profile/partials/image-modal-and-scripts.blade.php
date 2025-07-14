@@ -1,109 +1,161 @@
 <!-- Image Modal -->
-<div id="imageModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <!-- Background overlay -->
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeImageModal()"></div>
-
-        <!-- Modal panel - tối ưu cho ảnh -->
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full">
-            <div class="bg-white px-2 pt-3 pb-2 sm:p-4">
-                <!-- Modal Header -->
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                        {{ __('profile.certificate_details') }}
-                    </h3>
-                    <button type="button" class="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100" onclick="closeImageModal()">
-                         <span class="sr-only">Close</span>
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+<div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onclick="closeImageModal(event)">
+    <div class="relative max-w-4xl max-h-full mx-4">
+        <!-- Close Button -->
+        <button onclick="closeImageModal()" class="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-75 transition-opacity">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        
+        <!-- Image Container -->
+        <div class="bg-white rounded-lg overflow-hidden shadow-2xl max-w-full max-h-full">
+            <!-- Image Header -->
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h3 id="modalImageTitle" class="text-lg font-semibold text-gray-900"></h3>
+                <p id="modalImageSubtitle" class="text-sm text-gray-600 mt-1"></p>
+            </div>
+            
+            <!-- Image Content -->
+            <div class="p-4 flex items-center justify-center bg-gray-100" style="max-height: 70vh;">
+                <img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain rounded shadow">
+            </div>
+            
+            <!-- Image Footer -->
+            <div class="px-6 py-3 bg-gray-50 border-t flex justify-end items-center">
+                <div class="flex space-x-2">
+                    <button onclick="downloadImage()" class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors">
+                        {{ __('common.download') }}
                     </button>
-                </div>
-
-                                <!-- Modal Content - chỉ hiển thị ảnh, không có vùng trống -->
-                <div class="flex justify-center items-center relative" style="min-height: 300px;">
-                    <!-- Loading indicator -->
-                    <div id="modalLoading" class="absolute inset-0 flex justify-center items-center">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-                    </div>
-
-                    <!-- Ảnh chính -->
-                    <img id="modalImage"
-                         src=""
-                         alt="Certificate"
-                         class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-lg"
-                         style="display: none; background: transparent;">
+                    <button onclick="closeImageModal()" class="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">
+                        {{ __('common.close') }}
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Đặt script trực tiếp trong head để đảm bảo function có sẵn -->
 <script>
-                // Định nghĩa functions ngay lập tức
-    window.openImageModal = function(imageSrc, caption) {
-        const modal = document.getElementById('imageModal');
-        const modalImage = document.getElementById('modalImage');
-        const modalTitle = document.getElementById('modal-title');
-        const modalLoading = document.getElementById('modalLoading');
+// Image Modal Functions
+function openImageModal(imageSrc, title, subtitle = '') {
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalTitle = document.getElementById('modalImageTitle');
+    const modalSubtitle = document.getElementById('modalImageSubtitle');
+    
+    if (modal && modalImage && modalTitle) {
+        modalImage.src = imageSrc;
+        modalImage.alt = title;
+        modalTitle.textContent = title;
+        modalSubtitle.textContent = subtitle;
+        
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        
+        // Add keyboard event listener for ESC key
+        document.addEventListener('keydown', handleModalKeydown);
+    }
+}
 
-        if (modal && modalImage && modalTitle && modalLoading) {
-            // Reset trạng thái
-            modalImage.style.display = 'none';
-            modalImage.src = '';
-            modalLoading.style.display = 'flex';
+function closeImageModal(event = null) {
+    // Nếu click vào modal background (không phải content), đóng modal
+    if (event && event.target.id !== 'imageModal') return;
+    
+    const modal = document.getElementById('imageModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = ''; // Restore scrolling
+        
+        // Remove keyboard event listener
+        document.removeEventListener('keydown', handleModalKeydown);
+    }
+}
 
-            // Cập nhật title
-            modalTitle.textContent = caption;
+function handleModalKeydown(event) {
+    if (event.key === 'Escape') {
+        closeImageModal();
+    }
+}
 
-            // Hiển thị modal
-            modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
+function downloadImage() {
+    const modalImage = document.getElementById('modalImage');
+    const modalTitle = document.getElementById('modalImageTitle');
+    
+    if (modalImage && modalImage.src) {
+        const link = document.createElement('a');
+        link.href = modalImage.src;
+        link.download = modalTitle.textContent || 'certificate';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
 
-            // Load ảnh mới
-            modalImage.onload = function() {
-                modalLoading.style.display = 'none';
-                modalImage.style.display = 'block';
-            };
-
-            modalImage.onerror = function() {
-                modalLoading.style.display = 'none';
-                modalImage.style.display = 'none';
-                modalTitle.textContent = 'Không thể tải ảnh';
-            };
-
-            modalImage.src = imageSrc;
-        }
-    };
-
-        window.closeImageModal = function() {
-        const modal = document.getElementById('imageModal');
-        const modalImage = document.getElementById('modalImage');
-        const modalLoading = document.getElementById('modalLoading');
-
-        if (modal) {
-            modal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-
-            // Reset trạng thái khi đóng modal
-            if (modalImage) {
-                modalImage.src = '';
-                modalImage.style.display = 'none';
-            }
-            if (modalLoading) {
-                modalLoading.style.display = 'none';
-            }
-        }
-    };
-
-            // Xử lý phím Escape để đóng modal
-    document.addEventListener('keydown', (e) => {
-        if (e.key === "Escape") {
-            const modal = document.getElementById('imageModal');
-            if (modal && !modal.classList.contains('hidden')) {
+// Auto-close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('imageModal');
+    if (modal) {
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
                 closeImageModal();
             }
-        }
-    });
+        });
+    }
+    
+    // Đảm bảo không có modal cũ nào còn sót lại
+    document.body.style.overflow = '';
+});
 </script>
+
+<style>
+/* Modal Animation */
+#imageModal {
+    animation: fadeIn 0.3s ease-out;
+}
+
+#imageModal.hidden {
+    animation: fadeOut 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+/* Hover effects for images */
+.certificate-image {
+    transition: all 0.3s ease;
+}
+
+.certificate-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading state */
+#modalImage {
+    transition: opacity 0.3s ease;
+}
+
+#modalImage[src=""] {
+    opacity: 0.5;
+}
+</style>

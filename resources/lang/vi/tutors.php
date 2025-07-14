@@ -29,6 +29,8 @@ return [
     'friday' => 'Thứ Sáu',
     'saturday' => 'Thứ Bảy',
     'sunday' => 'Chủ Nhật',
+    'details' => 'Chi Tiết',
+    'any_rating' => 'Bất Kỳ Đánh Giá',
     'sort_by' => 'Sắp Xếp Theo',
     'most_recent' => 'Mới Nhất',
     'price_low_high' => 'Giá: Thấp đến Cao',
@@ -53,7 +55,7 @@ return [
     'review_after_session' => 'Bạn chỉ có thể viết đánh giá sau khi hoàn thành buổi học với gia sư này.',
     'loading' => 'Đang tải...',
     'mon' => 'T2',
-    'tue' => 'T3', 
+    'tue' => 'T3',
     'wed' => 'T4',
     'thu' => 'T5',
     'fri' => 'T6',
@@ -62,6 +64,7 @@ return [
     'tutor_profile' => 'Hồ Sơ Gia Sư :name',
 
     // Missing translations for profile page
+    'education' => 'Học Vấn/Chứng chỉ',
     'education_and_certificates' => 'Học vấn và chứng chỉ',
     'certificate_images' => 'Hình ảnh chứng chỉ',
     'current_images' => 'Hình ảnh hiện tại',

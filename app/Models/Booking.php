@@ -72,7 +72,16 @@ class Booking extends Model
     // 🎯 BOOLEAN LOGIC HELPERS
     public function isPending(): bool
     {
-        return !$this->is_confirmed && !$this->is_cancelled && !$this->is_completed;
+        // Booking chỉ pending khi:
+        // - Chưa confirmed (chưa thanh toán)
+        // - Chưa cancelled
+        // - Chưa completed
+        // - VÀ chưa được gia sư chấp nhận (accepted_at = null)
+        return !$this->is_confirmed &&
+               !$this->is_cancelled &&
+               !$this->is_completed &&
+               is_null($this->accepted_at) &&
+               empty($this->rejection_reason);
     }
 
     public function isConfirmed(): bool
@@ -112,25 +121,25 @@ class Booking extends Model
         if ($this->is_completed) {
             return 'completed';
         }
-        
+
         if ($this->is_cancelled) {
             return 'cancelled';
         }
-        
+
         if ($this->is_confirmed) {
             return 'confirmed';
         }
-        
+
         // Nếu có rejection_reason thì là rejected
         if (!empty($this->rejection_reason)) {
             return 'rejected';
         }
-        
+
         // 🎯 SỬA LOGIC: Sử dụng accepted_at để xác định trạng thái accepted
         if (!is_null($this->accepted_at)) {
             return 'accepted';
         }
-        
+
         // Mặc định là pending
         return 'pending';
     }
@@ -139,14 +148,16 @@ class Booking extends Model
     public function isAccepted(): bool
     {
         // Booking được chấp nhận khi:
-        // - Không bị cancelled
-        // - Không completed  
-        // - Không pending (tức là đã có action từ tutor)
-        // - Nhưng chưa confirmed (chưa thanh toán)
-        return !$this->is_cancelled && 
-               !$this->is_completed && 
-               !$this->isPending() && 
-               !$this->is_confirmed;
+        // - Đã có accepted_at (gia sư đã chấp nhận)
+        // - Chưa confirmed (chưa thanh toán)
+        // - Chưa cancelled
+        // - Chưa completed
+        // - Không bị reject
+        return !is_null($this->accepted_at) &&
+               !$this->is_confirmed &&
+               !$this->is_cancelled &&
+               !$this->is_completed &&
+               empty($this->rejection_reason);
     }
 
     public function getPaymentStatusAttribute(): string
@@ -220,12 +231,14 @@ class Booking extends Model
         $start = Carbon::parse($this->start_time);
         $end = Carbon::parse($this->end_time);
 
-        return abs($start->diffInMinutes($end));
+        // FIXED: Use proper order and ensure positive duration
+        return $start->diffInMinutes($end);
     }
 
     public function getTotalPriceAttribute()
     {
-        return $this->price * ($this->duration / 60);
+        // FIXED: This should return the stored price, not recalculate
+        return $this->price;
     }
 
     public function review()
