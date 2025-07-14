@@ -164,6 +164,29 @@
                                 <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">QR Code</span>
                             </div>
                         </div>
+
+                        <!-- Stripe Option -->
+                        <div class="payment-method-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-purple-500 transition-colors" data-method="stripe">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M2,17H22V7H2V17M20,19H4A2,2 0 0,1 2,17V7A2,2 0 0,1 4,5H20A2,2 0 0,1 22,7V17A2,2 0 0,1 20,19Z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-medium text-gray-900">Stripe</h3>
+                                        <p class="text-sm text-gray-500">{{ __('booking.stripe_card') }}</p>
+                                    </div>
+                                </div>
+                                <input type="radio" name="payment_method" value="stripe" class="w-4 h-4 text-purple-600">
+                            </div>
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">Visa</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-800">Mastercard</span>
+                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-indigo-100 text-indigo-800">Amex</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -190,49 +213,19 @@
                                                 {{ strtoupper(substr($booking->tutor->user->name, 0, 1)) }}
                                             </div>
                                         @endif
-                                    </div>
-                                    <div class="flex-1">
-                                        <h3 class="text-xl font-semibold text-gray-900 mb-1">{{ $booking->tutor->user->name }}</h3>
-                                        <p class="text-base text-indigo-600 font-medium mb-2">{{ $booking->subject->name }}</p>
-                                        <div class="flex items-center">
-                                            <div class="flex items-center mr-3">
+                                   </div>
+                                    <div>
+                                        <h3 class="text-lg font-medium text-gray-900">{{ $booking->tutor->user->name }}</h3>
+                                        <p class="text-sm text-gray-600">{{ $booking->subject->name }}</p>
+                                        <div class="flex items-center mt-1">
+                                            <div class="flex items-center">
                                                 @for($i = 1; $i <= 5; $i++)
-                                                    <svg class="w-5 h-5 {{ $i <= ($booking->tutor->rating ?? 5) ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
+                                                    <svg class="w-4 h-4 {{ $i <= ($booking->tutor->rating ?? 5) ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
                                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                    </svg>
                                                 @endfor
                                             </div>
-                                            <span class="text-sm text-gray-600">({{ $booking->tutor->reviews_count ?? 0 }} {{ __('reviews') }})</span>
-                                        </div>
-
-                                        <!-- Tutor badges/credentials -->
-                                        <div class="flex items-center mt-2 space-x-2">
-                                            @if($booking->tutor->experience_years >= 5)
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                                    </svg>
-                                                    {{ __('Experienced') }}
-                                                </span>
-                                            @endif
-
-                                            @if($booking->tutor->education && $booking->tutor->education->count() > 0)
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M12 14l9-5-9-5-9 5 9 5z"/>
-                                                        <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-                                                    </svg>
-                                                    {{ __('Verified Education') }}
-                                                </span>
-                                            @endif
-
-                                            @if(($booking->tutor->reviews_avg_rating ?? 0) >= 4.5)
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                                    </svg>
-                                                    {{ __('Top Rated') }}
-                                                </span>
-                                            @endif
+                                            <span class="ml-2 text-sm text-gray-600">({{ $booking->tutor->reviews_count ?? 0 }} {{ __('reviews') }})</span>
                                         </div>
                                     </div>
                                 </div>
@@ -254,23 +247,6 @@
                                         <span class="text-gray-500">{{ __('Hourly Rate') }}:</span>
                                         <span class="font-medium text-gray-900">{{ formatHourlyRate($booking->tutor->hourly_rate) }}</span>
                                     </div>
-
-                                    <!-- Education summary -->
-                                    @if($booking->tutor->education && $booking->tutor->education->count() > 0)
-                                        <div class="flex justify-between text-sm">
-                                            <span class="text-gray-500">{{ __('Education') }}:</span>
-                                            <div class="text-right max-w-xs">
-                                                @foreach($booking->tutor->education->take(2) as $education)
-                                                    <div class="font-medium text-gray-900 text-xs">{{ $education->degree }}</div>
-                                                    <div class="text-gray-600 text-xs">{{ $education->institution }}</div>
-                                                @endforeach
-                                                @if($booking->tutor->education->count() > 2)
-                                                    <div class="text-gray-500 text-xs mt-1">+{{ $booking->tutor->education->count() - 2 }} {{ __('more') }}</div>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @endif
-
                                     <div class="flex justify-between pt-3 border-t border-gray-200">
                                         <span class="text-base font-medium text-gray-900">{{ __('booking.total_amount') }}:</span>
                                         <span class="text-lg font-bold text-gray-900">{{ $booking->display_amount }}</span>
@@ -306,6 +282,19 @@
                                         <li>• {{ __('Ví điện tử VNPay') }}</li>
                                         <li>• {{ __('Bảo mật SSL 256-bit') }}</li>
                                     </ul>
+                                </div>
+                            </div>
+
+                            <!-- Stripe Form -->
+                            <div id="stripe-form" class="payment-form hidden">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="card-element" class="block text-sm font-medium text-gray-700 mb-2">
+                                            {{ __('Credit or debit card') }}
+                                        </label>
+                                        <div id="card-element" class="p-3 border border-gray-300 rounded-md bg-white"></div>
+                                        <div id="card-errors" class="mt-1 text-sm text-red-600"></div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -352,43 +341,22 @@
         let selectedPaymentMethod = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing payment page...');
-
-            // Initialize elements
+            // Elements
             const paymentMethodCards = document.querySelectorAll('.payment-method-card');
             const paymentButton = document.getElementById('payment-button');
             const cancelButton = document.getElementById('cancel-payment-button');
             const buttonText = document.getElementById('button-text');
             const vnpayForm = document.getElementById('vnpay-form');
+            const stripeForm = document.getElementById('stripe-form');
             const paymentError = document.getElementById('payment-error');
-            const spinner = document.getElementById('spinner');
 
-            // Debug logging
-            console.log('Payment button found:', !!paymentButton);
-            console.log('Cancel button found:', !!cancelButton);
-            console.log('Payment method cards found:', paymentMethodCards.length);
-
-            // Verify critical elements exist
-            if (!paymentButton || !cancelButton) {
-                console.error('Critical buttons not found!');
-                return;
-            }
-
-            // Force enable cancel button (it should always be clickable)
-            cancelButton.disabled = false;
-            cancelButton.style.pointerEvents = 'auto';
-            cancelButton.style.opacity = '1';
-
-            // Payment method selection (only VNPay now)
-            paymentMethodCards.forEach((card, index) => {
-                console.log(`Setting up card ${index}:`, card.dataset.method);
-
+            // Payment method selection
+            paymentMethodCards.forEach(card => {
                 card.addEventListener('click', function() {
-                    console.log('Payment method clicked:', this.dataset.method);
 
                     // Remove previous selections
                     paymentMethodCards.forEach(c => {
-                        c.classList.remove('border-blue-500', 'bg-blue-50');
+                        c.classList.remove('border-blue-500', 'border-purple-500', 'bg-blue-50', 'bg-purple-50');
                         c.classList.add('border-gray-200');
                         const radio = c.querySelector('input[type="radio"]');
                         if (radio) radio.checked = false;
@@ -399,10 +367,9 @@
                         form.classList.add('hidden');
                     });
 
-                    // Select current method (should only be VNPay)
+                    // Select current method
                     const method = this.dataset.method;
                     selectedPaymentMethod = method;
-                    console.log('Selected payment method set to:', selectedPaymentMethod);
 
                     const radio = this.querySelector('input[type="radio"]');
                     if (radio) radio.checked = true;
@@ -410,69 +377,63 @@
                     if (method === 'vnpay') {
                         this.classList.remove('border-gray-200');
                         this.classList.add('border-blue-500', 'bg-blue-50');
-                        if (vnpayForm) vnpayForm.classList.remove('hidden');
-                        if (buttonText) buttonText.textContent = 'Thanh toán với VNPay';
+                        vnpayForm.classList.remove('hidden');
+                        buttonText.textContent = 'Thanh toán với VNPay';
+                    } else if (method === 'stripe') {
+                        this.classList.remove('border-gray-200');
+                        this.classList.add('border-purple-500', 'bg-purple-50');
+                        stripeForm.classList.remove('hidden');
+                        buttonText.textContent = 'Thanh toán với Stripe';
                     }
 
-                    // Force enable payment button
+                    // Enable payment button
                     paymentButton.disabled = false;
                     paymentButton.classList.remove('opacity-50');
-                    paymentButton.style.pointerEvents = 'auto';
-                    paymentButton.style.opacity = '1';
-
-                    console.log('Payment button enabled:', !paymentButton.disabled);
                 });
             });
 
-            // Payment button click handler
+            // Payment button click
             paymentButton.addEventListener('click', function(e) {
-                console.log('Payment button clicked');
                 e.preventDefault();
-                e.stopPropagation();
 
-                if (!selectedPaymentMethod || selectedPaymentMethod !== 'vnpay') {
-                    showError('Vui lòng chọn phương thức thanh toán VNPay');
+                if (!selectedPaymentMethod) {
+                    showError('Vui lòng chọn phương thức thanh toán');
                     return;
                 }
 
-                console.log('Processing VNPay payment...');
+                // Show loading
+                paymentButton.disabled = true;
+                buttonText.textContent = 'Đang xử lý...';
+                document.getElementById('spinner').classList.remove('hidden');
 
-                // Show loading state
-                this.disabled = true;
-                if (buttonText) buttonText.textContent = 'Đang xử lý...';
-                if (spinner) spinner.classList.remove('hidden');
-
-                processVNPayPayment();
-            });
-
-            // Cancel button click handler
-            cancelButton.addEventListener('click', function(e) {
-                console.log('Cancel button clicked');
-                e.preventDefault();
-                e.stopPropagation();
-
-                if (confirm('Bạn có chắc chắn muốn hủy thanh toán? Bạn có thể quay lại thanh toán sau.')) {
-                    console.log('User confirmed cancellation, redirecting...');
-
-                    try {
-                        @auth
-                            @if(auth()->user()->role === 'student')
-                                window.location.href = '{{ route("student.dashboard") }}';
-                            @else
-                                window.location.href = '{{ route("bookings.show", $booking) }}';
-                            @endif
-                        @else
-                            window.location.href = '{{ route("bookings.index") }}';
-                        @endauth
-                    } catch (error) {
-                        console.error('Redirect error:', error);
-                        window.location.href = '/web_booking/public/bookings/{{ $booking->id }}';
-                    }
+                if (selectedPaymentMethod === 'vnpay') {
+                    processVNPayPayment();
+                } else if (selectedPaymentMethod === 'stripe') {
+                    processStripePayment();
                 }
             });
 
-            function processVNPayPayment() {
-                console.log('Starting VNPay payment process...');
+            // Cancel payment button click
+            cancelButton.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // Show confirmation dialog
+                if (confirm('Bạn có chắc chắn muốn hủy thanh toán? Bạn có thể quay lại thanh toán sau.')) {
+
+                    // Redirect to student dashboard
+                    @auth
+                        @if(auth()->user()->role === 'student')
+                            window.location.href = '{{ route("student.dashboard") }}';
+                        @else
+                            window.location.href = '{{ route("bookings.show", $booking) }}';
+                        @endif
+                    @else
+                        window.location.href = '{{ route("bookings.index") }}';
+                    @endauth
+                }
+            });
+
+                                                                                                function processVNPayPayment() {
 
                 fetch(`/web_booking/public/bookings/{{ $booking->id }}/payment/process`, {
                     method: 'POST',
@@ -485,25 +446,33 @@
                     })
                 })
                 .then(response => {
-                    console.log('VNPay response status:', response.status);
 
                     if (!response.ok) {
+                                                // Handle different error status codes
                         if (response.status === 403) {
                             throw new Error('Bạn không có quyền thanh toán cho booking này.');
                         } else if (response.status === 422) {
                             throw new Error('Booking này không thể thanh toán (đã thanh toán hoặc chưa được chấp nhận).');
                         } else if (response.status === 404) {
-                            throw new Error('Booking không tồn tại hoặc đã bị xóa.');
+                            throw new Error('Booking không tồn tại hoặc đã bị xóa. Vui lòng kiểm tra lại.');
                         }
-                        throw new Error('Lỗi xử lý thanh toán');
+
+                        // If response is not ok, try to get error message
+                        return response.json().then(data => {
+                            throw new Error(data.error || `Lỗi server: ${response.status}`);
+                        }).catch(() => {
+                            if (response.status === 500) {
+                                throw new Error('Lỗi server nội bộ. Vui lòng thử lại sau.');
+                            } else {
+                                throw new Error(`Lỗi kết nối server: ${response.status}`);
+                            }
+                        });
                     }
+
                     return response.json();
                 })
-                .then(data => {
-                    console.log('VNPay response data:', data);
-
+                                .then(data => {
                     if (data.payment_url) {
-                        console.log('Redirecting to VNPay:', data.payment_url);
                         window.location.href = data.payment_url;
                     } else {
                         throw new Error(data.error || 'Có lỗi xảy ra khi tạo link thanh toán VNPay');
@@ -511,61 +480,56 @@
                 })
                 .catch(error => {
                     console.error('VNPay payment error:', error);
-                    showError(error.message || 'Có lỗi xảy ra khi xử lý thanh toán');
+
+                    // Handle different error types
+                    let errorMessage = 'Có lỗi xảy ra khi kết nối đến VNPay';
+
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        errorMessage = 'Không thể kết nối đến server. Vui lòng thử lại.';
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+
+                    showError(errorMessage);
                     resetPaymentButton();
                 });
             }
 
+            function processStripePayment() {
+                // TODO: Implement Stripe payment processing
+                showError('Stripe payment chưa được triển khai');
+                resetPaymentButton();
+            }
+
             function showError(message) {
-                console.log('Showing error:', message);
-                if (paymentError) {
-                    paymentError.textContent = message;
-                    paymentError.classList.remove('hidden');
-                    setTimeout(() => {
-                        paymentError.classList.add('hidden');
-                    }, 5000);
-                } else {
-                    alert(message);
-                }
+                paymentError.textContent = message;
+                paymentError.classList.remove('hidden');
+
+                // Hide error after 5 seconds
+                setTimeout(() => {
+                    paymentError.classList.add('hidden');
+                }, 5000);
             }
 
             function resetPaymentButton() {
-                if (paymentButton) {
-                    paymentButton.disabled = !selectedPaymentMethod;
-                    paymentButton.classList.toggle('opacity-50', !selectedPaymentMethod);
-                    paymentButton.style.pointerEvents = selectedPaymentMethod ? 'auto' : 'none';
+                paymentButton.disabled = selectedPaymentMethod ? false : true;
+                paymentButton.classList.toggle('opacity-50', !selectedPaymentMethod);
+
+                if (selectedPaymentMethod === 'vnpay') {
+                    buttonText.textContent = 'Thanh toán với VNPay';
+                } else if (selectedPaymentMethod === 'stripe') {
+                    buttonText.textContent = 'Thanh toán với Stripe';
+                } else {
+                    buttonText.textContent = 'Chọn phương thức thanh toán';
                 }
-                if (buttonText) {
-                    buttonText.textContent = selectedPaymentMethod === 'vnpay' ? 'Thanh toán với VNPay' : 'Chọn phương thức thanh toán';
-                }
-                if (spinner) {
-                    spinner.classList.add('hidden');
-                }
+                document.getElementById('spinner').classList.add('hidden');
             }
 
-            // Auto-select VNPay (the only option now)
-            setTimeout(() => {
-                const vnpayCard = document.querySelector('[data-method="vnpay"]');
-                if (vnpayCard) {
-                    console.log('Auto-selecting VNPay...');
-                    vnpayCard.click();
-                } else {
-                    console.log('VNPay card not found for auto-selection');
-                }
-            }, 200);
-
-            // Final check to ensure buttons are properly set up
-            setTimeout(() => {
-                console.log('Final button check:');
-                console.log('Payment button disabled:', paymentButton.disabled);
-                console.log('Cancel button disabled:', cancelButton.disabled);
-                console.log('Selected payment method:', selectedPaymentMethod);
-
-                // Force enable cancel button one more time
-                cancelButton.disabled = false;
-                cancelButton.style.pointerEvents = 'auto';
-                cancelButton.style.opacity = '1';
-            }, 500);
+            // Auto-select VNPay for Vietnamese users
+            const vnpayCard = document.querySelector('[data-method="vnpay"]');
+            if (vnpayCard) {
+                setTimeout(() => vnpayCard.click(), 100); // Small delay to ensure DOM is ready
+            }
         });
     </script>
     @endpush
