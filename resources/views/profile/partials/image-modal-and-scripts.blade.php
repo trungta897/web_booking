@@ -7,7 +7,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
         </button>
-        
+
         <!-- Image Container -->
         <div class="bg-white rounded-lg overflow-hidden shadow-2xl max-w-full max-h-full">
             <!-- Image Header -->
@@ -15,12 +15,12 @@
                 <h3 id="modalImageTitle" class="text-lg font-semibold text-gray-900"></h3>
                 <p id="modalImageSubtitle" class="text-sm text-gray-600 mt-1"></p>
             </div>
-            
+
             <!-- Image Content -->
             <div class="p-4 flex items-center justify-center bg-gray-100" style="max-height: 70vh;">
                 <img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain rounded shadow">
             </div>
-            
+
             <!-- Image Footer -->
             <div class="px-6 py-3 bg-gray-50 border-t flex justify-end items-center">
                 <div class="flex space-x-2">
@@ -43,16 +43,16 @@ function openImageModal(imageSrc, title, subtitle = '') {
     const modalImage = document.getElementById('modalImage');
     const modalTitle = document.getElementById('modalImageTitle');
     const modalSubtitle = document.getElementById('modalImageSubtitle');
-    
+
     if (modal && modalImage && modalTitle) {
         modalImage.src = imageSrc;
         modalImage.alt = title;
         modalTitle.textContent = title;
         modalSubtitle.textContent = subtitle;
-        
+
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        
+
         // Add keyboard event listener for ESC key
         document.addEventListener('keydown', handleModalKeydown);
     }
@@ -61,12 +61,12 @@ function openImageModal(imageSrc, title, subtitle = '') {
 function closeImageModal(event = null) {
     // Nếu click vào modal background (không phải content), đóng modal
     if (event && event.target.id !== 'imageModal') return;
-    
+
     const modal = document.getElementById('imageModal');
     if (modal) {
         modal.classList.add('hidden');
         document.body.style.overflow = ''; // Restore scrolling
-        
+
         // Remove keyboard event listener
         document.removeEventListener('keydown', handleModalKeydown);
     }
@@ -81,7 +81,7 @@ function handleModalKeydown(event) {
 function downloadImage() {
     const modalImage = document.getElementById('modalImage');
     const modalTitle = document.getElementById('modalImageTitle');
-    
+
     if (modalImage && modalImage.src) {
         const link = document.createElement('a');
         link.href = modalImage.src;
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Đảm bảo không có modal cũ nào còn sót lại
     document.body.style.overflow = '';
 });

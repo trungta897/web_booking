@@ -366,7 +366,7 @@ return [
     'total_amount' => 'Total Amount',
     'recent_activity' => 'Recent Activity',
     'back_to_dashboard' => 'Back to Dashboard',
-    
+
     // Profile form translations - FIX MISSING KEYS
     'name' => 'Name',
     'email' => 'Email',

@@ -10,29 +10,29 @@ use Carbon\Carbon;
 class FixBookingPrices extends Command
 {
     protected $signature = 'booking:fix-prices {--dry-run : Show what would be fixed without making changes}';
-    
+
     protected $description = 'Fix booking prices that were calculated incorrectly due to currency conversion bugs';
 
     public function handle()
     {
         $dryRun = $this->option('dry-run');
-        
+
         $this->info('🔍 Scanning for bookings with incorrect prices...');
-        
+
         // Find bookings with suspiciously low prices (likely affected by currency bug)
         $suspiciousBookings = Booking::with(['tutor'])
             ->where('price', '<', 1000) // Any booking less than 1000 VND is suspicious
             ->whereNotNull('start_time')
             ->whereNotNull('end_time')
             ->get();
-            
+
         if ($suspiciousBookings->isEmpty()) {
             $this->info('✅ No suspicious bookings found!');
             return 0;
         }
-        
+
         $this->warn("🚨 Found {$suspiciousBookings->count()} bookings with suspicious prices:");
-        
+
         $fixes = [];
         foreach ($suspiciousBookings as $booking) {
             // Calculate duration from start_time and end_time
@@ -40,9 +40,9 @@ class FixBookingPrices extends Command
             $end = Carbon::parse($booking->end_time);
             $durationMinutes = $start->diffInMinutes($end);
             $hours = $durationMinutes / 60.0;
-            
+
             $correctPrice = $hours * $booking->tutor->hourly_rate;
-            
+
             if (abs($booking->price - $correctPrice) > 1) { // Significant difference
                 $fixes[] = [
                     'booking_id' => $booking->id,
@@ -54,12 +54,12 @@ class FixBookingPrices extends Command
                 ];
             }
         }
-        
+
         if (empty($fixes)) {
             $this->info('✅ All prices are already correct!');
             return 0;
         }
-        
+
         // Show the fixes
         $this->table(
             ['Booking ID', 'Current Price', 'Correct Price', 'Hourly Rate', 'Duration (min)', 'Difference'],
@@ -74,17 +74,17 @@ class FixBookingPrices extends Command
                 ];
             }, $fixes)
         );
-        
+
         if ($dryRun) {
             $this->warn('🧪 DRY RUN: No changes were made. Remove --dry-run to apply fixes.');
             return 0;
         }
-        
+
         if (!$this->confirm('Apply these price fixes?')) {
             $this->info('❌ Cancelled.');
             return 0;
         }
-        
+
         // Apply fixes
         DB::beginTransaction();
         try {
@@ -93,19 +93,19 @@ class FixBookingPrices extends Command
                 Booking::where('id', $fix['booking_id'])
                     ->update(['price' => $fix['correct_price']]);
                 $fixed++;
-                
+
                 $this->info("✅ Fixed booking #{$fix['booking_id']}: {$fix['current_price']} → " . number_format($fix['correct_price'], 0, ',', '.') . " VND");
             }
-            
+
             DB::commit();
             $this->info("🎉 Fixed {$fixed} booking prices successfully!");
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             $this->error('❌ Error fixing prices: ' . $e->getMessage());
             return 1;
         }
-        
+
         return 0;
     }
 }

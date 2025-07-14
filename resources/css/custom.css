@@ -607,17 +607,17 @@ label {
     .search-box {
         margin-top: -2rem;
     }
-    
+
     .certificate-image-container {
         width: 60px;
         height: 60px;
     }
-    
+
     .certificate-image {
         max-width: 60px;
         max-height: 60px;
     }
-    
+
     .certificate-grid {
         grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
         max-width: 300px;

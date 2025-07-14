@@ -253,7 +253,7 @@
                                                 // FIXED: Always use the stored booking price directly
                                                 // No more recalculation that can cause discrepancies
                                                 $displayAmount = formatBookingAmount($booking);
-                                                
+
                                                 // Debug logging for price issues
                                                 \Log::debug('Payment view price display', [
                                                     'booking_id' => $booking->id,
@@ -401,14 +401,14 @@
             paymentMethodCards.forEach(card => {
                 card.addEventListener('click', function() {
                     const method = this.dataset.method;
-                    
+
                     // Check VNPay minimum amount restriction
                     @php
                         $bookingAmount = (float) $booking->price;
                         $vnpayMinimum = 5000;
                         $isVnpayBlocked = $bookingAmount < $vnpayMinimum;
                     @endphp
-                    
+
                     if (method === 'vnpay' && {{ $isVnpayBlocked ? 'true' : 'false' }}) {
                         showError('Số tiền booking quá nhỏ để thanh toán qua VNPay. Vui lòng chọn Stripe.');
                         return;
@@ -590,7 +590,7 @@
                 $vnpayMinimum = 5000;
                 $isVnpayBlocked = $bookingAmount < $vnpayMinimum;
             @endphp
-            
+
             @if($isVnpayBlocked)
                 // VNPay is blocked, disable it and auto-select Stripe
                 const vnpayCard = document.querySelector('[data-method="vnpay"]');
@@ -598,7 +598,7 @@
                     vnpayCard.classList.add('opacity-50', 'cursor-not-allowed');
                     vnpayCard.classList.remove('cursor-pointer', 'hover:border-blue-500');
                 }
-                
+
                 const stripeCard = document.querySelector('[data-method="stripe"]');
                 if (stripeCard) {
                     setTimeout(() => stripeCard.click(), 100);
