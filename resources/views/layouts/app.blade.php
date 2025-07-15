@@ -16,7 +16,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/css/custom.css', 'resources/js/app.js'])
-        
+
         <!-- JavaScript Module Manager -->
         <script src="{{ asset('js/app-modules.js') }}"></script>
     </head>

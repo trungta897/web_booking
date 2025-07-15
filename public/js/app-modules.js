@@ -9,7 +9,7 @@ class JavaScriptManager {
         this.pageModules = {
             // Admin pages
             'admin.payouts.index': 'admin-payouts-index.js',
-            'admin.payouts.show': 'admin-payouts-show.js', 
+            'admin.payouts.show': 'admin-payouts-show.js',
             'admin.refunds': 'admin-refunds.js',
             'admin.refund-details': 'admin-refund-details.js',
             'admin.tutors.show': 'admin-tutors-show.js',
