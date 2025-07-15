@@ -9,10 +9,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const chartElement = document.getElementById('earningsChart');
         if (chartElement) {
             const ctx = chartElement.getContext('2d');
-            
+
             // Get data from data attributes or global variables
             const monthlyData = window.chartData?.monthly_data || [];
-            
+
             new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-    
+
     // Quick stats refresh
     const refreshButton = document.getElementById('refreshStats');
     if (refreshButton) {
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             location.reload();
         });
     }
-    
+
     // Export functionality
     const exportButton = document.getElementById('exportData');
     if (exportButton) {

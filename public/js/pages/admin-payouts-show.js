@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             window.alert = originalAlert; // Restore alert
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }

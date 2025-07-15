@@ -15,10 +15,10 @@ return new class () extends Migration {
 
         // Đảm bảo data consistency trước khi xóa
         DB::statement("
-            UPDATE bookings 
-            SET status = CASE 
+            UPDATE bookings
+            SET status = CASE
                 WHEN is_completed = 1 THEN 'completed'
-                WHEN is_cancelled = 1 THEN 'cancelled' 
+                WHEN is_cancelled = 1 THEN 'cancelled'
                 WHEN is_confirmed = 1 THEN 'confirmed'
                 ELSE status
             END
@@ -57,8 +57,8 @@ return new class () extends Migration {
 
         // Kiểm tra status distribution sau cleanup
         $statusStats = DB::select('
-            SELECT status, COUNT(*) as count 
-            FROM bookings 
+            SELECT status, COUNT(*) as count
+            FROM bookings
             GROUP BY status
         ');
 
@@ -89,7 +89,7 @@ return new class () extends Migration {
 
         // Sync data ngược lại
         DB::statement("
-            UPDATE bookings SET 
+            UPDATE bookings SET
                 is_confirmed = CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END,
                 is_cancelled = CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END,
                 is_completed = CASE WHEN status = 'completed' THEN 1 ELSE 0 END

@@ -5,7 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-    
+
     // Favorite functionality
     window.toggleFavorite = function(tutorId) {
         if (!csrfToken) {
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check availability on page load
     checkAvailability();
-    
+
     // Refresh availability every 5 minutes
     setInterval(checkAvailability, 300000);
 });

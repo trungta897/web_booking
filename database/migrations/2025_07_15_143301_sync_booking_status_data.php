@@ -15,10 +15,10 @@ return new class () extends Migration {
 
         // Cập nhật status enum dựa trên boolean fields
         $updated = DB::update("
-            UPDATE bookings 
-            SET status = CASE 
+            UPDATE bookings
+            SET status = CASE
                 WHEN is_completed = 1 THEN 'completed'
-                WHEN is_cancelled = 1 THEN 'cancelled' 
+                WHEN is_cancelled = 1 THEN 'cancelled'
                 WHEN is_confirmed = 1 THEN 'confirmed'
                 ELSE 'pending'
             END
@@ -29,8 +29,8 @@ return new class () extends Migration {
 
         // Cập nhật payment_status dựa trên payment_at và confirmed status
         $paymentUpdated = DB::update("
-            UPDATE bookings 
-            SET payment_status = CASE 
+            UPDATE bookings
+            SET payment_status = CASE
                 WHEN payment_at IS NOT NULL AND is_confirmed = 1 THEN 'paid'
                 WHEN is_cancelled = 1 AND payment_at IS NOT NULL THEN 'refunded'
                 ELSE 'pending'
@@ -42,8 +42,8 @@ return new class () extends Migration {
 
         // Thống kê sau khi sync
         $statusStats = DB::select('
-            SELECT status, COUNT(*) as count 
-            FROM bookings 
+            SELECT status, COUNT(*) as count
+            FROM bookings
             GROUP BY status
         ');
 
@@ -53,8 +53,8 @@ return new class () extends Migration {
         }
 
         $paymentStats = DB::select('
-            SELECT payment_status, COUNT(*) as count 
-            FROM bookings 
+            SELECT payment_status, COUNT(*) as count
+            FROM bookings
             GROUP BY payment_status
         ');
 

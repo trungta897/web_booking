@@ -5,7 +5,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-    
+
     // Payout cancellation
     window.cancelPayout = function(payoutId) {
         if (confirm('Are you sure you want to cancel this payout request?')) {
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     };
-    
+
     // Filter functionality
     const filterForm = document.getElementById('filterForm');
     if (filterForm) {
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.submit();
         });
     }
-    
+
     // Date range picker
     const dateInputs = document.querySelectorAll('input[type="date"]');
     dateInputs.forEach(input => {
