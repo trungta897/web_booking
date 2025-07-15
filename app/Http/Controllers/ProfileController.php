@@ -52,15 +52,7 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        // Debug logging
-        Log::info('Profile update request received', [
-            'user_id' => Auth::id(),
-            'request_data' => $request->all(),
-            'user_role' => Auth::user()->role,
-            'has_education_data' => $request->has('education'),
-            'education_count' => $request->has('education') ? count($request->input('education', [])) : 0,
-            'education_keys' => $request->has('education') ? array_keys($request->input('education', [])) : [],
-        ]);
+        // Validate and update the user's profile information.
 
         try {
             $user = Auth::user();
