@@ -2,28 +2,16 @@
 
 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" x-data="tutorCalendar(@js($calendarData))">
     <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h4 class="text-lg font-medium text-gray-900">{{ __('common.teaching_schedule') }}</h4>
-            <div class="flex space-x-2">
-                <button @click="showCurrentMonth" :class="{'bg-blue-500 text-white': currentView === 'current', 'bg-gray-100 text-gray-700': currentView !== 'current'}" class="px-3 py-1 rounded-md text-sm font-medium transition-colors">
-                    {{ __('common.current_month') }}
-                </button>
-                <button @click="showNextMonth" :class="{'bg-blue-500 text-white': currentView === 'next', 'bg-gray-100 text-gray-700': currentView !== 'next'}" class="px-3 py-1 rounded-md text-sm font-medium transition-colors">
-                    {{ __('common.next_month') }}
-                </button>
-            </div>
+        <!-- Fixed header without toggle buttons -->
+        <div class="mb-6">
+            <h4 class="text-lg font-medium text-gray-900 mb-2">{{ __('Lịch Dạy') }}</h4>
+            <p class="text-sm text-gray-600">{{ __('Lịch học') }}</p>
         </div>
 
-        <!-- Current Month Calendar -->
-        <div x-show="currentView === 'current'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
-            <h5 class="text-md font-medium text-gray-800 mb-4" x-text="calendarData.current_month_name"></h5>
+        <!-- Show only current month calendar -->
+        <div class="border border-gray-200 rounded-lg p-4">
+            <h5 class="text-md font-medium text-gray-800 mb-4 bg-blue-50 p-2 rounded" x-text="calendarData.current_month_name"></h5>
             @include('components.calendar-grid', ['weeks' => $calendarData['calendar_weeks'], 'monthType' => 'current'])
-        </div>
-
-        <!-- Next Month Calendar -->
-        <div x-show="currentView === 'next'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
-            <h5 class="text-md font-medium text-gray-800 mb-4" x-text="calendarData.next_month_name"></h5>
-            @include('components.calendar-grid', ['weeks' => $calendarData['next_calendar_weeks'], 'monthType' => 'next'])
         </div>
 
         <!-- Booking Details Modal -->
@@ -42,7 +30,7 @@
                 <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-medium text-gray-900" x-text="`{{ __('common.schedule_for') }} ${selectedDate}`"></h3>
+                            <h3 class="text-lg font-medium text-gray-900" x-text="`{{ __('Chi tiết lịch học ngày') }} ${selectedDate}`"></h3>
                             <button @click="closeBookingModal" class="text-gray-400 hover:text-gray-600">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -65,10 +53,10 @@
                                             </div>
                                             <div class="flex flex-col items-end space-y-2">
                                                 <span :class="{
-                                                    'bg-yellow-50': booking.status === 'pending',
-                                                    'bg-green-50': booking.status === 'accepted',
-                                                    'bg-blue-50': booking.status === 'completed',
-                                                    'bg-gray-100 text-gray-800': booking.status === 'cancelled'
+                                                    'bg-yellow-50 text-yellow-800 border border-yellow-300': booking.status === 'pending',
+                                                    'bg-green-50 text-green-800 border border-green-300': booking.status === 'accepted',
+                                                    'bg-blue-50 text-blue-800 border border-blue-300': booking.status === 'completed',
+                                                    'bg-red-50 text-red-800 border border-red-300': booking.status === 'cancelled'
                                                 }" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" x-text="booking.status"></span>
                                                 <a :href="`/bookings/${booking.id}`" class="text-sm text-indigo-600 hover:text-indigo-900">
                                                     {{ __('common.view_details') }}
@@ -81,31 +69,41 @@
                         </div>
 
                         <div x-show="selectedBookings.length === 0" class="text-gray-500 text-center py-4">
-                            {{ __('common.no_bookings_on_this_date') }}
+                            {{ __('Không có lịch học nào trong ngày này') }}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Legend -->
-        <div class="mt-6 flex items-center justify-center space-x-6 text-sm">
-            <div class="flex items-center">
-                <div class="w-4 h-4 bg-blue-100 border border-blue-200 rounded mr-2"></div>
-                <span class="text-gray-600">{{ __('common.has_classes') }}</span>
-            </div>
-            <div class="flex items-center">
-                <div class="w-4 h-4 bg-green-100 border border-green-200 rounded mr-2"></div>
-                <span class="text-gray-600">{{ __('common.accepted') }}</span>
-            </div>
-            <div class="flex items-center">
-                <div class="w-4 h-4 bg-yellow-100 border border-yellow-200 rounded mr-2"></div>
-                <span class="text-gray-600">{{ __('common.pending') }}</span>
+        <!-- Fixed Legend - Always visible -->
+        <div class="mt-4 bg-white border border-gray-200 rounded-lg p-3">
+            <h6 class="font-medium text-gray-900 mb-2 text-sm">{{ __('Chú thích màu sắc') }}</h6>
+            <div class="flex flex-wrap items-center justify-center gap-3 text-xs">
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-blue-100 border border-blue-200 rounded mr-1"></div>
+                    <span class="text-gray-600">{{ __('Có lịch học') }}</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-green-100 border border-green-200 rounded mr-1"></div>
+                    <span class="text-gray-600">{{ __('Đã xác nhận') }}</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-yellow-100 border border-yellow-200 rounded mr-1"></div>
+                    <span class="text-gray-600">{{ __('Chờ duyệt') }}</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-red-100 border border-red-200 rounded mr-1"></div>
+                    <span class="text-gray-600">{{ __('Đã hủy') }}</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-3 h-3 bg-orange-100 border border-orange-300 rounded mr-1"></div>
+                    <span class="text-gray-600">{{ __('Hôm nay') }}</span>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
 
 
     @push('scripts')

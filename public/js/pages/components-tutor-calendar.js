@@ -4,28 +4,26 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Fixed Tutor Calendar with enhanced colors initialized');
+});
+
 function tutorCalendar(calendarData) {
     return {
         calendarData: calendarData,
-        currentView: 'current',
         showBookingModal: false,
         selectedDate: '',
         selectedBookings: [],
-
-        showCurrentMonth() {
-            this.currentView = 'current';
-        },
-
-        showNextMonth() {
-            this.currentView = 'next';
-        },
 
         async openBookingModal(date) {
             this.selectedDate = this.formatDate(date);
             this.selectedBookings = this.calendarData.bookings_by_date[date] || [];
             this.showBookingModal = true;
 
-            // Optionally fetch fresh data via AJAX for more details
+            // Log để debug
+            console.log('Opening booking modal for date:', date);
+            console.log('Selected bookings:', this.selectedBookings);
+
+            // Fetch fresh data via AJAX for more details
             try {
                 const response = await fetch(`/calendar/bookings/${date}`, {
                     method: 'GET',
@@ -39,6 +37,7 @@ function tutorCalendar(calendarData) {
                     const data = await response.json();
                     if (data.success) {
                         this.selectedBookings = data.bookings;
+                        console.log('Fresh booking data loaded:', data.bookings);
                     }
                 }
             } catch (error) {
@@ -68,7 +67,8 @@ function tutorCalendar(calendarData) {
         },
 
         getBookingCount(date) {
-            return this.calendarData.bookings_by_date && this.calendarData.bookings_by_date[date] ? this.calendarData.bookings_by_date[date].length : 0;
+            return this.calendarData.bookings_by_date && this.calendarData.bookings_by_date[date] ? 
+                   this.calendarData.bookings_by_date[date].length : 0;
         },
 
         getBookingStatus(date) {
@@ -79,16 +79,40 @@ function tutorCalendar(calendarData) {
             const bookings = this.calendarData.bookings_by_date[date];
             if (bookings.length === 0) return null;
 
+            // Check for different status priorities
+            const hasCancelled = bookings.some(booking => booking.status === 'cancelled');
             const hasPending = bookings.some(booking => booking.status === 'pending');
             const hasAccepted = bookings.some(booking => booking.status === 'accepted');
             const hasCompleted = bookings.some(booking => booking.status === 'completed');
 
-            if (hasAccepted && hasPending) return 'mixed';
+            // Priority order: cancelled > completed > accepted > pending
+            if (hasCancelled) return 'cancelled';
             if (hasCompleted) return 'completed';
             if (hasAccepted) return 'accepted';
             if (hasPending) return 'pending';
+            
             return null;
+        },
+
+        // Get statistics summary with cancelled bookings
+        getStatsSummary() {
+            if (!this.calendarData.bookings_by_date) return {
+                totalDays: 0,
+                totalBookings: 0,
+                acceptedBookings: 0,
+                pendingBookings: 0,
+                cancelledBookings: 0
+            };
+
+            const bookings = Object.values(this.calendarData.bookings_by_date).flat();
+            
+            return {
+                totalDays: Object.keys(this.calendarData.bookings_by_date).length,
+                totalBookings: bookings.length,
+                acceptedBookings: bookings.filter(b => b.status === 'accepted').length,
+                pendingBookings: bookings.filter(b => b.status === 'pending').length,
+                cancelledBookings: bookings.filter(b => b.status === 'cancelled').length
+            };
         }
     }
 }
-});

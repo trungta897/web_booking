@@ -20,22 +20,24 @@
                     <div class="grid grid-cols-7 gap-0">
                         @foreach($week as $dayIndex => $day)
                             @if(isset($day) && is_array($day) && isset($day['date']) && isset($day['day']))
-                                <div class="border-r border-b border-gray-100 last:border-r-0 {{ $weekIndex === count($weeks) - 1 ? 'border-b-0' : '' }}"
+                                <div class="border-r border-b border-gray-100 last:border-r-0 {{ $weekIndex === count($weeks) - 1 ? 'border-b-0' : '' }} relative"
                                      :class="{
                                          'bg-blue-50': hasBookings('{{ $day['date'] }}'),
                                          'bg-yellow-50': getBookingStatus('{{ $day['date'] }}') === 'pending',
                                          'bg-green-50': getBookingStatus('{{ $day['date'] }}') === 'accepted',
-                                         'bg-blue-50': getBookingStatus('{{ $day['date'] }}') === 'completed'
+                                         'bg-blue-50': getBookingStatus('{{ $day['date'] }}') === 'completed',
+                                         'bg-red-50': getBookingStatus('{{ $day['date'] }}') === 'cancelled',
+                                         'ring-2 ring-orange-400 ring-inset': {{ ($day['is_today'] ?? false) ? 'true' : 'false' }}
                                      }">
                                     <button @click="openBookingModal('{{ $day['date'] }}')"
-                                            class="w-full h-16 p-1 hover:bg-gray-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                                            class="w-full h-16 p-1 hover:bg-gray-50 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset {{ ($day['is_today'] ?? false) ? 'today-cell' : '' }}"
                                             :class="{
                                                 'cursor-pointer': hasBookings('{{ $day['date'] }}'),
                                                 'cursor-default': !hasBookings('{{ $day['date'] }}')
                                             }">
                                         <div class="flex flex-col items-center justify-center h-full">
-                                            <!-- Day Number -->
-                                            <span class="text-sm font-medium {{ !($day['is_current_month'] ?? true) ? 'text-gray-400' : (($day['is_today'] ?? false) ? 'text-blue-600 font-bold' : (($day['is_past'] ?? false) ? 'text-gray-500' : 'text-gray-900')) }}">
+                                            <!-- Day Number with special today styling -->
+                                            <span class="text-sm font-medium {{ !($day['is_current_month'] ?? true) ? 'text-gray-400' : (($day['is_today'] ?? false) ? 'text-orange-600 font-bold bg-orange-100 rounded-full w-6 h-6 flex items-center justify-center' : (($day['is_past'] ?? false) ? 'text-gray-500' : 'text-gray-900')) }}">
                                                 {{ $day['day'] }}
                                             </span>
 
@@ -44,9 +46,10 @@
                                                 <div class="flex items-center justify-center">
                                                     <span class="inline-flex items-center justify-center w-5 h-4 text-xs font-medium rounded-full"
                                                           :class="{
-                                                              'bg-yellow-100 text-yellow-700': getBookingStatus('{{ $day['date'] }}') === 'pending',
-                                                              'bg-green-100 text-green-700': getBookingStatus('{{ $day['date'] }}') === 'accepted',
-                                                              'bg-blue-100 text-blue-700': getBookingStatus('{{ $day['date'] }}') === 'completed'
+                                                              'bg-yellow-100 text-yellow-700 border border-yellow-300': getBookingStatus('{{ $day['date'] }}') === 'pending',
+                                                              'bg-green-100 text-green-700 border border-green-300': getBookingStatus('{{ $day['date'] }}') === 'accepted',
+                                                              'bg-blue-100 text-blue-700 border border-blue-300': getBookingStatus('{{ $day['date'] }}') === 'completed',
+                                                              'bg-red-100 text-red-700 border border-red-300': getBookingStatus('{{ $day['date'] }}') === 'cancelled'
                                                           }"
                                                           x-text="getBookingCount('{{ $day['date'] }}')">
                                                     </span>
@@ -54,6 +57,11 @@
                                             </div>
                                         </div>
                                     </button>
+                                    
+                                    <!-- Today marker dot -->
+                                    @if($day['is_today'] ?? false)
+                                        <div class="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full"></div>
+                                    @endif
                                 </div>
                             @else
                                 {{-- 🎯 FALLBACK: Empty cell for invalid day data --}}
@@ -84,26 +92,25 @@
     transition: transform 0.1s ease-in-out;
 }
 
-/* Today highlight */
-.calendar-grid .today {
-    position: relative;
+/* Enhanced Today styling */
+.calendar-grid .today-cell {
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.1), rgba(255, 140, 0, 0.1));
+    border: 2px solid rgba(255, 165, 0, 0.3) !important;
 }
 
-.calendar-grid .today::after {
-    content: '';
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 6px;
-    height: 6px;
-    background-color: #3B82F6;
-    border-radius: 50%;
+.calendar-grid .today-cell:hover {
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.2), rgba(255, 140, 0, 0.2));
 }
 
 /* Past day styling */
 .calendar-grid .past-day {
     opacity: 0.6;
+}
+
+/* Cancelled booking cells */
+.calendar-grid [class*="bg-red-50"] {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+    border-left: 3px solid #ef4444;
 }
 
 /* Responsive adjustments */
@@ -115,6 +122,10 @@
 
     .calendar-grid .text-sm {
         font-size: 0.75rem;
+    }
+    
+    .today-cell {
+        border-width: 1px !important;
     }
 }
 </style>
