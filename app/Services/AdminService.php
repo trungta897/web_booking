@@ -207,7 +207,7 @@ class AdminService extends BaseService
      */
     protected function getBookingStatistics(): array
     {
-        // 🎯 BOOLEAN LOGIC: Get booking statistics using boolean fields
+        // BOOLEAN LOGIC: Get booking statistics using boolean fields
         $total = Booking::count();
         $pending = Booking::where('is_confirmed', false)->where('is_cancelled', false)->where('is_completed', false)->count();
         $accepted = Booking::where('is_confirmed', true)->where('is_completed', false)->count();

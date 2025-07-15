@@ -82,7 +82,7 @@ class PaymentService extends BaseService implements PaymentServiceInterface
 
             // 🎯 THANH TOÁN THÀNH CÔNG - CẬP NHẬT BOOLEAN LOGIC
             $booking->update([
-                'is_confirmed' => true, // ✅ Đã chấp nhận VÀ đã thanh toán = sẵn sàng học
+                'is_confirmed' => true, // Đã chấp nhận VÀ đã thanh toán = sẵn sàng học
                 'payment_method' => 'stripe',
                 'payment_at' => now(),
             ]);

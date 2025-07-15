@@ -83,7 +83,6 @@ class StudentService extends BaseService
     {
         $bookings = $this->bookingRepository->getStudentBookings($student->id);
 
-        // 🎯 BOOLEAN LOGIC: Use boolean fields instead of status
         $stats = [
             'total_bookings' => $bookings->count(),
             'total_spent' => $bookings->where('is_completed', true)->sum('price'),

@@ -259,7 +259,7 @@ class VnpayService
             $transactionNo = $vnpData['vnp_TransactionNo'] ?? null;
             $amount = $vnpData['vnp_Amount'] / 100; // Convert back to VND
 
-            // 🔍 KIỂM TRA GIAO DỊCH ĐÃ XỬ LÝ
+            // Check if transaction is already processed
             $existingCompletedTransaction = Transaction::where('transaction_id', $txnRef)
                 ->where('status', Transaction::STATUS_COMPLETED)
                 ->first();
@@ -288,8 +288,8 @@ class VnpayService
                 return ['success' => false, 'message' => 'Booking not found'];
             }
 
-            // 🎯 BOOLEAN LOGIC: Check if booking is already paid using is_confirmed
-            if ($booking->is_confirmed) {
+            // Check if booking is already paid using is_confirmed
+            if ($booking->is_confirmed && $booking->payment_at) {
                 LogService::vnpay('Booking already paid', [
                     'booking_id' => $booking->id,
                     'current_is_confirmed' => $booking->is_confirmed,
@@ -309,10 +309,10 @@ class VnpayService
             if ($responseCode === '00') {
                 // Thanh toán thành công
                 $booking->update([
-                    'is_confirmed' => true, // ✅ Đã chấp nhận VÀ đã thanh toán = sẵn sàng học
-                    'accepted_at' => $booking->accepted_at ?: Carbon::now(), // ✅ SỬA: Tự động accept nếu chưa có
-                    'payment_method' => 'vnpay',
                     'payment_at' => Carbon::now(),
+                    'is_confirmed' => true, // Confirmed and paid - ready for learning
+                    'accepted_at' => $booking->accepted_at ?: Carbon::now(), // Auto accept if not already accepted
+                    'payment_method' => 'vnpay',
                     'payment_metadata' => array_merge($booking->payment_metadata ?? [], [
                         'vnpay_transaction_no' => $transactionNo,
                         'vnpay_response_time' => Carbon::now(),

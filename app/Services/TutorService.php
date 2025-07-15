@@ -709,7 +709,7 @@ class TutorService extends BaseService implements TutorServiceInterface
             $weeks = [[]];
         }
 
-        // 🎯 VALIDATION: Ensure each week has valid day data
+        // VALIDATION: Ensure each week has valid day data
         foreach ($weeks as $weekIndex => $week) {
             if (empty($week)) {
                 // Remove empty weeks
