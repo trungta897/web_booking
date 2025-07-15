@@ -8,9 +8,7 @@ use App\Models\Tutor;
 use App\Models\TutorPayout;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PayoutService extends BaseService
@@ -44,6 +42,7 @@ class PayoutService extends BaseService
         // Skip if commission already calculated
         if ($booking->hasCommissionCalculated()) {
             Log::info('Commission already calculated for booking', ['booking_id' => $booking->id]);
+
             return false;
         }
 
@@ -69,6 +68,7 @@ class PayoutService extends BaseService
                 'booking_id' => $booking->id,
                 'error' => $e->getMessage(),
             ]);
+
             throw $e;
         }
     }
@@ -240,20 +240,24 @@ class PayoutService extends BaseService
             switch ($status) {
                 case TutorPayout::STATUS_PROCESSING:
                     $updates['processed_at'] = now();
+
                     break;
                 case TutorPayout::STATUS_COMPLETED:
                     $updates['completed_at'] = now();
                     if (!$payout->processed_at) {
                         $updates['processed_at'] = now();
                     }
+
                     break;
                 case TutorPayout::STATUS_FAILED:
                     $updates['failure_reason'] = $notes;
                     // Release bookings back to available earnings
                     $this->releasePayout($payout);
+
                     break;
                 case TutorPayout::STATUS_CANCELLED:
                     $this->releasePayout($payout);
+
                     break;
             }
 
@@ -272,6 +276,7 @@ class PayoutService extends BaseService
                 'status' => $status,
                 'error' => $e->getMessage(),
             ]);
+
             throw $e;
         }
     }

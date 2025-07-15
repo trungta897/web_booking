@@ -2,11 +2,10 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
@@ -84,20 +83,25 @@ return new class extends Migration
                         $isPaid = !is_null($booking->payment_at) ||
                                  (isset($booking->payment_status) && $booking->payment_status === 'paid');
                         $isConfirmed = $isPaid;
+
                         break;
                     case 'confirmed':
                         $isConfirmed = true;
+
                         break;
                     case 'cancelled':
                         $isCancelled = true;
+
                         break;
                     case 'completed':
                         $isCompleted = true;
+
                         break;
                     case 'rejected':
                         $isCancelled = true;
+
                         break;
-                    // 'pending' -> giữ nguyên false cho tất cả
+                        // 'pending' -> giữ nguyên false cho tất cả
                 }
             }
 

@@ -54,7 +54,7 @@ return new class () extends Migration {
                 'platform_fee_amount',
                 'tutor_earnings',
                 'commission_calculated_at',
-                'payout_id'
+                'payout_id',
             ]);
         });
     }
@@ -66,6 +66,7 @@ return new class () extends Migration {
     {
         try {
             $exists = Schema::getConnection()->select("SHOW INDEX FROM `{$table}` WHERE Key_name = ?", [$index]);
+
             return !empty($exists);
         } catch (\Exception $e) {
             return false;

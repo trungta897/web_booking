@@ -1,4 +1,4 @@
-# 💰 COMMISSION SYSTEM SPECIFICATION
+# 💰 Commission System Specification
 
 ## 🎯 **OVERVIEW**
 Triển khai hệ thống hoa hồng để platform có thể thu phí từ mỗi booking thành công.
@@ -217,4 +217,7 @@ Monthly Trends:
 - 100% commission calculation accuracy
 - <24h payout request processing time
 - >90% tutor satisfaction with payout system
-- Sustainable 15% platform revenue 
+- Sustainable 15% platform revenue
+
+---
+*Moved from root directory - Last updated: July 15, 2025*

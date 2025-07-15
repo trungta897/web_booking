@@ -15,7 +15,7 @@ class CheckAvatarExists
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-        public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next): Response
     {
         // Only check for authenticated users and avoid checking during AJAX uploads
         if (Auth::check() && !$request->isXmlHttpRequest() && !$request->is('debug-*')) {

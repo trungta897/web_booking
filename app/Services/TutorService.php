@@ -616,9 +616,9 @@ class TutorService extends BaseService implements TutorServiceInterface
 
         // Get all bookings for current and next month - 🎯 BOOLEAN LOGIC: Use boolean fields instead of status
         $bookings = \App\Models\Booking::where('tutor_id', $tutor->id)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->where('is_confirmed', true)  // Confirmed bookings
-                      ->orWhere(function($q) {
+                      ->orWhere(function ($q) {
                           $q->where('is_confirmed', false)
                             ->where('is_cancelled', false)
                             ->where('is_completed', false); // Pending bookings
@@ -743,9 +743,9 @@ class TutorService extends BaseService implements TutorServiceInterface
 
         // 🎯 BOOLEAN LOGIC: Use boolean fields instead of status column
         $bookings = \App\Models\Booking::where('tutor_id', $tutor->id)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->where('is_confirmed', true)  // Confirmed bookings
-                      ->orWhere(function($q) {
+                      ->orWhere(function ($q) {
                           $q->where('is_confirmed', false)
                             ->where('is_cancelled', false)
                             ->where('is_completed', false); // Pending bookings

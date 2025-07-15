@@ -1,44 +1,53 @@
 /**
- * Extracted from: tutors\earnings\history.blade.php
- * Generated on: 2025-07-15 03:51:34
+ * Tutors Earnings History JavaScript
+ * Handles earnings history page functionality
  */
 
-function cancelPayout(payoutId) {
-    if (confirm('{{ __("common.confirm_cancel_payout") }}')) {
-        fetch(`/tutors/earnings/payout/${payoutId}/cancel`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                location.reload();
-            } else {
-                alert(data.message || '{{ __("common.error_occurred") }}');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('{{ __("common.network_error") }}');
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    
+    // Payout cancellation
+    window.cancelPayout = function(payoutId) {
+        if (confirm('Are you sure you want to cancel this payout request?')) {
+            fetch(`/tutors/earnings/payout/${payoutId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message || 'Payout cancelled successfully');
+                    location.reload();
+                } else {
+                    alert(data.message || 'An error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Network error occurred');
+            });
+        }
+    };
+    
+    // Filter functionality
+    const filterForm = document.getElementById('filterForm');
+    if (filterForm) {
+        filterForm.addEventListener('change', function() {
+            this.submit();
         });
     }
-}
-
-// Auto-submit form when filters change
-document.addEventListener('DOMContentLoaded', function() {
-    const statusSelect = document.getElementById('status');
-    const fromDate = document.getElementById('from_date');
-    const toDate = document.getElementById('to_date');
-
-    // Auto-submit when status changes
-    statusSelect.addEventListener('change', function() {
-        if (this.value !== '') {
-            this.form.submit();
-        }
+    
+    // Date range picker
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            if (filterForm) {
+                filterForm.submit();
+            }
+        });
     });
 });

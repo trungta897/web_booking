@@ -162,7 +162,10 @@ class Booking extends Model
 
     public function getPaymentStatusAttribute(): string
     {
-        if ($this->isPaid()) return 'paid';
+        if ($this->isPaid()) {
+            return 'paid';
+        }
+
         return 'pending';
     }
 

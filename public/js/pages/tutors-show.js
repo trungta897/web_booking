@@ -1,68 +1,87 @@
 /**
- * Extracted from: tutors\show.blade.php
- * Generated on: 2025-07-15 03:51:34
+ * Tutors Show Page JavaScript
+ * Handles favorite functionality, availability checking, reviews, and certificate modal
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-// Favorite functionality
-        function toggleFavorite(tutorId) {
-            fetch(`/tutors/${tutorId}/favorite`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data) => {
-                const btn = document.getElementById('favoriteBtn');
-                const text = document.getElementById('favoriteText');
-                if (data.is_favorite) {
-                    btn.classList.add('bg-red-50', 'border-red-300', 'text-red-700');
-                    text.textContent = '{{ __('common.remove_from_favorites') }}';
-                } else {
-                    btn.classList.remove('bg-red-50', 'border-red-300', 'text-red-700');
-                    text.textContent = '{{ __('common.add_to_favorites') }}';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    
+    // Favorite functionality
+    window.toggleFavorite = function(tutorId) {
+        if (!csrfToken) {
+            alert('CSRF token not found. Please refresh the page.');
+            return;
         }
 
-        // Real-time availability checking
-        function checkAvailability() {
-            const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-            days.forEach(day => {
-                fetch(`/tutors/{{ $tutor->id }}/availability/${day}`)
-                    .then(response => response.json())
-                    .then(data) => {
-                        const element = document.getElementById(`availability-${day}`);
+        fetch(`/tutors/${tutorId}/favorite`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const btn = document.getElementById('favoriteBtn');
+            const text = document.getElementById('favoriteText');
+            if (data.is_favorite) {
+                btn.classList.add('bg-red-50', 'border-red-300', 'text-red-700');
+                text.textContent = 'Remove from Favorites';
+            } else {
+                btn.classList.remove('bg-red-50', 'border-red-300', 'text-red-700');
+                text.textContent = 'Add to Favorites';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating favorites.');
+        });
+    };
+
+    // Real-time availability checking
+    function checkAvailability() {
+        const tutorId = document.querySelector('[data-tutor-id]')?.dataset.tutorId;
+        if (!tutorId) return;
+
+        const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        days.forEach(day => {
+            fetch(`/tutors/${tutorId}/availability/${day}`)
+                .then(response => response.json())
+                .then(data => {
+                    const element = document.getElementById(`availability-${day}`);
+                    if (element) {
                         if (data.available) {
                             element.textContent = data.slots.join(', ');
-                            element.classList.add('text-green-600');
+                            element.className = 'text-green-600';
                         } else {
-                            element.textContent = '{{ __('common.unavailable') }}';
-                            element.classList.add('text-red-600');
+                            element.textContent = 'Unavailable';
+                            element.className = 'text-red-600';
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error loading availability:', error);
-                        const element = document.getElementById(`availability-${day}`);
-                        element.textContent = '{{ __('common.error') }}';
-                        element.classList.add('text-red-600');
-                    });
-            });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading availability:', error);
+                    const element = document.getElementById(`availability-${day}`);
+                    if (element) {
+                        element.textContent = 'Error';
+                        element.className = 'text-red-600';
+                    }
+                });
+        });
+    }
+
+    // Star rating functionality
+    window.setRating = function(rating) {
+        const ratingInput = document.getElementById('rating');
+        if (ratingInput) {
+            ratingInput.value = rating;
         }
 
-        // Star rating functionality
-        function setRating(rating) {
-            document.getElementById('rating').value = rating;
-
-            // Update star colors
-            for (let i = 1; i <= 5; i++) {
-                const star = document.getElementById(`star-${i}`);
+        // Update star colors
+        for (let i = 1; i <= 5; i++) {
+            const star = document.getElementById(`star-${i}`);
+            if (star) {
                 if (i <= rating) {
                     star.classList.remove('text-gray-300');
                     star.classList.add('text-yellow-400');
@@ -72,33 +91,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
+    };
 
-        // Check availability on page load
-        checkAvailability();
-        // Refresh availability every 5 minutes
-        setInterval(checkAvailability, 300000);
+    // Certificate modal functionality
+    window.showCertificateModal = function(imageUrl, degree, institution) {
+        const modal = document.getElementById('certificateModal');
+        const modalImage = document.getElementById('modalCertificateImage');
+        const modalTitle = document.getElementById('modalCertificateTitle');
+        const modalInstitution = document.getElementById('modalCertificateInstitution');
 
-        // Certificate modal functionality
-        function showCertificateModal(imageUrl, degree, institution) {
-            const modal = document.getElementById('certificateModal');
-            const modalImage = document.getElementById('modalCertificateImage');
-            const modalTitle = document.getElementById('modalCertificateTitle');
-            const modalInstitution = document.getElementById('modalCertificateInstitution');
-
+        if (modal && modalImage && modalTitle && modalInstitution) {
             modalImage.src = imageUrl;
             modalTitle.textContent = degree;
             modalInstitution.textContent = institution;
             modal.classList.remove('hidden');
         }
+    };
 
-        function closeCertificateModal() {
-            document.getElementById('certificateModal').classList.add('hidden');
+    window.closeCertificateModal = function() {
+        const modal = document.getElementById('certificateModal');
+        if (modal) {
+            modal.classList.add('hidden');
         }
+    };
 
-        // Close modal when clicking outside
-        document.getElementById('certificateModal').addEventListener('click', function(e) {
+    // Close modal when clicking outside
+    const certificateModal = document.getElementById('certificateModal');
+    if (certificateModal) {
+        certificateModal.addEventListener('click', function(e) {
             if (e.target === this) {
                 closeCertificateModal();
             }
         });
+    }
+
+    // Check availability on page load
+    checkAvailability();
+    
+    // Refresh availability every 5 minutes
+    setInterval(checkAvailability, 300000);
 });

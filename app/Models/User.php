@@ -151,9 +151,9 @@ class User extends Authenticatable
             return Booking::with(['tutor.user', 'subject'])
                 ->where('student_id', $this->id)
                 ->where('start_time', '>=', $now)
-                ->where(function($query) {
+                ->where(function ($query) {
                     $query->where('is_confirmed', true)  // Accepted bookings
-                          ->orWhere(function($q) {
+                          ->orWhere(function ($q) {
                               $q->where('is_confirmed', false)
                                 ->where('is_cancelled', false)
                                 ->where('is_completed', false); // Pending bookings
@@ -177,9 +177,9 @@ class User extends Authenticatable
         } else {
             return Booking::where('student_id', $this->id)
                 ->where('start_time', '>=', $now)
-                ->where(function($query) {
+                ->where(function ($query) {
                     $query->where('is_confirmed', true)  // Accepted bookings
-                          ->orWhere(function($q) {
+                          ->orWhere(function ($q) {
                               $q->where('is_confirmed', false)
                                 ->where('is_cancelled', false)
                                 ->where('is_completed', false); // Pending bookings

@@ -37,7 +37,7 @@ class Education extends Model
     }
 
     /**
-     * Get all images for this education record (from images array only)
+     * Get all images for this education record (from images array only).
      */
     public function getAllImages(): array
     {
@@ -50,7 +50,7 @@ class Education extends Model
     }
 
     /**
-     * Check if this education record has any images
+     * Check if this education record has any images.
      */
     public function hasImages(): bool
     {

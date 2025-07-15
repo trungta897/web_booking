@@ -113,7 +113,6 @@ class BookingController extends Controller
 
                 // Gửi thông báo cho student
                 $booking->student->notify(new \App\Notifications\BookingStatusChanged($booking));
-
             } elseif ($validated['action'] === 'reject') {
                 $booking->update([
                     'rejection_reason' => $validated['rejection_reason'],

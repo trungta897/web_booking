@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\TutorPayout;
-use App\Models\Booking;
 use App\Services\PayoutService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AdminPayoutController extends Controller
@@ -20,7 +19,7 @@ class AdminPayoutController extends Controller
     }
 
     /**
-     * Display admin payout dashboard
+     * Display admin payout dashboard.
      */
     public function index(Request $request)
     {
@@ -76,7 +75,7 @@ class AdminPayoutController extends Controller
     }
 
     /**
-     * Show specific payout details
+     * Show specific payout details.
      */
     public function show(TutorPayout $payout)
     {
@@ -86,14 +85,14 @@ class AdminPayoutController extends Controller
     }
 
     /**
-     * Approve a payout request
+     * Approve a payout request.
      */
     public function approve(Request $request, TutorPayout $payout)
     {
         if ($payout->status !== 'pending') {
             return response()->json([
                 'success' => false,
-                'message' => __('admin.payout_not_pending')
+                'message' => __('admin.payout_not_pending'),
             ], 400);
         }
 
@@ -103,7 +102,7 @@ class AdminPayoutController extends Controller
                     'status' => 'processing',
                     'processed_by' => Auth::id(),
                     'processed_at' => now(),
-                    'admin_notes' => $request->admin_notes
+                    'admin_notes' => $request->admin_notes,
                 ]);
 
                 // Log admin action
@@ -111,36 +110,35 @@ class AdminPayoutController extends Controller
                     'payout_id' => $payout->id,
                     'admin_id' => Auth::id(),
                     'admin_notes' => $request->admin_notes,
-                    'amount' => $payout->amount
+                    'amount' => $payout->amount,
                 ]);
             });
 
             return response()->json([
                 'success' => true,
-                'message' => __('admin.payout_approved_successfully')
+                'message' => __('admin.payout_approved_successfully'),
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('admin.error_approving_payout') . ': ' . $e->getMessage()
+                'message' => __('admin.error_approving_payout') . ': ' . $e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     * Reject a payout request
+     * Reject a payout request.
      */
     public function reject(Request $request, TutorPayout $payout)
     {
         $request->validate([
-            'rejection_reason' => 'required|string|max:500'
+            'rejection_reason' => 'required|string|max:500',
         ]);
 
         if ($payout->status !== 'pending') {
             return response()->json([
                 'success' => false,
-                'message' => __('admin.payout_not_pending')
+                'message' => __('admin.payout_not_pending'),
             ], 400);
         }
 
@@ -152,7 +150,7 @@ class AdminPayoutController extends Controller
                     'processed_by' => Auth::id(),
                     'processed_at' => now(),
                     'failure_reason' => $request->rejection_reason,
-                    'admin_notes' => $request->admin_notes
+                    'admin_notes' => $request->admin_notes,
                 ]);
 
                 // Return bookings to available status
@@ -166,37 +164,36 @@ class AdminPayoutController extends Controller
                     'admin_id' => Auth::id(),
                     'rejection_reason' => $request->rejection_reason,
                     'admin_notes' => $request->admin_notes,
-                    'amount' => $payout->amount
+                    'amount' => $payout->amount,
                 ]);
             });
 
             return response()->json([
                 'success' => true,
-                'message' => __('admin.payout_rejected_successfully')
+                'message' => __('admin.payout_rejected_successfully'),
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('admin.error_rejecting_payout') . ': ' . $e->getMessage()
+                'message' => __('admin.error_rejecting_payout') . ': ' . $e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     * Mark payout as completed
+     * Mark payout as completed.
      */
     public function complete(Request $request, TutorPayout $payout)
     {
         $request->validate([
             'transaction_id' => 'nullable|string|max:255',
-            'completion_notes' => 'nullable|string|max:500'
+            'completion_notes' => 'nullable|string|max:500',
         ]);
 
         if ($payout->status !== 'processing') {
             return response()->json([
                 'success' => false,
-                'message' => __('admin.payout_not_processing')
+                'message' => __('admin.payout_not_processing'),
             ], 400);
         }
 
@@ -207,7 +204,7 @@ class AdminPayoutController extends Controller
                     'processed_by' => Auth::id(),
                     'processed_at' => now(),
                     'transaction_id' => $request->transaction_id,
-                    'admin_notes' => $request->completion_notes
+                    'admin_notes' => $request->completion_notes,
                 ]);
 
                 // Log admin action
@@ -216,25 +213,24 @@ class AdminPayoutController extends Controller
                     'admin_id' => Auth::id(),
                     'transaction_id' => $request->transaction_id,
                     'completion_notes' => $request->completion_notes,
-                    'amount' => $payout->amount
+                    'amount' => $payout->amount,
                 ]);
             });
 
             return response()->json([
                 'success' => true,
-                'message' => __('admin.payout_completed_successfully')
+                'message' => __('admin.payout_completed_successfully'),
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => __('admin.error_completing_payout') . ': ' . $e->getMessage()
+                'message' => __('admin.error_completing_payout') . ': ' . $e->getMessage(),
             ], 500);
         }
     }
 
     /**
-     * Get payout analytics
+     * Get payout analytics.
      */
     public function analytics(Request $request)
     {
@@ -253,14 +249,14 @@ class AdminPayoutController extends Controller
                 ->avg('amount'),
             'top_tutors' => $this->getTopTutorsByPayouts($startDate),
             'monthly_trends' => $this->getMonthlyPayoutTrends(),
-            'status_distribution' => $this->getStatusDistribution()
+            'status_distribution' => $this->getStatusDistribution(),
         ];
 
         return view('admin.payouts.analytics', compact('analytics'));
     }
 
     /**
-     * Export payouts data
+     * Export payouts data.
      */
     public function export(Request $request)
     {
@@ -288,7 +284,7 @@ class AdminPayoutController extends Controller
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-        $callback = function() use ($payouts) {
+        $callback = function () use ($payouts) {
             $file = fopen('php://output', 'w');
 
             // CSV Headers
@@ -296,7 +292,7 @@ class AdminPayoutController extends Controller
                 'ID', 'Tutor Name', 'Email', 'Amount', 'Status',
                 'Bank Name', 'Account Number', 'Account Holder',
                 'Requested Date', 'Processed Date', 'Bookings Count',
-                'Transaction ID', 'Admin Notes'
+                'Transaction ID', 'Admin Notes',
             ]);
 
             foreach ($payouts as $payout) {
@@ -313,7 +309,7 @@ class AdminPayoutController extends Controller
                     $payout->processed_at ? $payout->processed_at->format('Y-m-d H:i:s') : '',
                     $payout->payoutItems->count(),
                     $payout->transaction_id ?? '',
-                    $payout->admin_notes ?? ''
+                    $payout->admin_notes ?? '',
                 ]);
             }
 
@@ -324,7 +320,7 @@ class AdminPayoutController extends Controller
     }
 
     /**
-     * Get payout statistics
+     * Get payout statistics.
      */
     protected function getPayoutStatistics($request)
     {
@@ -349,12 +345,12 @@ class AdminPayoutController extends Controller
             'pending_amount' => (clone $query)->where('status', 'pending')->sum('amount'),
             'completed_amount' => (clone $query)->where('status', 'completed')->sum('amount'),
             'average_amount' => $query->avg('amount') ?: 0,
-            'average_processing_time' => $this->getAverageProcessingTime()
+            'average_processing_time' => $this->getAverageProcessingTime(),
         ];
     }
 
     /**
-     * Get top tutors by payout amount
+     * Get top tutors by payout amount.
      */
     protected function getTopTutorsByPayouts($startDate)
     {
@@ -369,16 +365,16 @@ class AdminPayoutController extends Controller
     }
 
     /**
-     * Get monthly payout trends
+     * Get monthly payout trends.
      */
     protected function getMonthlyPayoutTrends()
     {
         return TutorPayout::select(
-                DB::raw('DATE_FORMAT(requested_at, "%Y-%m") as month'),
-                DB::raw('COUNT(*) as count'),
-                DB::raw('SUM(amount) as total_amount'),
-                DB::raw('AVG(amount) as avg_amount')
-            )
+            DB::raw('DATE_FORMAT(requested_at, "%Y-%m") as month'),
+            DB::raw('COUNT(*) as count'),
+            DB::raw('SUM(amount) as total_amount'),
+            DB::raw('AVG(amount) as avg_amount')
+        )
             ->where('requested_at', '>=', now()->subYear())
             ->groupBy('month')
             ->orderBy('month')
@@ -386,7 +382,7 @@ class AdminPayoutController extends Controller
     }
 
     /**
-     * Get status distribution
+     * Get status distribution.
      */
     protected function getStatusDistribution()
     {
@@ -396,7 +392,7 @@ class AdminPayoutController extends Controller
     }
 
     /**
-     * Get average processing time
+     * Get average processing time.
      */
     protected function getAverageProcessingTime()
     {

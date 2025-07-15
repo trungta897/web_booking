@@ -33,16 +33,20 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
             switch ($filters['status']) {
                 case 'pending':
                     $query->pending();
+
                     break;
                 case 'confirmed':
                 case 'accepted':
                     $query->confirmed();
+
                     break;
                 case 'cancelled':
                     $query->cancelled();
+
                     break;
                 case 'completed':
                     $query->completed();
+
                     break;
             }
         }
@@ -78,16 +82,20 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
         switch ($status) {
             case 'pending':
                 $query->pending();
+
                 break;
             case 'confirmed':
             case 'accepted':
                 $query->confirmed();
+
                 break;
             case 'cancelled':
                 $query->cancelled();
+
                 break;
             case 'completed':
                 $query->completed();
+
                 break;
         }
 
@@ -191,16 +199,20 @@ class BookingRepository extends BaseRepository implements BookingRepositoryInter
             switch ($filters['status']) {
                 case 'pending':
                     $query->pending();
+
                     break;
                 case 'confirmed':
                 case 'accepted':
                     $query->confirmed();
+
                     break;
                 case 'cancelled':
                     $query->cancelled();
+
                     break;
                 case 'completed':
                     $query->completed();
+
                     break;
             }
         }

@@ -30,7 +30,7 @@ class ProfileUpdateRequest extends FormRequest
             'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'], // Increased to 5MB
         ];
 
-                // Add tutor and education validation for tutors
+        // Add tutor and education validation for tutors
         if ($this->user()->role === 'tutor' && $this->user()->tutor) {
             // Tutor profile fields - remove 'sometimes' to always validate when present
             $rules['hourly_rate'] = ['nullable', 'numeric', 'min:0', 'max:9999999'];

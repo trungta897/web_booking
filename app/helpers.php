@@ -62,7 +62,7 @@ if (!function_exists('getTutorCard')) {
 
 if (!function_exists('formatCurrency')) {
     /**
-     * Format currency for display - always show VND for Vietnamese locale
+     * Format currency for display - always show VND for Vietnamese locale.
      */
     function formatCurrency($amount, $currency = 'VND'): string
     {
@@ -83,6 +83,7 @@ if (!function_exists('formatCurrency')) {
             if ($amount > 1000) {
                 // Convert VND to USD for display
                 $usdAmount = $amount / 25000;
+
                 return '$' . number_format($usdAmount, 2);
             } else {
                 // Already USD
@@ -122,6 +123,7 @@ if (!function_exists('formatBookingAmount')) {
         } else {
             // For English: show USD equivalent for display only
             $usdAmount = $amount / 25000;
+
             return '$' . number_format($usdAmount, 2);
         }
     }

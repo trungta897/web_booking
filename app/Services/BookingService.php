@@ -12,9 +12,9 @@ use App\Repositories\BookingRepository;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class BookingService extends BaseService
 {

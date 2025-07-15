@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Requests\EducationUpdateRequest;
+use App\Http\Requests\ProfileUpdateRequest;
 use App\Services\UserService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -76,7 +76,7 @@ class ProfileController extends Controller
 
             Log::info('Profile updated successfully', [
                 'user_id' => $user->id,
-                'education_count' => $user->tutor?->education?->count() ?? 0
+                'education_count' => $user->tutor?->education?->count() ?? 0,
             ]);
 
             return redirect()->route('profile.edit')
@@ -85,7 +85,7 @@ class ProfileController extends Controller
             Log::error('Profile update failed', [
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return back()
@@ -111,6 +111,7 @@ class ProfileController extends Controller
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
+
             return back()->withInput()->withErrors(['error' => __('common.error_occurred')]);
         }
     }

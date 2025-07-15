@@ -181,8 +181,8 @@ class AdminService extends BaseService
     {
         if ($user->role === 'student') {
             return Booking::where('student_id', $user->id)
-                ->where(function($query) {
-                    $query->where(function($q) {
+                ->where(function ($query) {
+                    $query->where(function ($q) {
                         $q->where('is_confirmed', false)
                           ->where('is_cancelled', false)
                           ->where('is_completed', false); // Pending bookings
@@ -193,8 +193,8 @@ class AdminService extends BaseService
 
         return Booking::whereHas('tutor', function ($q) use ($user) {
             $q->where('user_id', $user->id);
-        })->where(function($query) {
-            $query->where(function($q) {
+        })->where(function ($query) {
+            $query->where(function ($q) {
                 $q->where('is_confirmed', false)
                   ->where('is_cancelled', false)
                   ->where('is_completed', false); // Pending bookings
@@ -689,8 +689,8 @@ class AdminService extends BaseService
     {
         return $this->executeTransaction(function () use ($subject) {
             // Check if subject has active bookings or tutors
-            $activeBookings = $subject->bookings()->where(function($query) {
-                $query->where(function($q) {
+            $activeBookings = $subject->bookings()->where(function ($query) {
+                $query->where(function ($q) {
                     $q->where('is_confirmed', false)
                       ->where('is_cancelled', false)
                       ->where('is_completed', false); // Pending bookings

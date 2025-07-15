@@ -66,6 +66,7 @@ class UserService extends BaseService
         return $this->executeTransaction(function () use ($user, $data) {
             $user->update(['password' => Hash::make($data['password'])]);
             $this->logActivity('Password updated', ['user_id' => $user->id]);
+
             return true;
         });
     }
@@ -112,8 +113,10 @@ class UserService extends BaseService
             }
             $user->update(['avatar' => null]);
             $this->logActivity('Avatar removed', ['user_id' => $user->id]);
+
             return true;
         }
+
         return false;
     }
 
@@ -134,6 +137,7 @@ class UserService extends BaseService
             $user->delete();
 
             $this->logActivity('Account deleted', ['user_id' => $userId]);
+
             return true;
         });
     }
@@ -164,15 +168,15 @@ class UserService extends BaseService
             'tutor_id' => $tutor->id,
             'incoming_data_count' => count($educationData),
             'incoming_data_keys' => array_keys($educationData),
-            'incoming_data_structure' => array_map(function($item) {
+            'incoming_data_structure' => array_map(function ($item) {
                 return [
                     'id' => $item['id'] ?? 'no_id',
                     'degree' => $item['degree'] ?? 'no_degree',
                     'has_new_images' => isset($item['new_images']),
                     'new_images_count' => isset($item['new_images']) ? count($item['new_images']) : 0,
-                    'new_images_types' => isset($item['new_images']) ? array_map('get_class', $item['new_images']) : []
+                    'new_images_types' => isset($item['new_images']) ? array_map('get_class', $item['new_images']) : [],
                 ];
-            }, $educationData)
+            }, $educationData),
         ]);
 
         $existingEducations = $tutor->education()->get()->keyBy('id');
@@ -187,7 +191,7 @@ class UserService extends BaseService
                 'education_id' => $educationId,
                 'degree' => $eduData['degree'] ?? 'no_degree',
                 'has_new_images' => isset($eduData['new_images']),
-                'new_images_count' => isset($eduData['new_images']) ? count($eduData['new_images']) : 0
+                'new_images_count' => isset($eduData['new_images']) ? count($eduData['new_images']) : 0,
             ]);
 
             if ($educationId && $existingEducations->has($educationId)) {
@@ -204,14 +208,14 @@ class UserService extends BaseService
                     Log::info('Processing new images for existing education', [
                         'education_id' => $educationId,
                         'new_images_count' => count($eduData['new_images']),
-                        'new_images_details' => array_map(function($img) {
+                        'new_images_details' => array_map(function ($img) {
                             return [
                                 'type' => get_class($img),
                                 'is_uploaded_file' => $img instanceof UploadedFile,
                                 'original_name' => $img instanceof UploadedFile ? $img->getClientOriginalName() : 'not_uploaded_file',
-                                'size' => $img instanceof UploadedFile ? $img->getSize() : 'not_uploaded_file'
+                                'size' => $img instanceof UploadedFile ? $img->getSize() : 'not_uploaded_file',
                             ];
-                        }, $eduData['new_images'])
+                        }, $eduData['new_images']),
                     ]);
 
                     try {
@@ -237,14 +241,14 @@ class UserService extends BaseService
                                 'existing_images_count' => count($existingImages),
                                 'total_images_count' => count($allImages),
                                 'new_filenames' => $newImageFilenames,
-                                'all_filenames' => $allImages
+                                'all_filenames' => $allImages,
                             ]);
                         }
                     } catch (\Exception $e) {
                         Log::error('Multiple image upload failed for existing record.', [
                             'education_id' => $educationId,
                             'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString()
+                            'trace' => $e->getTraceAsString(),
                         ]);
                     }
                 }
@@ -255,7 +259,7 @@ class UserService extends BaseService
                 Log::info('Updated existing education record.', [
                     'education_id' => $educationId,
                     'degree' => $eduData['degree'],
-                    'final_images' => $education->fresh()->images
+                    'final_images' => $education->fresh()->images,
                 ]);
             } else {
                 // Create new education record
@@ -268,7 +272,7 @@ class UserService extends BaseService
                 Log::info('Creating new education record', [
                     'index' => $index,
                     'degree' => $eduData['degree'],
-                    'has_new_images' => isset($eduData['new_images'])
+                    'has_new_images' => isset($eduData['new_images']),
                 ]);
 
                 // Handle multiple image uploads for new record
@@ -286,13 +290,13 @@ class UserService extends BaseService
                             $createData['images'] = $imageFilenames;
                             Log::info('Uploaded multiple images for new education record.', [
                                 'images_count' => count($imageFilenames),
-                                'filenames' => $imageFilenames
+                                'filenames' => $imageFilenames,
                             ]);
                         }
                     } catch (\Exception $e) {
                         Log::error('Multiple image upload failed for new record.', [
                             'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString()
+                            'trace' => $e->getTraceAsString(),
                         ]);
                     }
                 }
@@ -302,14 +306,14 @@ class UserService extends BaseService
                     Log::info('Created new education record.', [
                         'id' => $newEducation->id,
                         'degree' => $newEducation->degree,
-                        'final_images' => $newEducation->images
+                        'final_images' => $newEducation->images,
                     ]);
                 } catch (\Exception $e) {
                     Log::error('Failed to create education record.', [
                         'tutor_id' => $tutor->id,
                         'degree' => $eduData['degree'],
                         'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
+                        'trace' => $e->getTraceAsString(),
                     ]);
                 }
             }
@@ -331,7 +335,7 @@ class UserService extends BaseService
 
         Log::info('Education update completed.', [
             'tutor_id' => $tutor->id,
-            'final_education_count' => $tutor->education()->count()
+            'final_education_count' => $tutor->education()->count(),
         ]);
     }
 
@@ -363,6 +367,7 @@ class UserService extends BaseService
         }
 
         $image->move($destinationPath, $filename);
+
         return $filename;
     }
 }

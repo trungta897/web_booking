@@ -250,6 +250,7 @@ class VnpayService
             // Verify security hash
             if (!$this->verifyIpn($vnpData)) {
                 LogService::vnpay('IPN verification failed', $vnpData, 'error');
+
                 return ['success' => false, 'message' => 'Invalid signature'];
             }
 
@@ -275,7 +276,7 @@ class VnpayService
                     'success' => true,
                     'booking' => $existingCompletedTransaction->booking,
                     'message' => 'Transaction already processed successfully',
-                    'duplicate' => true
+                    'duplicate' => true,
                 ];
             }
 
@@ -283,6 +284,7 @@ class VnpayService
             $booking = Booking::where('vnpay_txn_ref', $txnRef)->first();
             if (!$booking) {
                 LogService::vnpay('Booking not found for txn_ref: ' . $txnRef, ['txn_ref' => $txnRef], 'error');
+
                 return ['success' => false, 'message' => 'Booking not found'];
             }
 
@@ -297,7 +299,7 @@ class VnpayService
                     'success' => true,
                     'booking' => $booking,
                     'message' => 'Booking đã được thanh toán rồi',
-                    'duplicate' => true
+                    'duplicate' => true,
                 ];
             }
 
@@ -500,7 +502,7 @@ class VnpayService
     }
 
     /**
-     * Get payment amount for VNPay (applying minimum if needed)
+     * Get payment amount for VNPay (applying minimum if needed).
      */
     private function getVnpayPaymentAmount(Booking $booking): float
     {
@@ -514,7 +516,7 @@ class VnpayService
                 'booking_id' => $booking->id,
                 'original_amount' => $originalAmount,
                 'vnpay_minimum' => $minVnpayAmount,
-                'note' => 'Amount too small for VNPay, but keeping original for consistency'
+                'note' => 'Amount too small for VNPay, but keeping original for consistency',
             ]);
 
             // Return original amount to maintain consistency

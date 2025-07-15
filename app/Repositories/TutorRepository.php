@@ -238,7 +238,7 @@ class TutorRepository extends BaseRepository implements TutorRepositoryInterface
         // 🎯 BOOLEAN LOGIC: Count bookings that have been responded to
         // (confirmed, cancelled, or completed - anything that's not just pending)
         $respondedRequests = $tutor->bookings()
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->where('is_confirmed', true)    // Accepted bookings
                       ->orWhere('is_cancelled', true)   // Cancelled/rejected bookings
                       ->orWhere('is_completed', true);  // Completed bookings

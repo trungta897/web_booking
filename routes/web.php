@@ -16,7 +16,6 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TutorController;
 use App\Http\Controllers\TutorPayoutController;
-use App\Http\Controllers\TutorProfileController;
 use Illuminate\Support\Facades\Route;
 
 // Language switching route (available to all users)
@@ -228,5 +227,3 @@ Route::post('/clear-avatar', function () {
         'user_id' => $user->id,
     ]);
 })->middleware('auth');
-
-

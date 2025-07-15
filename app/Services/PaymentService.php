@@ -7,7 +7,6 @@ use App\Models\Booking;
 use App\Models\Transaction;
 use App\Notifications\PaymentReceived;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;

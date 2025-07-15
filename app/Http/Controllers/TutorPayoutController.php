@@ -11,7 +11,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class TutorPayoutController extends Controller
@@ -146,14 +145,14 @@ class TutorPayoutController extends Controller
             if ($requestedAmount && $requestedAmount > $earnings['available_earnings']) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Số tiền yêu cầu vượt quá số dư khả dụng.'
+                    'message' => 'Số tiền yêu cầu vượt quá số dư khả dụng.',
                 ], 422);
             }
 
             if ($earnings['available_earnings'] < 100000) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Số dư khả dụng không đủ để rút tiền (tối thiểu 100,000 VND).'
+                    'message' => 'Số dư khả dụng không đủ để rút tiền (tối thiểu 100,000 VND).',
                 ], 422);
             }
 
@@ -174,12 +173,11 @@ class TutorPayoutController extends Controller
 
             return redirect()->route('tutors.earnings.index')
                 ->with('success', 'Yêu cầu rút tiền đã được gửi thành công. Chúng tôi sẽ xử lý trong 1-3 ngày làm việc.');
-
         } catch (Exception $e) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+                    'message' => 'Có lỗi xảy ra: ' . $e->getMessage(),
                 ], 500);
             }
 
