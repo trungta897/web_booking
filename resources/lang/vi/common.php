@@ -119,6 +119,15 @@ return [
     'user_name' => 'Tên người dùng',
     'admin_dashboard' => 'Bảng điều khiển Admin',
     'tutor_dashboard' => 'Bảng điều khiển Gia sư',
+
+    // Teaching schedule translations
+    'teaching_schedule' => 'Lịch Dạy',
+    'current_month' => 'Tháng hiện tại',
+    'next_month' => 'Tháng sau',
+    'schedule_for' => 'Lịch học ngày',
+    'has_classes' => 'Có lớp học',
+    'no_bookings_on_this_date' => 'Không có booking nào vào ngày này',
+
     'upcoming_sessions' => 'Buổi học sắp tới',
     'total_earnings' => 'Tổng thu nhập',
     'recent_bookings' => 'Booking gần đây',
@@ -195,7 +204,6 @@ return [
     'meeting_link' => 'Liên kết họp',
 
     // Status translations
-    'pending' => 'Chờ duyệt',
     'accepted' => 'Đã chấp nhận',
     'rejected' => 'Đã từ chối',
     'cancelled' => 'Đã hủy',
