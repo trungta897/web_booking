@@ -54,19 +54,8 @@
     </div>
 </div>
 
-<script>
-function toggleLanguageMenu() {
-    const menu = document.getElementById('language-menu');
-    menu.classList.toggle('hidden');
-}
 
-// Close menu when clicking outside
-document.addEventListener('click', function(event) {
-    const button = document.getElementById('language-menu-button');
-    const menu = document.getElementById('language-menu');
 
-    if (!button.contains(event.target) && !menu.contains(event.target)) {
-        menu.classList.add('hidden');
-    }
-});
-</script>
+    @push('scripts')
+        <script src="{{ asset('js/pages/components-language-switcher.js') }}"></script>
+    @endpush

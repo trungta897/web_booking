@@ -238,29 +238,9 @@
         </div>
     </div>
 
-    <script>
-        function openImageModal(imageSrc, degree, institutionYear) {
-            const modal = document.getElementById('imageModal');
-            const modalImage = document.getElementById('modalImage');
-            const modalDegree = document.getElementById('modalDegree');
-            const modalInstitutionYear = document.getElementById('modalInstitutionYear');
+    
 
-            modalImage.src = imageSrc;
-            modalDegree.innerText = degree;
-            modalInstitutionYear.innerText = institutionYear;
-
-            modal.classList.remove('hidden');
-        }
-
-        document.getElementById('closeModal').onclick = function() {
-            document.getElementById('imageModal').classList.add('hidden');
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('imageModal');
-            if (event.target === modal) {
-                modal.classList.add('hidden');
-            }
-        }
-    </script>
+    @push('scripts')
+        <script src="{{ asset('js/pages/admin-tutors-show.js') }}"></script>
+    @endpush
 @endsection

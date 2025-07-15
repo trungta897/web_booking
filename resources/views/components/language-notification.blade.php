@@ -24,32 +24,7 @@
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const notification = document.getElementById('language-notification');
-    if (notification) {
-        // Show notification
-        setTimeout(() => {
-            notification.classList.remove('translate-x-full');
-        }, 100);
 
-        // Auto hide after 4 seconds
-        setTimeout(() => {
-            closeLanguageNotification();
-        }, 4000);
-    }
-});
-
-function closeLanguageNotification() {
-    const notification = document.getElementById('language-notification');
-    if (notification) {
-        notification.classList.add('translate-x-full');
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }
-}
-</script>
 @endif
 
 
@@ -59,3 +34,7 @@ function closeLanguageNotification() {
 
 
 
+
+    @push('scripts')
+        <script src="{{ asset('js/pages/components-language-notification.js') }}"></script>
+    @endpush

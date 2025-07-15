@@ -106,11 +106,9 @@
         </div>
     </div>
 
-    <script>
-        // Scroll to bottom of messages container on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const messagesContainer = document.getElementById('messages-container');
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        });
-    </script>
+    
+
+    @push('scripts')
+        <script src="{{ asset('js/pages/messages-show.js') }}"></script>
+    @endpush
 </x-app-layout>

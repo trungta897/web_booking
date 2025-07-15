@@ -293,32 +293,10 @@
 @endpush
 
 @push('scripts')
-<script>
-function cancelPayout(payoutId) {
-    if (confirm('{{ __("common.confirm_cancel_payout") }}')) {
-        fetch(`/tutors/earnings/payout/${payoutId}/cancel`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                location.reload();
-            } else {
-                alert(data.message || '{{ __("common.error_occurred") }}');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('{{ __("common.network_error") }}');
-        });
-    }
-}
-</script>
+
 @endpush
+
+    @push('scripts')
+        <script src="{{ asset('js/pages/tutors-earnings-payout-details.js') }}"></script>
+    @endpush
 @endsection

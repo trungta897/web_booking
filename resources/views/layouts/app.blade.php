@@ -16,6 +16,9 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/css/custom.css', 'resources/js/app.js'])
+        
+        <!-- JavaScript Module Manager -->
+        <script src="{{ asset('js/app-modules.js') }}"></script>
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
