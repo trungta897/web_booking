@@ -5,7 +5,7 @@
         <!-- Fixed header without toggle buttons -->
         <div class="mb-6">
             <h4 class="text-lg font-medium text-gray-900 mb-2">{{ __('Lịch Dạy') }}</h4>
-            <p class="text-sm text-gray-600">{{ __('Lịch học') }}</p>
+            <p class="text-sm text-gray-600">{{ __('Lịch học của học viên') }}</p>
         </div>
 
         <!-- Show only current month calendar -->
