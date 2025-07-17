@@ -1,17 +1,17 @@
-# 🗄️ Database Documentation
+# 🗄️ Tài liệu Cơ sở dữ liệu
 
-## 📋 Overview
-Documentation for database management, backup procedures, and schema design.
+## 📋 Tổng quan
+Tài liệu hướng dẫn quản lý cơ sở dữ liệu, quy trình sao lưu và thiết kế schema.
 
-## 📄 Documents:
-- `backup-guide.md` - Database backup and restore procedures
-- `redesign-proposal.md` - Database optimization and restructuring
-- `migration-guide.md` - Migration best practices
+## 📄 Tài liệu:
+- `backup-guide.md` - Quy trình sao lưu và khôi phục cơ sở dữ liệu
+- `redesign-proposal.md` - Tối ưu hóa và tái cấu trúc cơ sở dữ liệu
+- `migration-guide.md` - Thực hành tốt nhất cho migration
 
-## 🔧 Quick Reference:
-- Daily backups automated via cron
-- Use `php artisan backup:database` for manual backups
-- Follow migration naming conventions
+## 🔧 Tham khảo nhanh:
+- Sao lưu hàng ngày được tự động hóa qua cron
+- Sử dụng `php artisan backup:database` để sao lưu thủ công
+- Tuân thủ quy ước đặt tên migration
 
 ---
-*Last updated: July 15, 2025*
+*Cập nhật lần cuối: tháng 7, 2025*

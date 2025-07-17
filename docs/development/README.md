@@ -1,17 +1,18 @@
-# 💻 Development Documentation
+# 💻 Tài liệu Phát triển
 
-## 📋 Overview
-Development guides, code standards, and technical documentation for the project.
+## 📋 Tổng quan
+Hướng dẫn phát triển, tiêu chuẩn mã nguồn và tài liệu kỹ thuật cho dự án.
 
-## 📄 Documents:
-- `javascript-modules.md` - JavaScript module structure and usage
-- `code-quality.md` - Code quality standards and tools
-- `api-documentation.md` - API endpoints and usage
+## 📄 Tài liệu:
+- `javascript-modules.md` - Cấu trúc và sử dụng module JavaScript
+- `code-quality.md` - Tiêu chuẩn chất lượng mã nguồn và công cụ
+- `api-documentation.md` - Tài liệu API endpoints và cách sử dụng
+- `data-flow-diagram.md` - Biểu đồ luồng dữ liệu hệ thống
 
-## 🔧 Development Setup:
-- Follow PSR-12 coding standards
-- Use Laravel Pint for code formatting
-- Run `php artisan project:cleanup` weekly
+## 🔧 Thiết lập phát triển:
+- Tuân thủ tiêu chuẩn mã hóa PSR-12
+- Sử dụng Laravel Pint để định dạng mã nguồn
+- Chạy `php artisan project:cleanup` hàng tuần
 
 ---
-*Last updated: July 15, 2025*
+*Cập nhật lần cuối: 15 tháng 7, 2025*

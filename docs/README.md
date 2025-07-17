@@ -1,29 +1,29 @@
-# 📚 Documentation Directory
+# 📚 Thư mục Tài liệu
 
-This directory contains all project documentation organized by category.
+Thư mục này chứa toàn bộ tài liệu dự án được tổ chức theo danh mục.
 
-## 📁 Structure:
+## 📁 Cấu trúc:
 
-### `/payment/` - Payment & Financial Documentation
-- Payment gateway setup guides
-- Commission system specifications
-- Refund policies and procedures
+### `/payment/` - Tài liệu Thanh toán & Tài chính
+- Hướng dẫn thiết lập cổng thanh toán
+- Đặc tả hệ thống hoa hồng
+- Chính sách hoàn tiền và quy trình xử lý
 
-### `/database/` - Database Documentation
-- Backup and restore guides
-- Database design proposals
-- Migration documentation
+### `/database/` - Tài liệu Cơ sở dữ liệu
+- Hướng dẫn sao lưu và khôi phục
+- Đề xuất thiết kế cơ sở dữ liệu
+- Tài liệu migration
 
-### `/development/` - Development Documentation
-- JavaScript modules guide
-- Code quality standards
-- API documentation
+### `/development/` - Tài liệu Phát triển
+- Hướng dẫn module JavaScript
+- Tiêu chuẩn chất lượng mã nguồn
+- Tài liệu API
 
-### `/deployment/` - Deployment & Production
-- Production setup guides
-- Server configuration
-- Monitoring and maintenance
+### `/deployment/` - Triển khai & Sản phẩm
+- Hướng dẫn thiết lập sản phẩm
+- Cấu hình máy chủ
+- Giám sát và bảo trì
 
 ---
 
-**Note:** All documentation has been moved from root directory to maintain a clean project structure.
+**Ghi chú:** Toàn bộ tài liệu đã được chuyển từ thư mục gốc để duy trì cấu trúc dự án gọn gàng.
