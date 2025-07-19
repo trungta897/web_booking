@@ -68,7 +68,7 @@ Web_Booking là một hệ thống đặt lịch học trực tuyến hiện đ�
 
 ```bash
 # Clone repository (nếu từ Git)
-git clone <repository-url> web_booking
+git clone https://github.com/trungta897/web_booking
 cd web_booking
 
 # Hoặc nếu đã có source code, di chuyển vào thư mục dự án
