@@ -1,234 +1,360 @@
-# 🎓 Hệ thống Đặt lịch Gia sư Web_Booking
+# 📚 Hệ thống Đặt Lịch Học Trực Tuyến Web_Booking
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## 📖 Giới thiệu
 
-## 📋 Giới thiệu
+Web_Booking là một hệ thống đặt lịch học trực tuyến hiện đại, kết nối học viên với các gia sư chuyên nghiệp. Hệ thống được xây dựng với Laravel PHP Framework, cung cấp giao diện thân thiện và các tính năng quản lý toàn diện.
 
-Hệ thống Web_Booking là một nền tảng kết nối gia sư và học viên được xây dựng trên Laravel framework. Hệ thống cung cấp các chức năng đầy đủ cho việc tìm kiếm gia sư, đặt lịch học, thanh toán và quản lý.
+### 🎯 Mục tiêu dự án
+- Tạo nền tảng kết nối học viên và gia sư một cách hiệu quả
+- Cung cấp hệ thống đặt lịch học linh hoạt và dễ sử dụng
+- Quản lý thanh toán trực tuyến an toàn qua VNPay và Stripe
+- Hỗ trợ đánh giá và phản hồi để nâng cao chất lượng dịch vụ
 
-## ✨ Tính năng chính
+## 🔗 Liên kết mã nguồn
 
-- **🔍 Tìm kiếm gia sư**: Tìm kiếm theo môn học, giá cả, địa điểm
-- **📅 Đặt lịch học**: Hệ thống booking với xác nhận tự động
-- **💳 Thanh toán VNPay**: Tích hợp cổng thanh toán VNPay
-- **⭐ Đánh giá**: Hệ thống review và rating
-- **💬 Tin nhắn**: Chat trực tiếp giữa gia sư và học viên
-- **📊 Dashboard**: Giao diện quản lý cho học viên, gia sư và admin
-- **🔔 Thông báo**: Hệ thống notification real-time
+**Repository chính:** `c:\wamp64\www\web_booking`
+**Cấu trúc dự án:** Laravel 12.x Framework
 
-## 🛠️ Công nghệ sử dụng
+## 🛠️ Công nghệ và công cụ sử dụng
 
-- **Backend**: Laravel 11.x
-- **Frontend**: Blade Templates + TailwindCSS + Alpine.js
-- **Database**: MySQL 8.0
-- **Payment**: VNPay Gateway
-- **Testing**: PHPUnit + PestPHP
-- **Code Quality**: PHPStan, Laravel Pint
+### Backend Framework
+- **Laravel 12.x** - PHP Framework chính
+- **PHP 8.2+** - Ngôn ngữ lập trình
+- **MySQL** - Cơ sở dữ liệu
+- **Composer** - Quản lý dependencies PHP
 
-## 🚀 Cài đặt
+### Frontend Technologies
+- **Inertia.js** - Modern monolith approach
+- **Alpine.js 3.x** - JavaScript framework nhẹ
+- **Tailwind CSS 3.x** - Utility-first CSS framework
+- **Flowbite 3.x** - Component library for Tailwind
+- **Vite 6.x** - Build tool và development server
 
-### Yêu cầu hệ thống
+### Thanh toán và tích hợp
+- **VNPay** - Cổng thanh toán Việt Nam
+- **Stripe** - Cổng thanh toán quốc tế
+- **Intervention Image** - Xử lý hình ảnh
 
-- PHP 8.2 trở lên
-- Composer 2.x
-- MySQL 8.0
-- Node.js 18.x
-- Redis (tuỳ chọn)
+### Development Tools
+- **Laravel Breeze** - Authentication scaffolding
+- **PHPStan** - Static analysis tool
+- **Laravel Pint** - Code style fixer
+- **Pest PHP** - Testing framework
+- **Laravel Sail** - Docker development environment
 
-### Các bước cài đặt
+### Các package quan trọng khác
+- **Doctrine DBAL** - Database abstraction layer
+- **Carbon** - Date/time manipulation
+- **Faker** - Test data generation
 
-1. **Clone repository**
-   ```bash
-   git clone https://github.com/your-username/web_booking.git
-   cd web_booking
-   ```
+## 📋 Yêu cầu hệ thống
 
-2. **Cài đặt dependencies**
-   ```bash
-   composer install
-   npm install
-   ```
+### Yêu cầu tối thiểu
+- **PHP:** 8.2 hoặc cao hơn
+- **Composer:** 2.0+
+- **Node.js:** 18.0+
+- **NPM/Yarn:** Để quản lý frontend dependencies
+- **MySQL:** 8.0+ hoặc MariaDB 10.3+
+- **Web Server:** Apache/Nginx
 
-3. **Cấu hình môi trường**
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
+### Khuyến nghị
+- **RAM:** 2GB+ cho development
+- **Disk Space:** 1GB+ cho project và dependencies
+- **PHP Extensions:** BCMath, Ctype, Fileinfo, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML
 
-4. **Cấu hình database**
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=web_booking
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
+## 🚀 Hướng dẫn cài đặt
 
-5. **Chạy migration và seeder**
-   ```bash
-   php artisan migrate --seed
-   ```
+### Bước 1: Clone và cài đặt dependencies
 
-6. **Build assets**
-   ```bash
-   npm run build
-   ```
+```bash
+# Clone repository (nếu từ Git)
+git clone <repository-url> web_booking
+cd web_booking
 
-7. **Khởi chạy server**
-   ```bash
-   php artisan serve
-   ```
+# Hoặc nếu đã có source code, di chuyển vào thư mục dự án
+cd c:\wamp64\www\web_booking
 
-## 🏗️ Cấu hình Admin Dashboard
+# Cài đặt PHP dependencies
+composer install
 
-Để sử dụng trang admin độc lập, thực hiện các bước sau:
-
-### Cấu hình môi trường
-
-Thêm các dòng sau vào file `.env`:
-
-```env
-APP_DOMAIN=web-booking.test
-ADMIN_DOMAIN=admin.web-booking.test
+# Cài đặt JavaScript dependencies
+npm install
 ```
 
-### Cấu hình Local Development
+### Bước 2: Cấu hình môi trường
 
-Đối với môi trường phát triển local, bạn cần cấu hình file hosts:
+```bash
+# Sao chép file environment
+cp .env.example .env
 
-1. **Mở file hosts**:
-   - Windows: `C:\Windows\System32\drivers\etc\hosts`
-   - Mac/Linux: `/etc/hosts`
+# Tạo application key
+php artisan key:generate
+```
 
-2. **Thêm các dòng sau**:
-   ```
-   127.0.0.1  web-booking.test
-   127.0.0.1  admin.web-booking.test
-   ```
+### Bước 3: Cấu hình database
 
-3. **Lưu file hosts** (có thể cần quyền administrator)
+Chỉnh sửa file `.env` với thông tin database của bạn:
 
-4. **Khởi động lại web server**
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=web_booking
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-### Truy cập hệ thống
+### Bước 4: Thiết lập cơ sở dữ liệu
 
-1. **Trang chính**: http://web-booking.test
-2. **Admin dashboard**: http://admin.web-booking.test
+```bash
+# Tạo database tables
+php artisan migrate
 
-## 🎯 Cấu trúc dự án
+# Chạy seeders để tạo dữ liệu mẫu
+php artisan db:seed
+```
+
+### Bước 5: Cấu hình storage và permissions
+
+```bash
+# Tạo symbolic link cho storage
+php artisan storage:link
+
+# Thiết lập quyền truy cập (Linux/macOS)
+chmod -R 775 storage
+chmod -R 775 bootstrap/cache
+```
+
+### Bước 6: Build frontend assets
+
+```bash
+# Development build
+npm run dev
+
+# Production build
+npm run build
+```
+
+### Bước 7: Khởi chạy ứng dụng
+
+```bash
+# Development server
+php artisan serve
+
+# Hoặc sử dụng script tích hợp (chạy đồng thời server, queue, và vite)
+composer run dev
+```
+
+Truy cập ứng dụng tại: `http://localhost:8000`
+
+## ⚙️ Cấu hình nâng cao
+
+### Cấu hình thanh toán
+
+#### VNPay Setup
+```env
+VNPAY_TMN_CODE=your_tmn_code
+VNPAY_HASH_SECRET=your_hash_secret
+VNPAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+```
+
+#### Stripe Setup
+```env
+STRIPE_KEY=your_stripe_publishable_key
+STRIPE_SECRET=your_stripe_secret_key
+```
+
+### Cấu hình email
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=your_smtp_host
+MAIL_PORT=587
+MAIL_USERNAME=your_email
+MAIL_PASSWORD=your_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@yourdomain.com
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+### Cấu hình Queue (tùy chọn)
+
+```env
+QUEUE_CONNECTION=database
+# Hoặc sử dụng Redis
+QUEUE_CONNECTION=redis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+```
+
+## 👥 Hệ thống người dùng
+
+### Loại tài khoản
+1. **Học viên (Student)** - Đặt lịch học, thanh toán, đánh giá gia sư
+2. **Gia sư (Tutor)** - Quản lý lịch dạy, nhận đặt lịch, quản lý thu nhập
+3. **Quản trị viên (Admin)** - Quản lý toàn bộ hệ thống
+
+### Tính năng chính
+
+#### Cho học viên
+- Tìm kiếm và lựa chọn gia sư theo môn học, giá cả, đánh giá
+- Đặt lịch học linh hoạt với gia sư
+- Thanh toán trực tuyến an toàn
+- Đánh giá và phản hồi về gia sư
+- Theo dõi lịch sử học tập
+
+#### Cho gia sư
+- Tạo hồ sơ gia sư chuyên nghiệp
+- Quản lý lịch dạy và thời gian rảnh
+- Nhận và xử lý yêu cầu đặt lịch
+- Theo dõi thu nhập và yêu cầu rút tiền
+- Xem đánh giá từ học viên
+
+#### Cho quản trị viên
+- Quản lý người dùng và tài khoản
+- Theo dõi và quản lý giao dịch
+- Quản lý môn học và danh mục
+- Xem báo cáo thống kê hệ thống
+
+## 📊 Cấu trúc dự án
 
 ```
 web_booking/
-├── app/
-│   ├── Http/Controllers/     # Controllers xử lý request
-│   ├── Models/              # Eloquent models
-│   ├── Services/            # Business logic layer
-│   ├── Repositories/        # Data access layer
-│   ├── Notifications/       # Hệ thống thông báo
-│   └── Policies/           # Authorization policies
-├── database/
-│   ├── migrations/         # Database migrations
-│   ├── seeders/           # Database seeders
-│   └── factories/         # Model factories
+├── app/                    # Mã nguồn chính Laravel
+│   ├── Http/Controllers/   # Controllers xử lý request
+│   ├── Models/            # Eloquent models
+│   ├── Services/          # Business logic layer
+│   ├── Repositories/      # Data access layer
+│   └── Components/        # Reusable components
+├── database/              # Database migrations và seeders
 ├── resources/
-│   ├── views/             # Blade templates
-│   ├── css/               # CSS files
-│   └── js/                # JavaScript files
-├── routes/
-│   ├── web.php            # Web routes
-│   └── auth.php           # Authentication routes
-└── tests/                 # Test files
+│   ├── views/            # Blade templates
+│   ├── js/               # JavaScript files
+│   └── css/              # CSS/SCSS files
+├── routes/               # Route definitions
+├── public/               # Public assets
+└── storage/              # File storage
 ```
 
-## 🔧 Phát triển
-
-### Chạy tests
+## 🧪 Testing
 
 ```bash
-# PHPUnit tests
+# Chạy tất cả tests
 php artisan test
 
-# Pest tests
-./vendor/bin/pest
+# Chạy tests với coverage
+php artisan test --coverage
 
-# Với coverage
-./vendor/bin/pest --coverage
+# Chạy specific test file
+php artisan test tests/Feature/BookingTest.php
 ```
 
-### Code quality
+## 🔧 Development Tools
+
+### Code Quality
 
 ```bash
-# Chạy PHPStan
-./vendor/bin/phpstan analyse
-
-# Laravel Pint (code formatting)
+# Kiểm tra code style
 ./vendor/bin/pint
 
-# Chạy tất cả checks
-composer check
+# Static analysis
+./vendor/bin/phpstan analyse
+
+# Format code
+./vendor/bin/pint --dirty
 ```
 
-### Development commands
+### Database
 
 ```bash
-# Tạo migration
-php artisan make:migration create_table_name
+# Fresh migration với seeder
+php artisan migrate:fresh --seed
 
-# Tạo model với resource
-php artisan make:model ModelName -mcr
+# Rollback migration
+php artisan migrate:rollback
 
-# Tạo service
-php artisan make:service ServiceName
-
-# Tạo repository
-php artisan make:repository RepositoryName
-
-# Xóa cache
-php artisan optimize:clear
+# Tạo factory và seeder mới
+php artisan make:factory ModelFactory
+php artisan make:seeder TableSeeder
 ```
 
-## 🌟 Đóng góp
+## 🚀 Deployment
 
-Cảm ơn bạn đã quan tâm đến việc đóng góp cho dự án! Vui lòng:
+### Production Setup
 
+1. **Server Requirements**
+   - PHP 8.2+ với các extension cần thiết
+   - MySQL 8.0+
+   - Nginx/Apache với URL rewrite enabled
+   - SSL certificate
+
+2. **Environment Configuration**
+   ```bash
+   # Thiết lập production environment
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_URL=https://yourdomain.com
+   ```
+
+3. **Optimization Commands**
+   ```bash
+   # Cache configuration
+   php artisan config:cache
+   
+   # Cache routes
+   php artisan route:cache
+   
+   # Cache views
+   php artisan view:cache
+   
+   # Optimize autoloader
+   composer install --optimize-autoloader --no-dev
+   ```
+
+### CI/CD Pipeline
+
+Dự án hỗ trợ automated deployment với:
+- GitHub Actions workflow
+- Docker containerization với Laravel Sail
+- Automated testing và code quality checks
+
+## 📞 Hỗ trợ và đóng góp
+
+### Báo cáo lỗi
+Nếu bạn phát hiện lỗi, vui lòng tạo issue với thông tin chi tiết:
+- Mô tả lỗi
+- Các bước tái tạo lỗi
+- Environment và version thông tin
+- Screenshots (nếu có)
+
+### Đóng góp code
 1. Fork repository
 2. Tạo feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Tạo Pull Request
 
-## 📝 Quy tắc đóng góp
+### Coding Standards
+- Tuân thủ PSR-12 coding standard
+- Viết tests cho features mới
+- Sử dụng meaningful commit messages
+- Documentation cho các function và class quan trọng
 
-- Tuân thủ PSR-12 coding standards
-- Viết tests cho code mới
-- Cập nhật documentation khi cần
-- Sử dụng conventional commits
+## 📄 License
 
-## 🐛 Báo cáo lỗi
+Dự án này được phát hành dưới MIT License. Xem file `LICENSE` để biết thêm chi tiết.
 
-Nếu phát hiện lỗi bảo mật, vui lòng gửi email trực tiếp đến team thay vì tạo issue công khai.
+## 🔗 Liên kết hữu ích
 
-## 📄 Giấy phép
-
-Dự án này được phát hành dưới giấy phép [MIT License](https://opensource.org/licenses/MIT).
-
-## 🤝 Hỗ trợ
-
-- **Documentation**: Xem thư mục `docs/` để biết thêm chi tiết
-- **Issues**: Tạo issue trên GitHub
-- **Email**: support@web-booking.test
-
-## 🎉 Cảm ơn
-
-Cảm ơn tất cả những người đã đóng góp cho dự án này!
+- [Laravel Documentation](https://laravel.com/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Alpine.js Documentation](https://alpinejs.dev/)
+- [Inertia.js Documentation](https://inertiajs.com/)
+- [VNPay Integration Guide](https://sandbox.vnpayment.vn/apis/)
 
 ---
 
-**Phiên bản Laravel**: 11.x  
-**Cập nhật lần cuối**: 17 tháng 7, 2025
+**Phiên bản:** 1.0.0  
+**Cập nhật cuối:** Tháng 7, 2025  
+**Tác giả:** Development Team
