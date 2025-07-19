@@ -12,7 +12,7 @@ Web_Booking là một hệ thống đặt lịch học trực tuyến hiện đ�
 
 ## 🔗 Liên kết mã nguồn
 
-**Repository chính:** `c:\wamp64\www\web_booking`
+**Repository chính:** `https://github.com/trungta897/web_booking`
 **Cấu trúc dự án:** Laravel 12.x Framework
 
 ## 🛠️ Công nghệ và công cụ sử dụng
