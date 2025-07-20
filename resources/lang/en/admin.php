@@ -330,4 +330,17 @@ return [
     'confirmed' => 'Confirmed',
     'refunded' => 'Refunded',
     'refund_pending' => 'Refund Pending',
+
+    'tutor_details' => 'Tutor Details',
+    'account_status' => 'Account Status',
+    'joined_date' => 'Joined Date',
+    'bookings_as_tutor' => 'Bookings as Tutor',
+    'no_bookings_found_for_tutor' => 'No bookings found for this tutor.',
+    'bio' => 'Bio',
+    'no_reviews_found_for_tutor' => 'No reviews found for this tutor.',
+    'reviews_received' => 'Reviews Received',
+    'average_rating' => 'Average Rating',
+    'phone_number' => 'Phone Number',
+    'hourly_rate' => 'Hourly Rate',
+    'back_to_tutors_list' => 'Back to Tutors List',
 ];

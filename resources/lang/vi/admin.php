@@ -264,14 +264,12 @@ return [
     'category' => 'Danh Mục',
     'level' => 'Cấp Độ',
     'total_tutors_teaching' => 'Tổng Số Gia Sư Giảng Dạy',
-    'total_bookings' => 'Tổng Số Lịch Học',
     'description' => 'Mô Tả',
     'tutors_teaching_subject' => 'Gia Sư Giảng Dạy',
     'tutor_name' => 'Tên Gia Sư',
     'account_status' => 'Trạng Thái Tài Khoản',
     'no_tutors_teaching' => 'Hiện tại không có gia sư nào giảng dạy môn học này.',
     'bookings_for_subject' => 'Lịch Học Cho Môn',
-    'booking_id' => 'Mã Lịch Học',
     'date_time' => 'Ngày & Giờ',
     'no_bookings_for_subject' => 'Không tìm thấy lịch học nào cho môn học này.',
     'back_to_subjects_list' => 'Quay Lại Danh Sách Môn Học',
@@ -291,4 +289,5 @@ return [
     'anonymous' => 'Ẩn danh',
     'no_reviews_found_for_tutor' => 'Không tìm thấy đánh giá nào cho gia sư này.',
     'back_to_tutors_list' => 'Quay Lại Danh Sách Gia Sư',
+
 ];
