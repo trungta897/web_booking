@@ -173,3 +173,147 @@
         outline-offset: 2px;
     }
 }
+
+/* Dark Mode Input Improvements */
+@layer utilities {
+    /* Input Field Dark Mode Improvements */
+    .input-field {
+        @apply border-secondary-300 focus:border-primary-500 focus:ring-primary-500 rounded-md shadow-sm;
+    }
+    
+    /* Dark mode specific input styles */
+    html.dark .input-field,
+    html.dark input[type="text"],
+    html.dark input[type="email"],
+    html.dark input[type="password"],
+    html.dark input[type="date"],
+    html.dark input[type="time"],
+    html.dark input[type="number"],
+    html.dark textarea,
+    html.dark select {
+        background-color: #374151 !important; /* gray-700 */
+        border-color: #6b7280 !important; /* gray-500 */
+        color: #ffffff !important; /* white text */
+    }
+    
+    /* Placeholder text in dark mode */
+    html.dark input::placeholder,
+    html.dark textarea::placeholder {
+        color: #d1d5db !important; /* gray-300 - much lighter */
+        opacity: 0.8;
+    }
+    
+    /* Focus states in dark mode */
+    html.dark input:focus,
+    html.dark textarea:focus,
+    html.dark select:focus {
+        background-color: #4b5563 !important; /* gray-600 - slightly lighter on focus */
+        border-color: #3b82f6 !important; /* blue-500 */
+        color: #ffffff !important; /* white text */
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    }
+    
+    /* Disabled inputs in dark mode */
+    html.dark input:disabled,
+    html.dark textarea:disabled,
+    html.dark select:disabled {
+        background-color: #1f2937 !important; /* gray-800 */
+        color: #9ca3af !important; /* gray-400 */
+        opacity: 0.7;
+    }
+    
+    /* Labels in dark mode */
+    html.dark label {
+        color: #e5e7eb !important; /* gray-200 */
+        font-weight: 500;
+    }
+    
+    /* Form validation error text in dark mode */
+    html.dark .date-error,
+    html.dark .input-error,
+    html.dark .text-red-600 {
+        color: #fca5a5 !important; /* red-300 */
+    }
+    
+    /* Specific improvements for admin refunds filter inputs */
+    html.dark #from_date,
+    html.dark #to_date {
+        background-color: #374151 !important;
+        border-color: #6b7280 !important;
+        color: #ffffff !important;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+    
+    html.dark #from_date::placeholder,
+    html.dark #to_date::placeholder {
+        color: #d1d5db !important;
+        opacity: 0.9;
+        font-style: italic;
+    }
+    
+    html.dark #from_date:focus,
+    html.dark #to_date:focus {
+        background-color: #4b5563 !important;
+        border-color: #3b82f6 !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    }
+    
+    /* Select dropdowns in dark mode */
+    html.dark select option {
+        background-color: #374151 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Input groups and form sections in dark mode */
+    html.dark .form-group,
+    html.dark .input-group {
+        color: #e5e7eb;
+    }
+    
+    /* Better contrast for form help text */
+    html.dark .text-sm.text-gray-500,
+    html.dark .help-text {
+        color: #d1d5db !important; /* gray-300 */
+    }
+}
+
+/* Additional specific fixes for common input patterns */
+@layer components {
+    /* Enhanced input field component for dark mode */
+    .input-enhanced {
+        @apply border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm transition-colors duration-200;
+    }
+    
+    html.dark .input-enhanced {
+        @apply bg-gray-700 border-gray-500 text-white placeholder-gray-300;
+    }
+    
+    html.dark .input-enhanced:focus {
+        @apply bg-gray-600 border-blue-500 text-white;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+}
+
+/* Fix for admin table inputs */
+html.dark .admin-table input,
+html.dark .admin-table select,
+html.dark .admin-table textarea {
+    background-color: #374151 !important;
+    border-color: #6b7280 !important;
+    color: #ffffff !important;
+}
+
+/* Fix for filter forms in admin pages */
+html.dark .filter-form input,
+html.dark .filter-form select {
+    background-color: #374151 !important;
+    border-color: #6b7280 !important;
+    color: #ffffff !important;
+}
+
+html.dark .filter-form input::placeholder {
+    color: #d1d5db !important;
+    opacity: 0.8;
+}

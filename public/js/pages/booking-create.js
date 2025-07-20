@@ -13,12 +13,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const endTimeInput = document.getElementById('end_time_only');
     const endTimeHidden = document.getElementById('end_time_hidden');
 
-    // Format date as dd-mm-yyyy for display
+    // Format date as dd/mm/yy for display
     function formatDateForDisplay(date) {
         const day = date.getDate().toString().padStart(2, '0');
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}-${month}-${year}`;
+        const year = date.getFullYear().toString().slice(-2); // Get last 2 digits of year
+        return `${day}/${month}/${year}`;
     }
 
     // Format date as YYYY-MM-DD for backend
@@ -38,11 +38,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Parse dd-mm-yyyy format to Date object
     function parseDateFromDisplay(dateString) {
-        const parts = dateString.split('-');
+        const parts = dateString.split('/');
         if (parts.length === 3) {
             const day = parseInt(parts[0]);
             const month = parseInt(parts[1]) - 1; // Month is 0-indexed
-            const year = parseInt(parts[2]);
+            const year = parseInt(parts[2]) + 2000; // Convert to 4-digit year
             return new Date(year, month, day);
         }
         return null;
@@ -50,13 +50,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Validate date format dd-mm-yyyy
     function isValidDateFormat(dateString) {
-        const regex = /^(\d{2})-(\d{2})-(\d{4})$/;
+        const regex = /^(\d{2})\/(\d{2})\/(\d{2})$/;
         const match = dateString.match(regex);
         if (!match) return false;
 
         const day = parseInt(match[1]);
         const month = parseInt(match[2]);
-        const year = parseInt(match[3]);
+        const year = parseInt(match[3]) + 2000; // Convert to 4-digit year
 
         if (month < 1 || month > 12) return false;
         if (day < 1 || day > 31) return false;

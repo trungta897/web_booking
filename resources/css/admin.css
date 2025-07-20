@@ -226,28 +226,145 @@ body.admin-body {
 
 .admin-form-input {
     width: 100%;
-    padding: 0.5rem 0.75rem;
+    padding: 0.75rem 1rem;
     border: 1px solid #d1d5db;
     border-radius: 0.375rem;
     background-color: white;
+    color: #111827;
+    font-size: 0.95rem;
+    font-weight: 400;
+    transition: all 0.15s ease-in-out;
 }
 
 .admin-form-input:focus {
     outline: 2px solid var(--admin-primary);
     outline-offset: 2px;
+    border-color: var(--admin-primary);
+    background-color: white;
+}
+
+.admin-form-input::placeholder {
+    color: #6b7280;
+    opacity: 0.8;
 }
 
 .admin-form-select {
     width: 100%;
-    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
     border: 1px solid #d1d5db;
     border-radius: 0.375rem;
     background-color: white;
+    color: #111827;
+    font-size: 0.95rem;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 0.5rem center;
+    background-position: right 0.75rem center;
     background-repeat: no-repeat;
     background-size: 1.5em 1.5em;
     appearance: none;
+    transition: all 0.15s ease-in-out;
+}
+
+.admin-form-select:focus {
+    outline: 2px solid var(--admin-primary);
+    outline-offset: 2px;
+    border-color: var(--admin-primary);
+}
+
+/* Dark mode admin form improvements */
+html.dark .admin-form-label {
+    color: #e5e7eb !important;
+}
+
+html.dark .admin-form-input {
+    background-color: #374151 !important;
+    border-color: #6b7280 !important;
+    color: #ffffff !important;
+}
+
+html.dark .admin-form-input:focus {
+    background-color: #4b5563 !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+html.dark .admin-form-input::placeholder {
+    color: #d1d5db !important;
+    opacity: 0.9;
+}
+
+html.dark .admin-form-select {
+    background-color: #374151 !important;
+    border-color: #6b7280 !important;
+    color: #ffffff !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23d1d5db' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+
+html.dark .admin-form-select:focus {
+    background-color: #4b5563 !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+html.dark .admin-form-select option {
+    background-color: #374151 !important;
+    color: #ffffff !important;
+}
+
+/* Enhanced admin input styles for better dark mode visibility */
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark input[type="date"],
+html.dark input[type="time"],
+html.dark input[type="number"],
+html.dark input[type="search"],
+html.dark textarea {
+    background-color: #374151 !important;
+    border-color: #6b7280 !important;
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+html.dark input[type="text"]:focus,
+html.dark input[type="email"]:focus,
+html.dark input[type="password"]:focus,
+html.dark input[type="date"]:focus,
+html.dark input[type="time"]:focus,
+html.dark input[type="number"]:focus,
+html.dark input[type="search"]:focus,
+html.dark textarea:focus {
+    background-color: #4b5563 !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    outline: none !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: #d1d5db !important;
+    opacity: 0.9;
+    font-style: italic;
+}
+
+/* Specific fixes for filter forms in admin */
+html.dark .admin-main-content input,
+html.dark .admin-main-content select,
+html.dark .admin-main-content textarea {
+    background-color: #374151 !important;
+    border-color: #6b7280 !important;
+    color: #ffffff !important;
+}
+
+html.dark .admin-main-content input:focus,
+html.dark .admin-main-content select:focus,
+html.dark .admin-main-content textarea:focus {
+    background-color: #4b5563 !important;
+    border-color: #3b82f6 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
 }
 
 /* Admin buttons */

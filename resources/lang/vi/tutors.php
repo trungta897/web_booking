@@ -9,6 +9,8 @@ return [
     'clear_all_filters' => 'Xóa Tất Cả Bộ Lọc',
     'reset' => 'Đặt Lại',
     'apply_filters' => 'Áp Dụng Bộ Lọc',
+    'search_tutors' => 'Tìm Kiếm Gia Sư',
+    'search_placeholder' => 'Tìm theo tên gia sư hoặc mô tả...',
     'core_filters' => 'Bộ Lọc Cốt Lõi',
     'subject' => 'Môn Học',
     'all_subjects' => 'Tất Cả Môn Học',

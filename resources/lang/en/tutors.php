@@ -9,6 +9,8 @@ return [
     'clear_all_filters' => 'Clear All Filters',
     'reset' => 'Reset',
     'apply_filters' => 'Apply Filters',
+    'search_tutors' => 'Search Tutors',
+    'search_placeholder' => 'Search by tutor name or description...',
     'core_filters' => 'Core Filters',
     'subject' => 'Subject',
     'all_subjects' => 'All Subjects',

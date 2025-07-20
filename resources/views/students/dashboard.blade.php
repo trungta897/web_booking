@@ -48,7 +48,7 @@
                                                 <h5 class="font-medium text-gray-900">{{ translateSubjectName($session->subject->name) ?? 'N/A' }}</h5>
                                                 <p class="text-sm text-gray-600">{{ __('common.tutor') }}: {{ $session->tutor->user->name ?? 'N/A' }}</p>
                                                 <p class="text-sm text-gray-500">
-                                                    {{ Carbon\Carbon::parse($session->start_time)->format('d/m/Y H:i') }} -
+                                                    {{ Carbon\Carbon::parse($session->start_time)->format('d/m/y H:i') }} -
                                                     {{ Carbon\Carbon::parse($session->end_time)->format('H:i') }}
                                                 </p>
                                                 <p class="text-sm font-medium text-gray-700">{{ $session->display_amount }}</p>
@@ -140,7 +140,7 @@
                                                 {{ $session->tutor->user->name ?? 'N/A' }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ Carbon\Carbon::parse($session->start_time)->format('d/m/Y H:i') }}
+                                                {{ Carbon\Carbon::parse($session->start_time)->format('d/m/y H:i') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {{ $session->display_amount }}

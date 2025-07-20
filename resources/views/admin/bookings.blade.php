@@ -68,11 +68,11 @@
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm text-gray-900">{{ $booking->tutor->user->name ?? __('admin.na') }}</div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $booking->subject->name ?? __('admin.na') }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ translateSubjectName($booking->subject->name ?? '') }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ \Carbon\Carbon::parse($booking->start_time)->format('M d, Y H:i') }} - {{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}
+                                                {{ formatDateForDisplay($booking->start_time, 'd/m/y H:i') }} - {{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${{ number_format($booking->price, 2) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ formatCurrency($booking->price) }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                                     @switch($booking->status)

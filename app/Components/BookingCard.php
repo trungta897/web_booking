@@ -19,7 +19,7 @@ class BookingCard
             'show_tutor_info' => true,
             'show_student_info' => false,
             'show_payment_status' => true,
-            'date_format' => 'd-m-Y H:i',
+            'date_format' => 'dd/mm/yy H:i',
         ], $options);
     }
 
@@ -33,8 +33,8 @@ class BookingCard
             'student_name' => $this->booking->student->name,
             'tutor_name' => $this->booking->tutor->user->name,
             'subject_name' => $this->booking->subject->name,
-            'start_time' => $this->booking->start_time->format('d-m-Y H:i'),
-            'end_time' => $this->booking->end_time->format('d-m-Y H:i'),
+            'start_time' => $this->booking->start_time->format('dd/mm/yy H:i'),
+            'end_time' => $this->booking->end_time->format('dd/mm/yy H:i'),
             'status' => $this->booking->status,
             'status_badge' => getBookingStatusBadge($this->booking->status),
             'duration' => calculateBookingDuration($this->booking->start_time, $this->booking->end_time),

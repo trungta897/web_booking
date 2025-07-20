@@ -4,7 +4,7 @@
     <!-- Header -->
     <div class="admin-page-header bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 px-6 py-4">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Tutor Details: ') }} {{ $user->name }}
+            {{ __('admin.tutor_details') }}: {{ $user->name }}
         </h2>
     </div>
 
@@ -13,18 +13,18 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <!-- Tutor Information Card -->
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Tutor Information</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('admin.tutor_information') }}</h3>
                 <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-8">
                     <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Name</dt>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.name') }}</dt>
                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->name }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.email') }}</dt>
                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->email }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Account Status</dt>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.account_status') }}</dt>
                         <dd class="mt-1 text-sm">
                             <span @class([
                                 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
@@ -35,39 +35,45 @@
                                 'dark:bg-yellow-700 dark:text-yellow-100' => $user->account_status === 'suspended',
                                 'dark:bg-red-700 dark:text-red-100' => $user->account_status === 'banned',
                             ])>
-                                {{ ucfirst($user->account_status) }}
+                                {{ __('admin.' . $user->account_status) }}
                             </span>
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Joined Date</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->created_at->format('M d, Y H:i A') }}</dd>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.joined_date') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->created_at->format('d/m/Y H:i') }}</dd>
                     </div>
                     <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Phone Number</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->phone_number ?? 'N/A' }}</dd>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.phone_number') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->phone_number ?? __('admin.na') }}</dd>
                     </div>
                      <div>
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Address</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->address ?? 'N/A' }}</dd>
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.address') }}</dt>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->address ?? __('admin.na') }}</dd>
                     </div>
                     @if($user->tutor)
                         <div>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Hourly Rate</dt>
-                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">${{ number_format($user->tutor->hourly_rate, 2) }}</dd>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.hourly_rate') }}</dt>
+                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ formatCurrency($user->tutor->hourly_rate) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Average Rating</dt>
-                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $averageRating ? number_format($averageRating, 1) . ' / 5' : 'N/A' }}</dd>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.average_rating') }}</dt>
+                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $averageRating ? number_format($averageRating, 1) . ' / 5' : __('admin.na') }}</dd>
                         </div>
                         <div class="md:col-span-2">
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Bio</dt>
-                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->tutor->bio ?? 'N/A' }}</dd>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.bio') }}</dt>
+                            <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $user->tutor->bio ?? __('admin.na') }}</dd>
                         </div>
                         <div class="md:col-span-2">
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Subjects</dt>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.subjects') }}</dt>
                             <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                                {{ $user->tutor->subjects->count() > 0 ? $user->tutor->subjects->pluck('name')->implode(', ') : 'No subjects specified' }}
+                                @if($user->tutor->subjects->count() > 0)
+                                    @foreach($user->tutor->subjects as $subject)
+                                        {{ translateSubjectName($subject->name) }}{{ !$loop->last ? ', ' : '' }}
+                                    @endforeach
+                                @else
+                                    {{ __('admin.no_subjects_specified') }}
+                                @endif
                             </dd>
                         </div>
                     @endif
@@ -76,26 +82,26 @@
 
             <!-- Tutor Bookings Card -->
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Bookings as Tutor ({{ $user->tutorBookings->count() }})</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('admin.bookings_as_tutor') }} ({{ $user->tutorBookings->count() }})</h3>
                 @if($user->tutorBookings->count() > 0)
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Student</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Subject</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date & Time</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('admin.student') }}</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('admin.subject') }}</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('admin.date_time') }}</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('admin.status') }}</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('admin.price') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 @foreach($user->tutorBookings as $booking)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $booking->student->name ?? 'N/A' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $booking->subject->name ?? 'N/A' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $booking->student->name ?? __('admin.na') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ translateSubjectName($booking->subject->name) ?? __('admin.na') }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ Carbon\Carbon::parse($booking->start_time)->format('M d, Y H:i') }} - {{ Carbon\Carbon::parse($booking->end_time)->format('H:i') }}
+                                            {{ Carbon\Carbon::parse($booking->start_time)->format('d/m/Y H:i') }} - {{ Carbon\Carbon::parse($booking->end_time)->format('H:i') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                              <span @class([
@@ -109,30 +115,30 @@
                                                 'dark:bg-red-700 dark:text-red-100' => $booking->status === 'cancelled' || $booking->status === 'rejected',
                                                 'dark:bg-gray-600 dark:text-gray-200' => !in_array($booking->status, ['completed', 'accepted', 'pending', 'cancelled', 'rejected']),
                                             ])>
-                                                {{ ucfirst($booking->status) }}
+                                                {{ __('admin.' . $booking->status) }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">${{ number_format($booking->price, 2) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ formatCurrency($booking->price) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
                 @else
-                    <p class="text-gray-500 dark:text-gray-400">No bookings found for this tutor.</p>
+                    <p class="text-gray-500 dark:text-gray-400">{{ __('admin.no_bookings_found_for_tutor') }}</p>
                 @endif
             </div>
 
             <!-- Tutor Reviews Card -->
             <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Reviews Received ({{ $user->reviewsReceived->count() }})</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('admin.reviews_received') }} ({{ $user->reviewsReceived->count() }})</h3>
                 @if($user->reviewsReceived->count() > 0)
                     <div class="space-y-4">
                         @foreach($user->reviewsReceived as $review)
                             <div class="p-4 border rounded-md dark:border-gray-700">
                                 <div class="flex items-center justify-between">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $review->reviewer->name ?? 'Anonymous' }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $review->created_at->format('M d, Y') }}</p>
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $review->reviewer->name ?? __('admin.anonymous') }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $review->created_at->format('d/m/Y') }}</p>
                                 </div>
                                 <div class="flex items-center mt-1">
                                     @for ($i = 1; $i <= 5; $i++)
@@ -146,7 +152,7 @@
                         @endforeach
                     </div>
                 @else
-                    <p class="text-gray-500 dark:text-gray-400">No reviews found for this tutor.</p>
+                    <p class="text-gray-500 dark:text-gray-400">{{ __('admin.no_reviews_found_for_tutor') }}</p>
                 @endif
             </div>
 
@@ -218,7 +224,7 @@
 
             <div class="mt-6">
                 <a href="{{ route('admin.tutors') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                    Back to Tutors List
+                    {{ __('admin.back_to_tutors_list') }}
                 </a>
             </div>
         </div>

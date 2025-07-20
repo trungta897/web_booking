@@ -45,7 +45,7 @@
                                 <div class="flex-1">
                                     <input type="text" name="start_date_display" id="start_date_display"
                                         value="{{ $oldStartDateDisplay }}"
-                                        placeholder="dd-mm-yyyy"
+                                        placeholder="dd/mm/yy"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         required>
                                     <input type="hidden" name="start_date" id="start_date" value="{{ $oldStartDate }}">
@@ -73,7 +73,7 @@
                                 <div class="flex-1">
                                     <input type="text" name="end_date_display" id="end_date_display"
                                         value="{{ $oldEndDateDisplay }}"
-                                        placeholder="dd-mm-yyyy"
+                                        placeholder="dd/mm/yy"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         required>
                                     <input type="hidden" name="end_date" id="end_date" value="{{ $oldEndDate }}">

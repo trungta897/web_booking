@@ -37,19 +37,19 @@
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.subject') }}</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ $booking->subject->name ?? __('admin.na') }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ translateSubjectName($booking->subject->name ?? '') }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.scheduled_time') }}</dt>
                         <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">
-                            {{ Carbon\Carbon::parse($booking->start_time)->format('D, M d, Y ') }}
-                                                                    {{ __('admin.from') }} {{ Carbon\Carbon::parse($booking->start_time)->format('H:i') }}
-                                        {{ __('admin.to') }} {{ Carbon\Carbon::parse($booking->end_time)->format('H:i') }}
+                            {{ formatDateForDisplay($booking->start_time, 'D, d-m-Y') }}
+                            {{ __('admin.from') }} {{ Carbon\Carbon::parse($booking->start_time)->format('H:i') }}
+                            {{ __('admin.to') }} {{ Carbon\Carbon::parse($booking->end_time)->format('H:i') }}
                         </dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.price') }}</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">${{ number_format($booking->price, 2) }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-gray-100">{{ formatCurrency($booking->price) }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('admin.booking_status') }}</dt>

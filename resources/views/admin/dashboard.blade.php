@@ -50,7 +50,7 @@
             <div class="admin-stat-icon danger">
                 <i class="fas fa-dollar-sign text-xl"></i>
             </div>
-            <div class="admin-stat-value">{{ formatCurrency($totalRevenue ?? 0, 'VND') }}</div>
+            <div class="admin-stat-value">{{ formatCurrency($totalRevenue ?? 0) }}</div>
             <div class="admin-stat-label">{{ __('admin.total_revenue') }}</div>
         </div>
     </div>
@@ -78,8 +78,10 @@
                             <tr>
                                 <td>{{ optional($booking->student)->name }}</td>
                                 <td>{{ optional($booking->tutor)->name }}</td>
-                                <td>{{ optional($booking->subject)->name }}</td>
-                                <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('M d, Y') }}</td>
+                                <td>{{ translateSubjectName(optional($booking->subject)->name ?? '') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    {{ formatDateForDisplay($booking->start_time, 'd/m/y H:i') }} - {{ formatDateForDisplay($booking->end_time, 'H:i') }}
+                                </td>
                                 <td>
                                     <span class="admin-badge {{ $booking->status === 'accepted' ? 'admin-badge-success' : 'admin-badge-warning' }}">
                                         {{ __('admin.' . $booking->status) }}

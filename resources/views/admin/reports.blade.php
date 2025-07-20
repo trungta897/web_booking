@@ -19,30 +19,29 @@
                     <p class="text-gray-500">{{ __('admin.report_generation_tools') }}</p>
 
                     {{-- Example: A simple list or a form to select report type --}}
-                    {{--
                     <div class="mt-6">
-                        <h4 class="text-md font-semibold text-gray-700 mb-2">Available Reports:</h4>
+                        <h4 class="text-md font-semibold text-gray-700 mb-2">{{ __('admin.available_reports') }}</h4>
                         <ul class="list-disc list-inside space-y-1">
-                            <li>User Activity Report</li>
-                            <li>Booking Statistics</li>
-                            <li>Revenue Report</li>
-                            <li>Tutor Performance</li>
+                            <li>{{ __('admin.user_activity_report') }}</li>
+                            <li>{{ __('admin.booking_statistics') }}</li>
+                            <li>{{ __('admin.revenue_report') }}</li>
+                            <li>{{ __('admin.tutor_performance') }}</li>
                         </ul>
                     </div>
 
                     <div class="mt-8">
                         <form method="POST" action="#"> {{-- Replace # with actual report generation route --}}
                             @csrf
-                            <label for="report_type" class="block text-sm font-medium text-gray-700">Select Report Type</label>
+                            <label for="report_type" class="block text-sm font-medium text-gray-700">{{ __('admin.select_report_type') }}</label>
                             <select id="report_type" name="report_type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option>User Activity</option>
-                                <option>Booking Statistics</option>
-                                <option>Revenue</option>
+                                <option>{{ __('admin.user_activity') }}</option>
+                                <option>{{ __('admin.booking_statistics') }}</option>
+                                <option>{{ __('admin.revenue_report') }}</option>
                             </select>
 
                             <div class="mt-4">
                                 <x-primary-button>
-                                    {{ __('Generate Report') }}
+                                    {{ __('admin.generate_report') }}
                                 </x-primary-button>
                             </div>
                         </form>

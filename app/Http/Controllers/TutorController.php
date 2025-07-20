@@ -49,7 +49,7 @@ class TutorController extends Controller
     {
         $filters = $request->only([
             'subject', 'price_range', 'rating', 'location',
-            'day_of_week', 'experience', 'sort',
+            'day_of_week', 'experience', 'sort', 'search'
         ]);
 
         $tutors = $this->tutorService->getTutorsWithFilters($filters);

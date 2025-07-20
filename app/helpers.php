@@ -180,12 +180,29 @@ if (!function_exists('formatHourlyRate')) {
 
 if (!function_exists('formatDateForDisplay')) {
     /**
-     * Format date using user preferred format (d-m-Y).
+     * Format date using user preferred format with Vietnamese day names.
      */
-    function formatDateForDisplay($date, string $format = 'd-m-Y'): string
+    function formatDateForDisplay($date, string $format = 'dd/mm/yy'): string
     {
         if (is_string($date)) {
-            $date = new DateTime($date);
+            $date = \Carbon\Carbon::parse($date);
+        } elseif (!$date instanceof \Carbon\Carbon) {
+            $date = \Carbon\Carbon::parse($date);
+        }
+
+        // Get current locale
+        $locale = session('locale') ?: app()->getLocale();
+        if (!$locale || !in_array($locale, ['en', 'vi'])) {
+            $locale = config('app.locale', 'vi');
+        }
+
+        // For Vietnamese locale, replace English day names with Vietnamese
+        if ($locale === 'vi' && str_contains($format, 'D')) {
+            $englishDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            $vietnameseDays = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+            
+            $formatted = $date->format($format);
+            return str_replace($englishDays, $vietnameseDays, $formatted);
         }
 
         return $date->format($format);
@@ -196,7 +213,7 @@ if (!function_exists('formatDateTimeForDisplay')) {
     /**
      * Format datetime using user preferred format.
      */
-    function formatDateTimeForDisplay($dateTime, string $format = 'd-m-Y H:i'): string
+    function formatDateTimeForDisplay($dateTime, string $format = 'dd/mm/yy H:i'): string
     {
         if (is_string($dateTime)) {
             $dateTime = new DateTime($dateTime);

@@ -299,7 +299,8 @@
                         <label for="from_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             {{ __('admin.from_date') }}
                         </label>
-                        <input type="date" name="from_date" id="from_date" value="{{ request('from_date') }}"
+                        <input type="text" name="from_date" id="from_date" value="{{ request('from_date') }}"
+                               placeholder="dd/mm/yy"
                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                     </div>
 
@@ -308,7 +309,8 @@
                         <label for="to_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             {{ __('admin.to_date') }}
                         </label>
-                        <input type="date" name="to_date" id="to_date" value="{{ request('to_date') }}"
+                        <input type="text" name="to_date" id="to_date" value="{{ request('to_date') }}"
+                               placeholder="dd/mm/yy"
                                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                     </div>
 

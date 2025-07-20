@@ -53,7 +53,7 @@
                                                 <h5 class="font-medium text-gray-900">{{ $session->subject->name ?? 'N/A' }}</h5>
                                                 <p class="text-sm text-gray-600">{{ __('common.student') }}: {{ $session->student->name ?? 'N/A' }}</p>
                                                 <p class="text-sm text-gray-500">
-                                                    {{ Carbon\Carbon::parse($session->start_time)->format('d/m/Y H:i') }} -
+                                                    {{ Carbon\Carbon::parse($session->start_time)->format('d/m/y H:i') }} -
                                                     {{ Carbon\Carbon::parse($session->end_time)->format('H:i') }}
                                                 </p>
                                             </div>

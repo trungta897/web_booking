@@ -10,6 +10,21 @@
             <!-- Search and Filter Section -->
             <div class="bg-gray-50 p-4 sm:p-6 rounded-lg shadow mb-8">
                 <form method="GET" action="{{ route('tutors.index') }}" class="space-y-6">
+                    <!-- Search Bar -->
+                    <div class="mb-4">
+                        <label for="search" class="block text-sm font-medium text-gray-700 mb-2">{{ __('tutors.search_tutors') }}</label>
+                        <div class="relative">
+                            <input type="text" name="search" id="search" value="{{ request('search') }}" 
+                                   placeholder="{{ __('tutors.search_placeholder') }}" 
+                                   class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                         <fieldset class="space-y-2 md:col-span-1">
                             <legend class="text-sm font-medium text-gray-900">{{ __('tutors.core_filters') }}</legend>
