@@ -239,7 +239,7 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('bookings.show', $booking) }}" class="text-indigo-600 hover:text-indigo-900">{{ __('common.view') }}</a>
-                                                @if($booking->canBeCancelled())
+                                                @if(in_array($booking->status, ['pending', 'accepted']))
                                                     <form action="{{ route('bookings.destroy', $booking) }}" method="POST" class="inline-block ml-2">
                                                         @csrf
                                                         @method('DELETE')

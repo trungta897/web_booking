@@ -19,7 +19,7 @@ class BookingCard
             'show_tutor_info' => true,
             'show_student_info' => false,
             'show_payment_status' => true,
-            'date_format' => 'dd/mm/yy H:i',
+            'date_format' => 'd/m/Y H:i',
         ], $options);
     }
 
@@ -30,17 +30,17 @@ class BookingCard
     {
         return [
             'id' => $this->booking->id,
-            'student_name' => $this->booking->student->name,
-            'tutor_name' => $this->booking->tutor->user->name,
-            'subject_name' => $this->booking->subject->name,
-            'start_time' => $this->booking->start_time->format('dd/mm/yy H:i'),
-            'end_time' => $this->booking->end_time->format('dd/mm/yy H:i'),
-            'status' => $this->booking->status,
-            'status_badge' => getBookingStatusBadge($this->booking->status),
-            'duration' => calculateBookingDuration($this->booking->start_time, $this->booking->end_time),
-            'price' => formatCurrency($this->booking->price),
-            'is_upcoming' => isUpcomingBooking($this->booking->start_time),
-            'urgency' => getBookingUrgency($this->booking->start_time),
+            'student_name' => $this->booking->student->name ?? 'N/A',
+            'tutor_name' => $this->booking->tutor->user->name ?? 'N/A',
+            'subject_name' => $this->booking->subject->name ?? 'N/A',
+            'start_time' => $this->booking->start_time->format('d/m/Y H:i'),
+            'end_time' => $this->booking->end_time->format('d/m/Y H:i'),
+            'status' => $this->booking->status, // Sử dụng accessor
+            'status_badge' => $this->getBookingStatusBadge($this->booking->status),
+            'duration' => $this->calculateDuration(),
+            'price' => number_format((float) $this->booking->price, 0, ',', '.') . ' VND',
+            'is_upcoming' => $this->isUpcoming(),
+            'urgency' => $this->getUrgencyLevel(),
             'can_be_cancelled' => $this->booking->canBeCancelled(),
             'show_url' => route('bookings.show', $this->booking),
             ...$this->options,
@@ -56,9 +56,47 @@ class BookingCard
             'start_time' => Carbon::parse($this->booking->start_time)->format($this->options['date_format']),
             'end_time' => Carbon::parse($this->booking->end_time)->format($this->options['date_format']),
             'duration' => $this->calculateDuration(),
-            'price' => formatCurrency($this->booking->price),
+            'price' => number_format((float) $this->booking->price, 0, ',', '.') . ' VND',
             'status_text' => ucfirst($this->booking->status),
             ...$this->getPaymentStatusProperties(),
+        ];
+    }
+
+    /**
+     * Get booking status badge HTML class and text.
+     */
+    protected function getBookingStatusBadge(string $status): array
+    {
+        $badges = [
+            'pending' => [
+                'class' => 'bg-yellow-100 text-yellow-800',
+                'text' => 'Đang chờ'
+            ],
+            'accepted' => [
+                'class' => 'bg-blue-100 text-blue-800',
+                'text' => 'Đã chấp nhận'
+            ],
+            'confirmed' => [
+                'class' => 'bg-green-100 text-green-800', 
+                'text' => 'Đã xác nhận'
+            ],
+            'rejected' => [
+                'class' => 'bg-red-100 text-red-800',
+                'text' => 'Bị từ chối'
+            ],
+            'cancelled' => [
+                'class' => 'bg-gray-100 text-gray-800',
+                'text' => 'Đã hủy'
+            ],
+            'completed' => [
+                'class' => 'bg-purple-100 text-purple-800',
+                'text' => 'Hoàn thành'
+            ],
+        ];
+
+        return $badges[$status] ?? [
+            'class' => 'bg-gray-100 text-gray-800',
+            'text' => ucfirst($status)
         ];
     }
 
@@ -71,27 +109,32 @@ class BookingCard
             'pending' => [
                 'color' => 'warning',
                 'icon' => 'clock',
-                'text' => __('booking.status.pending'),
+                'text' => 'Đang chờ',
             ],
             'accepted' => [
-                'color' => 'success',
+                'color' => 'info',
                 'icon' => 'check',
-                'text' => __('booking.status.accepted'),
+                'text' => 'Đã chấp nhận',
+            ],
+            'confirmed' => [
+                'color' => 'success',
+                'icon' => 'check-circle',
+                'text' => 'Đã xác nhận',
             ],
             'rejected' => [
                 'color' => 'danger',
                 'icon' => 'times',
-                'text' => __('booking.status.rejected'),
+                'text' => 'Bị từ chối',
             ],
             'cancelled' => [
                 'color' => 'secondary',
                 'icon' => 'ban',
-                'text' => __('booking.status.cancelled'),
+                'text' => 'Đã hủy',
             ],
             'completed' => [
                 'color' => 'primary',
                 'icon' => 'check-circle',
-                'text' => __('booking.status.completed'),
+                'text' => 'Hoàn thành',
             ],
         ];
 
@@ -121,7 +164,7 @@ class BookingCard
         // View action (always available)
         $actions[] = [
             'type' => 'view',
-            'label' => __('common.view'),
+            'label' => 'Xem chi tiết',
             'route' => route('bookings.show', $this->booking),
             'class' => 'btn-outline-primary',
             'icon' => 'eye',
@@ -133,7 +176,7 @@ class BookingCard
                 if ($user->role === 'tutor' && $this->booking->tutor_id === $user->tutor?->id) {
                     $actions[] = [
                         'type' => 'accept',
-                        'label' => __('booking.actions.accept'),
+                        'label' => 'Chấp nhận',
                         'route' => route('bookings.update', $this->booking),
                         'class' => 'btn-success',
                         'icon' => 'check',
@@ -141,29 +184,28 @@ class BookingCard
                     ];
                     $actions[] = [
                         'type' => 'reject',
-                        'label' => __('booking.actions.reject'),
+                        'label' => 'Từ chối',
                         'route' => route('bookings.update', $this->booking),
                         'class' => 'btn-danger',
                         'icon' => 'times',
                         'method' => 'PATCH',
                     ];
                 }
-
                 break;
 
             case 'accepted':
+            case 'confirmed':
                 if ($this->booking->canBeCancelled()) {
                     $actions[] = [
                         'type' => 'cancel',
-                        'label' => __('booking.actions.cancel'),
+                        'label' => 'Hủy bỏ',
                         'route' => route('bookings.destroy', $this->booking),
                         'class' => 'btn-warning',
                         'icon' => 'ban',
                         'method' => 'DELETE',
-                        'confirm' => __('booking.confirm.cancel'),
+                        'confirm' => 'Bạn có chắc muốn hủy booking này?',
                     ];
                 }
-
                 break;
 
             case 'completed':
@@ -171,14 +213,13 @@ class BookingCard
                     if (!$this->booking->review) {
                         $actions[] = [
                             'type' => 'review',
-                            'label' => __('booking.actions.review'),
+                            'label' => 'Đánh giá',
                             'route' => route('tutors.show', $this->booking->tutor) . '#review',
                             'class' => 'btn-info',
                             'icon' => 'star',
                         ];
                     }
                 }
-
                 break;
         }
 
@@ -190,18 +231,22 @@ class BookingCard
      */
     protected function calculateDuration(): string
     {
+        if (!$this->booking->start_time || !$this->booking->end_time) {
+            return '0 phút';
+        }
+
         $start = Carbon::parse($this->booking->start_time);
         $end = Carbon::parse($this->booking->end_time);
 
-        $duration = $end->diffInMinutes($start);
+        $duration = $start->diffInMinutes($end);
         $hours = intval($duration / 60);
         $minutes = $duration % 60;
 
         if ($hours > 0) {
-            return $minutes > 0 ? "{$hours}h {$minutes}m" : "{$hours}h";
+            return $minutes > 0 ? "{$hours} giờ {$minutes} phút" : "{$hours} giờ";
         }
 
-        return "{$minutes}m";
+        return "{$minutes} phút";
     }
 
     /**

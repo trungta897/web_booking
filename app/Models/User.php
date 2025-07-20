@@ -8,6 +8,41 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property string $password
+ * @property string $role
+ * @property string|null $avatar
+ * @property string|null $phone_number
+ * @property string|null $address
+ * @property string $account_status
+ * @property string|null $remember_token
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * 
+ * @property-read string $profile_photo_url
+ * @property-read int $unread_notifications_count
+ * @property-read \Illuminate\Database\Eloquent\Collection $upcoming_bookings
+ * @property-read int $upcoming_bookings_count
+ * @property-read float $total_hours
+ * 
+ * @property-read \App\Models\TutorProfile|null $tutorProfile
+ * @property-read \App\Models\Tutor|null $tutor
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Subject> $subjects
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $studentBookings
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $tutorBookings
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Message> $messages
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Message> $receivedMessages
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviewsGiven
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviewsReceived
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Message> $unreadMessages
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Tutor> $favoriteTutors
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Illuminate\Notifications\DatabaseNotification> $unreadNotifications
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */

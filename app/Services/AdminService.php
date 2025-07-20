@@ -511,6 +511,7 @@ class AdminService extends BaseService
 
         $user->load([
             'tutor.subjects',
+            'tutor.education',  // Thêm dòng này để load education
             'tutorBookings.student',
             'tutorBookings.subject',
             'reviewsReceived.reviewer',

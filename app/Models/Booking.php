@@ -6,6 +6,55 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $student_id
+ * @property int $tutor_id
+ * @property int $subject_id
+ * @property \Illuminate\Support\Carbon $start_time
+ * @property \Illuminate\Support\Carbon $end_time
+ * @property bool $is_confirmed
+ * @property bool $is_cancelled
+ * @property bool $is_completed
+ * @property string|null $cancellation_reason
+ * @property string|null $rejection_reason
+ * @property string|null $rejection_description
+ * @property \Illuminate\Support\Carbon|null $accepted_at
+ * @property string|null $notes
+ * @property float $price
+ * @property string|null $meeting_link
+ * @property string|null $payment_method
+ * @property string|null $vnpay_txn_ref
+ * @property string|null $payment_intent_id
+ * @property \Illuminate\Support\Carbon|null $payment_at
+ * @property array|null $payment_metadata
+ * @property float|null $platform_fee_percentage
+ * @property float|null $platform_fee_amount
+ * @property float|null $tutor_earnings
+ * @property \Illuminate\Support\Carbon|null $commission_calculated_at
+ * @property int|null $payout_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * 
+ * @property-read string $status
+ * @property-read string $payment_status
+ * @property-read int $duration
+ * @property-read float $total_price
+ * @property-read float $total_amount
+ * @property-read string $display_amount
+ * @property-read string $payment_method_display
+ * @property-read string $formatted_platform_fee
+ * @property-read string $formatted_tutor_earnings
+ * 
+ * @property-read \App\Models\User $student
+ * @property-read \App\Models\Tutor $tutor
+ * @property-read \App\Models\Subject $subject
+ * @property-read \App\Models\Review|null $review
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviews
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Transaction> $transactions
+ * @property-read \App\Models\TutorPayout|null $payout
+ * @property-read \App\Models\PayoutItem|null $payoutItem
+ */
 class Booking extends Model
 {
     use HasFactory;

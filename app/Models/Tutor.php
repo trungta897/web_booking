@@ -6,6 +6,26 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string|null $bio
+ * @property float $hourly_rate
+ * @property bool $is_available
+ * @property int|null $experience_years
+ * @property string|null $specialization
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * 
+ * @property-read \App\Models\User $user
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Subject> $subjects
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviews
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Availability> $availability
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Booking> $bookings
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $favoritedBy
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Education> $education
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TutorPayout> $payouts
+ */
 class Tutor extends Model
 {
     use HasFactory;
