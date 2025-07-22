@@ -232,7 +232,7 @@
                             </p>
                             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
                     @auth
-                                    <a href="@if(Auth::user()->role === 'admin') {{ route('admin.dashboard') }} @elseif(Auth::user()->role === 'tutor') {{ route('tutor.dashboard') }} @else {{ route('profile.edit') }} @endif" class="btn-primary w-full sm:w-auto text-center">
+                                    <a href="@if(Auth::user()->role === 'admin') {{ route('admin.dashboard') }} @elseif(Auth::user()->role === 'tutor') {{ route('tutor.dashboard') }} @else {{ route('student.dashboard') }} @endif" class="btn-primary w-full sm:w-auto text-center">
                                         {{ __('common.dashboard') }}
                                     </a>
                     @else
