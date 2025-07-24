@@ -372,7 +372,7 @@ return [
     'email' => 'Email',
     'avatar' => 'Avatar',
     'save_changes' => 'Save Changes',
-    
+
        // Days of week
     'sunday' => 'Sunday',
     'monday' => 'Monday',
@@ -381,4 +381,11 @@ return [
     'thursday' => 'Thursday',
     'friday' => 'Friday',
     'saturday' => 'Saturday',
+
+    'become_a_tutor' => 'Become a Tutor',
+    'contact_us' => 'Contact Us',
+    'mathematics' => 'Mathematics',
+    'science' => 'Science',
+    'languages' => 'Languages',
+    'more_subjects' => 'More Subjects',
 ];
