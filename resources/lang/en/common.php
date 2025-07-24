@@ -372,4 +372,13 @@ return [
     'email' => 'Email',
     'avatar' => 'Avatar',
     'save_changes' => 'Save Changes',
+    
+       // Days of week
+    'sunday' => 'Sunday',
+    'monday' => 'Monday',
+    'tuesday' => 'Tuesday',
+    'wednesday' => 'Wednesday',
+    'thursday' => 'Thursday',
+    'friday' => 'Friday',
+    'saturday' => 'Saturday',
 ];
