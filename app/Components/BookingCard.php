@@ -77,7 +77,7 @@ class BookingCard
                 'text' => 'Đã chấp nhận'
             ],
             'confirmed' => [
-                'class' => 'bg-green-100 text-green-800', 
+                'class' => 'bg-green-100 text-green-800',
                 'text' => 'Đã xác nhận'
             ],
             'rejected' => [

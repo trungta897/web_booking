@@ -516,7 +516,7 @@ class PaymentController extends Controller
             throw new Exception(__('booking.errors.booking_cancelled_payment'), 422);
         }
 
-        // 🔐 KIỂM TRA CHẶT CHẼ: ĐÃ THANH TOÁN CHƯA?
+        // KIỂM TRA CHẶT CHẼ: ĐÃ THANH TOÁN CHƯA?
         if ($booking->is_confirmed || $booking->completedTransactions()->exists()) {
             throw new Exception('Booking này đã được thanh toán rồi. Không thể thanh toán lại.', 422);
         }

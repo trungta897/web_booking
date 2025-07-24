@@ -22,13 +22,13 @@ use Illuminate\Support\Carbon;
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * 
+ *
  * @property-read string $profile_photo_url
  * @property-read int $unread_notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection $upcoming_bookings
  * @property-read int $upcoming_bookings_count
  * @property-read float $total_hours
- * 
+ *
  * @property-read \App\Models\TutorProfile|null $tutorProfile
  * @property-read \App\Models\Tutor|null $tutor
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Subject> $subjects

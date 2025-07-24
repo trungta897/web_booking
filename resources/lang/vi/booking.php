@@ -146,4 +146,6 @@ return [
     'retry_payment' => 'Thử Lại Thanh Toán',
     'payment_processing_active' => 'Có giao dịch đang được xử lý. Vui lòng đợi hoặc làm mới trang để kiểm tra trạng thái.',
     'refresh_status' => 'Làm Mới Trạng Thái',
+    'select_payment_method' => 'Chọn phương thức thanh toán',
+    'credit_or_debit_card' => 'Thẻ tín dụng/ghi nợ',
 ];

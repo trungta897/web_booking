@@ -35,7 +35,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $payout_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * 
+ *
  * @property-read string $status
  * @property-read string $payment_status
  * @property-read int $duration
@@ -45,7 +45,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read string $payment_method_display
  * @property-read string $formatted_platform_fee
  * @property-read string $formatted_tutor_earnings
- * 
+ *
  * @property-read \App\Models\User $student
  * @property-read \App\Models\Tutor $tutor
  * @property-read \App\Models\Subject $subject

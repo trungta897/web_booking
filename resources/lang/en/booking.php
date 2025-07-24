@@ -145,4 +145,6 @@ return [
     'retry_payment' => 'Retry Payment',
     'payment_processing_active' => 'There is a transaction being processed. Please wait or refresh the page to check status.',
     'refresh_status' => 'Refresh Status',
+    'select_payment_method' => 'Select payment method',
+    'credit_or_debit_card' => 'Credit or debit card',
 ];

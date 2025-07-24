@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $specialization
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * 
+ *
  * @property-read \App\Models\User $user
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Subject> $subjects
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Review> $reviews
